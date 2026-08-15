@@ -318,15 +318,6 @@ func parsePaymentResumeSigningKey(raw string) []byte {
 	return []byte(raw)
 }
 
-func psSliceContains(sl []string, s string) bool {
-	for _, v := range sl {
-		if v == s {
-			return true
-		}
-	}
-	return false
-}
-
 // Subscription validity period unit constants.
 const (
 	validityUnitWeek   = "week"

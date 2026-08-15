@@ -158,14 +158,14 @@ func buildVietQRPayload(bin, accountNumber, amount, purpose string) string {
 		vietQRField(vietQRServiceCodeSubID, vietQRServiceTransfer)
 
 	var b strings.Builder
-	b.WriteString(vietQRField(vietQRPayloadFormatID, vietQRPayloadFormat))
-	b.WriteString(vietQRField(vietQRInitiationMethodID, vietQRDynamicMethod))
-	b.WriteString(vietQRField(vietQRMerchantAccountID, merchantAccount))
-	b.WriteString(vietQRField(vietQRTransactionCurrencyID, vietQRCurrencyVND))
-	b.WriteString(vietQRField(vietQRTransactionAmountID, amount))
-	b.WriteString(vietQRField(vietQRCountryCodeID, vietQRCountryVN))
+	_, _ = b.WriteString(vietQRField(vietQRPayloadFormatID, vietQRPayloadFormat))
+	_, _ = b.WriteString(vietQRField(vietQRInitiationMethodID, vietQRDynamicMethod))
+	_, _ = b.WriteString(vietQRField(vietQRMerchantAccountID, merchantAccount))
+	_, _ = b.WriteString(vietQRField(vietQRTransactionCurrencyID, vietQRCurrencyVND))
+	_, _ = b.WriteString(vietQRField(vietQRTransactionAmountID, amount))
+	_, _ = b.WriteString(vietQRField(vietQRCountryCodeID, vietQRCountryVN))
 	if purpose != "" {
-		b.WriteString(vietQRField(vietQRAdditionalDataID, vietQRField(vietQRPurposeSubID, purpose)))
+		_, _ = b.WriteString(vietQRField(vietQRAdditionalDataID, vietQRField(vietQRPurposeSubID, purpose)))
 	}
 
 	payload := b.String() + vietQRCRCPlaceholder

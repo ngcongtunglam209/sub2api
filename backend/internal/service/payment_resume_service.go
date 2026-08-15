@@ -329,6 +329,10 @@ func paymentResumeBindHash(providerKey, providerInstanceID, paymentType string) 
 	return sum[:paymentResumeBindHashLen]
 }
 
+// createSignedToken is exercised by the //go:build unit tests, which the linter
+// does not build.
+//
+//nolint:unused // used by payment_resume_token_test.go
 func (s *PaymentResumeService) createSignedToken(claims any) (string, error) {
 	payload, err := json.Marshal(claims)
 	if err != nil {
@@ -375,6 +379,7 @@ func validatePaymentResumeExpiry(expiresAt int64, code, message string) error {
 	return nil
 }
 
+//nolint:unused // reached through createSignedToken from the unit-tagged tests
 func (s *PaymentResumeService) sign(payload string) string {
 	return signPaymentResumePayload(payload, s.signingKey)
 }
