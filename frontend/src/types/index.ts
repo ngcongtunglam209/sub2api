@@ -343,6 +343,48 @@ export interface AnnouncementTargeting {
   any_of?: AnnouncementConditionGroup[]
 }
 
+/** A configured VIP tier. Levels start at 1; level 0 is "no tier" (VIP0). */
+export interface VIPTier {
+  id: number
+  level: number
+  name: string
+  min_spend_usd: number
+  /** Billing multiplier applied on top of the group rate, e.g. 0.9 = 10% off. */
+  rate_multiplier: number
+  concurrency: number
+  /** Days the tier is extended by on every completed order. */
+  grace_days: number
+  badge_color: string
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface VIPTierRequest {
+  level?: number
+  name?: string
+  min_spend_usd?: number
+  rate_multiplier?: number
+  concurrency?: number
+  grace_days?: number
+  badge_color?: string
+  enabled?: boolean
+}
+
+export interface VIPStatus {
+  /** null when the user holds no tier, or theirs has lapsed. */
+  tier: VIPTier | null
+  next_tier: VIPTier | null
+  /** Spend counted towards grading; reset when a tier lapses. */
+  qualifying_spend: number
+  /** Lifetime paid total, never reset. */
+  total_paid_usd: number
+  spend_to_next_tier: number
+  expires_at: string | null
+  /** Pinned by an admin: never expires, never re-graded. */
+  locked: boolean
+}
+
 export interface Announcement {
   id: number
   title: string

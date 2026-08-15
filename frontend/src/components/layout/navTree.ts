@@ -183,6 +183,7 @@ export function buildAdminNavItems(ctx: NavContext): NavItem[] {
     },
     { path: '/admin/redeem', label: t('nav.redeemCodes'), icon: 'ticket', hideInSimpleMode: true, domId: 'sidebar-wallet' },
     { path: '/admin/promo-codes', label: t('nav.promoCodes'), icon: 'gift', hideInSimpleMode: true },
+    { path: '/admin/vip-tiers', label: t('nav.vipTiers'), icon: 'gift', hideInSimpleMode: true },
     {
       path: '/admin/affiliates',
       label: t('nav.affiliateManagement'),

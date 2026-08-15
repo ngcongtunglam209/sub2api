@@ -74,6 +74,17 @@ export default {
   },
 
   // Announcements Page
+  vip: {
+    noTier: 'No tier yet',
+    pinned: 'Pinned by an admin',
+    expiresOn: 'Valid until {date}',
+    qualifyingSpend: 'Spend counted towards your tier',
+    totalPaid: 'Total paid',
+    concurrency: 'Concurrency',
+    discountBadge: '{percent}% off usage',
+    spendToNext: '${amount} more to reach {tier}',
+    topTier: 'You are on the highest tier'
+  },
   announcements: {
     title: 'Announcements',
     markRead: 'Mark as read',
