@@ -358,6 +358,31 @@ func ProvideSubscriptionExpiryService(userSubRepo UserSubscriptionRepository, se
 	return svc
 }
 
+// ProvideVIPTierService creates the admin/user facing VIP tier service.
+func ProvideVIPTierService(entClient *dbent.Client, invalidator APIKeyAuthCacheInvalidator) *VIPTierService {
+	svc := NewVIPTierService(entClient)
+	svc.SetAuthCacheInvalidator(invalidator)
+	return svc
+}
+
+// ProvideVIPExpiryService creates and starts VIPExpiryService.
+//
+// Runs every five minutes rather than every minute: a lapsed tier already
+// stops granting perks the moment it is read, so this sweep only has to reset
+// the qualifying spend eventually. Returns nil when the user repository has no
+// VIP capability, which keeps the service optional.
+func ProvideVIPExpiryService(userRepo UserRepository, invalidator APIKeyAuthCacheInvalidator, lockCache LeaderLockCache, db *sql.DB) *VIPExpiryService {
+	repo, ok := userRepo.(VIPExpiryRepository)
+	if !ok {
+		return nil
+	}
+	svc := NewVIPExpiryService(repo, 5*time.Minute)
+	svc.SetAuthCacheInvalidator(invalidator)
+	svc.SetLeaderLock(lockCache, db)
+	svc.Start()
+	return svc
+}
+
 // ProvideTimingWheelService creates and starts TimingWheelService
 func ProvideTimingWheelService() (*TimingWheelService, error) {
 	svc, err := NewTimingWheelService()
@@ -837,6 +862,8 @@ var ProviderSet = wire.NewSet(
 	ProvideOpenAICodexVersionSyncService,
 	ProvideProxyExpiryService,
 	ProvideSubscriptionExpiryService,
+	ProvideVIPExpiryService,
+	ProvideVIPTierService,
 	ProvideTimingWheelService,
 	ProvideDashboardAggregationService,
 	ProvideUsageCleanupService,
@@ -893,9 +920,10 @@ func ProvideBalanceNotifyService(emailService *EmailService, settingRepo Setting
 }
 
 // ProvidePaymentService creates PaymentService and attaches notification email delivery.
-func ProvidePaymentService(entClient *dbent.Client, registry *payment.Registry, loadBalancer payment.LoadBalancer, redeemService *RedeemService, subscriptionSvc *SubscriptionService, configService *PaymentConfigService, userRepo UserRepository, groupRepo GroupRepository, affiliateService *AffiliateService, notificationEmailService *NotificationEmailService) *PaymentService {
+func ProvidePaymentService(entClient *dbent.Client, registry *payment.Registry, loadBalancer payment.LoadBalancer, redeemService *RedeemService, subscriptionSvc *SubscriptionService, configService *PaymentConfigService, userRepo UserRepository, groupRepo GroupRepository, affiliateService *AffiliateService, notificationEmailService *NotificationEmailService, authCacheInvalidator APIKeyAuthCacheInvalidator) *PaymentService {
 	svc := NewPaymentService(entClient, registry, loadBalancer, redeemService, subscriptionSvc, configService, userRepo, groupRepo, affiliateService)
 	svc.SetNotificationEmailService(notificationEmailService)
+	svc.SetAuthCacheInvalidator(authCacheInvalidator)
 	return svc
 }
 

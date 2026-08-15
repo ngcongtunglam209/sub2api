@@ -54,6 +54,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/userattributevalue"
 	"github.com/Wei-Shaw/sub2api/ent/userplatformquota"
 	"github.com/Wei-Shaw/sub2api/ent/usersubscription"
+	"github.com/Wei-Shaw/sub2api/ent/viptier"
 
 	stdsql "database/sql"
 )
@@ -141,6 +142,8 @@ type Client struct {
 	UserPlatformQuota *UserPlatformQuotaClient
 	// UserSubscription is the client for interacting with the UserSubscription builders.
 	UserSubscription *UserSubscriptionClient
+	// VIPTier is the client for interacting with the VIPTier builders.
+	VIPTier *VIPTierClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -191,6 +194,7 @@ func (c *Client) init() {
 	c.UserAttributeValue = NewUserAttributeValueClient(c.config)
 	c.UserPlatformQuota = NewUserPlatformQuotaClient(c.config)
 	c.UserSubscription = NewUserSubscriptionClient(c.config)
+	c.VIPTier = NewVIPTierClient(c.config)
 }
 
 type (
@@ -322,6 +326,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		UserAttributeValue:            NewUserAttributeValueClient(cfg),
 		UserPlatformQuota:             NewUserPlatformQuotaClient(cfg),
 		UserSubscription:              NewUserSubscriptionClient(cfg),
+		VIPTier:                       NewVIPTierClient(cfg),
 	}, nil
 }
 
@@ -380,6 +385,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		UserAttributeValue:            NewUserAttributeValueClient(cfg),
 		UserPlatformQuota:             NewUserPlatformQuotaClient(cfg),
 		UserSubscription:              NewUserSubscriptionClient(cfg),
+		VIPTier:                       NewVIPTierClient(cfg),
 	}, nil
 }
 
@@ -419,7 +425,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting, c.SubscriptionPlan,
 		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
 		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
-		c.UserPlatformQuota, c.UserSubscription,
+		c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
 	} {
 		n.Use(hooks...)
 	}
@@ -439,7 +445,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting, c.SubscriptionPlan,
 		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
 		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
-		c.UserPlatformQuota, c.UserSubscription,
+		c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -526,6 +532,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UserPlatformQuota.mutate(ctx, m)
 	case *UserSubscriptionMutation:
 		return c.UserSubscription.mutate(ctx, m)
+	case *VIPTierMutation:
+		return c.VIPTier.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -6822,6 +6830,139 @@ func (c *UserSubscriptionClient) mutate(ctx context.Context, m *UserSubscription
 	}
 }
 
+// VIPTierClient is a client for the VIPTier schema.
+type VIPTierClient struct {
+	config
+}
+
+// NewVIPTierClient returns a client for the VIPTier from the given config.
+func NewVIPTierClient(c config) *VIPTierClient {
+	return &VIPTierClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `viptier.Hooks(f(g(h())))`.
+func (c *VIPTierClient) Use(hooks ...Hook) {
+	c.hooks.VIPTier = append(c.hooks.VIPTier, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `viptier.Intercept(f(g(h())))`.
+func (c *VIPTierClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VIPTier = append(c.inters.VIPTier, interceptors...)
+}
+
+// Create returns a builder for creating a VIPTier entity.
+func (c *VIPTierClient) Create() *VIPTierCreate {
+	mutation := newVIPTierMutation(c.config, OpCreate)
+	return &VIPTierCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VIPTier entities.
+func (c *VIPTierClient) CreateBulk(builders ...*VIPTierCreate) *VIPTierCreateBulk {
+	return &VIPTierCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VIPTierClient) MapCreateBulk(slice any, setFunc func(*VIPTierCreate, int)) *VIPTierCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VIPTierCreateBulk{err: fmt.Errorf("calling to VIPTierClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VIPTierCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VIPTierCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VIPTier.
+func (c *VIPTierClient) Update() *VIPTierUpdate {
+	mutation := newVIPTierMutation(c.config, OpUpdate)
+	return &VIPTierUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VIPTierClient) UpdateOne(_m *VIPTier) *VIPTierUpdateOne {
+	mutation := newVIPTierMutation(c.config, OpUpdateOne, withVIPTier(_m))
+	return &VIPTierUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VIPTierClient) UpdateOneID(id int64) *VIPTierUpdateOne {
+	mutation := newVIPTierMutation(c.config, OpUpdateOne, withVIPTierID(id))
+	return &VIPTierUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VIPTier.
+func (c *VIPTierClient) Delete() *VIPTierDelete {
+	mutation := newVIPTierMutation(c.config, OpDelete)
+	return &VIPTierDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VIPTierClient) DeleteOne(_m *VIPTier) *VIPTierDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VIPTierClient) DeleteOneID(id int64) *VIPTierDeleteOne {
+	builder := c.Delete().Where(viptier.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VIPTierDeleteOne{builder}
+}
+
+// Query returns a query builder for VIPTier.
+func (c *VIPTierClient) Query() *VIPTierQuery {
+	return &VIPTierQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVIPTier},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VIPTier entity by its id.
+func (c *VIPTierClient) Get(ctx context.Context, id int64) (*VIPTier, error) {
+	return c.Query().Where(viptier.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VIPTierClient) GetX(ctx context.Context, id int64) *VIPTier {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *VIPTierClient) Hooks() []Hook {
+	return c.hooks.VIPTier
+}
+
+// Interceptors returns the client interceptors.
+func (c *VIPTierClient) Interceptors() []Interceptor {
+	return c.inters.VIPTier
+}
+
+func (c *VIPTierClient) mutate(ctx context.Context, m *VIPTierMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VIPTierCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VIPTierUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VIPTierUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VIPTierDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VIPTier mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
@@ -6834,7 +6975,7 @@ type (
 		PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting, SubscriptionPlan,
 		TLSFingerprintProfile, UsageCleanupTask, UsageLog, User, UserAllowedGroup,
 		UserAttributeDefinition, UserAttributeValue, UserPlatformQuota,
-		UserSubscription []ent.Hook
+		UserSubscription, VIPTier []ent.Hook
 	}
 	inters struct {
 		APIKey, Account, AccountGroup, Announcement, AnnouncementRead, AuthIdentity,
@@ -6846,7 +6987,7 @@ type (
 		PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting, SubscriptionPlan,
 		TLSFingerprintProfile, UsageCleanupTask, UsageLog, User, UserAllowedGroup,
 		UserAttributeDefinition, UserAttributeValue, UserPlatformQuota,
-		UserSubscription []ent.Interceptor
+		UserSubscription, VIPTier []ent.Interceptor
 	}
 )
 

@@ -226,6 +226,7 @@ export default {
     redeemCodes: 'Redeem Codes',
     ops: 'Ops',
     promoCodes: 'Promo Codes',
+    vipTiers: 'VIP Tiers',
     settings: 'Settings',
     myAccount: 'My Account',
     lightMode: 'Light Mode',

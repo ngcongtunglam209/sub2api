@@ -1790,6 +1790,11 @@ var (
 		{Name: "balance_notify_extra_emails", Type: field.TypeString, Default: "[]", SchemaType: map[string]string{"postgres": "text"}},
 		{Name: "total_recharged", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "rpm_limit", Type: field.TypeInt, Default: 0},
+		{Name: "total_paid_usd", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "vip_qualifying_spend", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "vip_tier_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "vip_expires_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "vip_tier_locked", Type: field.TypeBool, Default: false},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -2064,6 +2069,33 @@ var (
 			},
 		},
 	}
+	// VipTiersColumns holds the columns for the "vip_tiers" table.
+	VipTiersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "level", Type: field.TypeInt, Unique: true},
+		{Name: "name", Type: field.TypeString, Size: 50},
+		{Name: "min_spend_usd", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "decimal(20,2)"}},
+		{Name: "rate_multiplier", Type: field.TypeFloat64, Default: 1, SchemaType: map[string]string{"postgres": "decimal(6,4)"}},
+		{Name: "concurrency", Type: field.TypeInt, Default: 5},
+		{Name: "grace_days", Type: field.TypeInt, Default: 60},
+		{Name: "badge_color", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "enabled", Type: field.TypeBool, Default: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+	}
+	// VipTiersTable holds the schema information for the "vip_tiers" table.
+	VipTiersTable = &schema.Table{
+		Name:       "vip_tiers",
+		Columns:    VipTiersColumns,
+		PrimaryKey: []*schema.Column{VipTiersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "viptier_enabled_min_spend_usd",
+				Unique:  false,
+				Columns: []*schema.Column{VipTiersColumns[8], VipTiersColumns[3]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		APIKeysTable,
@@ -2105,6 +2137,7 @@ var (
 		UserAttributeValuesTable,
 		UserPlatformQuotasTable,
 		UserSubscriptionsTable,
+		VipTiersTable,
 	}
 )
 
@@ -2261,5 +2294,8 @@ func init() {
 	UserSubscriptionsTable.ForeignKeys[2].RefTable = UsersTable
 	UserSubscriptionsTable.Annotation = &entsql.Annotation{
 		Table: "user_subscriptions",
+	}
+	VipTiersTable.Annotation = &entsql.Annotation{
+		Table: "vip_tiers",
 	}
 }

@@ -196,6 +196,36 @@ type RedeemUserAdjustmentRepository interface {
 	ApplyRedeemConcurrencyAdjustment(ctx context.Context, id int64, delta int) error
 }
 
+// VIPTierBenefitRepository reads the perks a user's active tier grants. Split
+// from VIPRateRepository because the auth snapshot needs the concurrency floor
+// while the billing hot path needs the multiplier, and neither should pull the
+// other's query along.
+type VIPTierBenefitRepository interface {
+	// GetVIPConcurrency returns the concurrency floor of the user's active
+	// tier, or 0 when they have none.
+	GetVIPConcurrency(ctx context.Context, userID int64) (int, error)
+}
+
+// VIPExpiryRepository backs the sweep that retires lapsed tiers.
+type VIPExpiryRepository interface {
+	// ListExpiredVIPUserIDs returns up to limit users whose tier lapsed at or
+	// before now. Locked tiers are never returned.
+	ListExpiredVIPUserIDs(ctx context.Context, now time.Time, limit int) ([]int64, error)
+	// ExpireVIPTiers clears the tier and resets the qualifying spend of the
+	// given users, leaving their lifetime paid total intact.
+	ExpireVIPTiers(ctx context.Context, ids []int64) (int, error)
+}
+
+// VIPSpendRepository accumulates the paid-order total that VIP tiers are
+// graded on. Kept out of UserRepository for the same reason as the redeem
+// adjustments above: only the payment fulfillment path may write it, and no
+// test stub of an unrelated service should have to implement it.
+type VIPSpendRepository interface {
+	// AddVIPSpend adds amountUSD to both the lifetime paid total and the
+	// tier-qualifying total. Callers must pass an amount in USD.
+	AddVIPSpend(ctx context.Context, id int64, amountUSD float64) error
+}
+
 type UserAuthIdentityRecord struct {
 	ProviderType    string
 	ProviderKey     string

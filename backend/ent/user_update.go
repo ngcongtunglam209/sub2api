@@ -432,6 +432,109 @@ func (_u *UserUpdate) AddRpmLimit(v int) *UserUpdate {
 	return _u
 }
 
+// SetTotalPaidUsd sets the "total_paid_usd" field.
+func (_u *UserUpdate) SetTotalPaidUsd(v float64) *UserUpdate {
+	_u.mutation.ResetTotalPaidUsd()
+	_u.mutation.SetTotalPaidUsd(v)
+	return _u
+}
+
+// SetNillableTotalPaidUsd sets the "total_paid_usd" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableTotalPaidUsd(v *float64) *UserUpdate {
+	if v != nil {
+		_u.SetTotalPaidUsd(*v)
+	}
+	return _u
+}
+
+// AddTotalPaidUsd adds value to the "total_paid_usd" field.
+func (_u *UserUpdate) AddTotalPaidUsd(v float64) *UserUpdate {
+	_u.mutation.AddTotalPaidUsd(v)
+	return _u
+}
+
+// SetVipQualifyingSpend sets the "vip_qualifying_spend" field.
+func (_u *UserUpdate) SetVipQualifyingSpend(v float64) *UserUpdate {
+	_u.mutation.ResetVipQualifyingSpend()
+	_u.mutation.SetVipQualifyingSpend(v)
+	return _u
+}
+
+// SetNillableVipQualifyingSpend sets the "vip_qualifying_spend" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableVipQualifyingSpend(v *float64) *UserUpdate {
+	if v != nil {
+		_u.SetVipQualifyingSpend(*v)
+	}
+	return _u
+}
+
+// AddVipQualifyingSpend adds value to the "vip_qualifying_spend" field.
+func (_u *UserUpdate) AddVipQualifyingSpend(v float64) *UserUpdate {
+	_u.mutation.AddVipQualifyingSpend(v)
+	return _u
+}
+
+// SetVipTierID sets the "vip_tier_id" field.
+func (_u *UserUpdate) SetVipTierID(v int64) *UserUpdate {
+	_u.mutation.ResetVipTierID()
+	_u.mutation.SetVipTierID(v)
+	return _u
+}
+
+// SetNillableVipTierID sets the "vip_tier_id" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableVipTierID(v *int64) *UserUpdate {
+	if v != nil {
+		_u.SetVipTierID(*v)
+	}
+	return _u
+}
+
+// AddVipTierID adds value to the "vip_tier_id" field.
+func (_u *UserUpdate) AddVipTierID(v int64) *UserUpdate {
+	_u.mutation.AddVipTierID(v)
+	return _u
+}
+
+// ClearVipTierID clears the value of the "vip_tier_id" field.
+func (_u *UserUpdate) ClearVipTierID() *UserUpdate {
+	_u.mutation.ClearVipTierID()
+	return _u
+}
+
+// SetVipExpiresAt sets the "vip_expires_at" field.
+func (_u *UserUpdate) SetVipExpiresAt(v time.Time) *UserUpdate {
+	_u.mutation.SetVipExpiresAt(v)
+	return _u
+}
+
+// SetNillableVipExpiresAt sets the "vip_expires_at" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableVipExpiresAt(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetVipExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearVipExpiresAt clears the value of the "vip_expires_at" field.
+func (_u *UserUpdate) ClearVipExpiresAt() *UserUpdate {
+	_u.mutation.ClearVipExpiresAt()
+	return _u
+}
+
+// SetVipTierLocked sets the "vip_tier_locked" field.
+func (_u *UserUpdate) SetVipTierLocked(v bool) *UserUpdate {
+	_u.mutation.SetVipTierLocked(v)
+	return _u
+}
+
+// SetNillableVipTierLocked sets the "vip_tier_locked" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableVipTierLocked(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetVipTierLocked(*v)
+	}
+	return _u
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_u *UserUpdate) AddAPIKeyIDs(ids ...int64) *UserUpdate {
 	_u.mutation.AddAPIKeyIDs(ids...)
@@ -1098,6 +1201,36 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedRpmLimit(); ok {
 		_spec.AddField(user.FieldRpmLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.TotalPaidUsd(); ok {
+		_spec.SetField(user.FieldTotalPaidUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedTotalPaidUsd(); ok {
+		_spec.AddField(user.FieldTotalPaidUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.VipQualifyingSpend(); ok {
+		_spec.SetField(user.FieldVipQualifyingSpend, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedVipQualifyingSpend(); ok {
+		_spec.AddField(user.FieldVipQualifyingSpend, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.VipTierID(); ok {
+		_spec.SetField(user.FieldVipTierID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedVipTierID(); ok {
+		_spec.AddField(user.FieldVipTierID, field.TypeInt64, value)
+	}
+	if _u.mutation.VipTierIDCleared() {
+		_spec.ClearField(user.FieldVipTierID, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.VipExpiresAt(); ok {
+		_spec.SetField(user.FieldVipExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.VipExpiresAtCleared() {
+		_spec.ClearField(user.FieldVipExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.VipTierLocked(); ok {
+		_spec.SetField(user.FieldVipTierLocked, field.TypeBool, value)
 	}
 	if _u.mutation.APIKeysCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -2108,6 +2241,109 @@ func (_u *UserUpdateOne) AddRpmLimit(v int) *UserUpdateOne {
 	return _u
 }
 
+// SetTotalPaidUsd sets the "total_paid_usd" field.
+func (_u *UserUpdateOne) SetTotalPaidUsd(v float64) *UserUpdateOne {
+	_u.mutation.ResetTotalPaidUsd()
+	_u.mutation.SetTotalPaidUsd(v)
+	return _u
+}
+
+// SetNillableTotalPaidUsd sets the "total_paid_usd" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableTotalPaidUsd(v *float64) *UserUpdateOne {
+	if v != nil {
+		_u.SetTotalPaidUsd(*v)
+	}
+	return _u
+}
+
+// AddTotalPaidUsd adds value to the "total_paid_usd" field.
+func (_u *UserUpdateOne) AddTotalPaidUsd(v float64) *UserUpdateOne {
+	_u.mutation.AddTotalPaidUsd(v)
+	return _u
+}
+
+// SetVipQualifyingSpend sets the "vip_qualifying_spend" field.
+func (_u *UserUpdateOne) SetVipQualifyingSpend(v float64) *UserUpdateOne {
+	_u.mutation.ResetVipQualifyingSpend()
+	_u.mutation.SetVipQualifyingSpend(v)
+	return _u
+}
+
+// SetNillableVipQualifyingSpend sets the "vip_qualifying_spend" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableVipQualifyingSpend(v *float64) *UserUpdateOne {
+	if v != nil {
+		_u.SetVipQualifyingSpend(*v)
+	}
+	return _u
+}
+
+// AddVipQualifyingSpend adds value to the "vip_qualifying_spend" field.
+func (_u *UserUpdateOne) AddVipQualifyingSpend(v float64) *UserUpdateOne {
+	_u.mutation.AddVipQualifyingSpend(v)
+	return _u
+}
+
+// SetVipTierID sets the "vip_tier_id" field.
+func (_u *UserUpdateOne) SetVipTierID(v int64) *UserUpdateOne {
+	_u.mutation.ResetVipTierID()
+	_u.mutation.SetVipTierID(v)
+	return _u
+}
+
+// SetNillableVipTierID sets the "vip_tier_id" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableVipTierID(v *int64) *UserUpdateOne {
+	if v != nil {
+		_u.SetVipTierID(*v)
+	}
+	return _u
+}
+
+// AddVipTierID adds value to the "vip_tier_id" field.
+func (_u *UserUpdateOne) AddVipTierID(v int64) *UserUpdateOne {
+	_u.mutation.AddVipTierID(v)
+	return _u
+}
+
+// ClearVipTierID clears the value of the "vip_tier_id" field.
+func (_u *UserUpdateOne) ClearVipTierID() *UserUpdateOne {
+	_u.mutation.ClearVipTierID()
+	return _u
+}
+
+// SetVipExpiresAt sets the "vip_expires_at" field.
+func (_u *UserUpdateOne) SetVipExpiresAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetVipExpiresAt(v)
+	return _u
+}
+
+// SetNillableVipExpiresAt sets the "vip_expires_at" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableVipExpiresAt(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetVipExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearVipExpiresAt clears the value of the "vip_expires_at" field.
+func (_u *UserUpdateOne) ClearVipExpiresAt() *UserUpdateOne {
+	_u.mutation.ClearVipExpiresAt()
+	return _u
+}
+
+// SetVipTierLocked sets the "vip_tier_locked" field.
+func (_u *UserUpdateOne) SetVipTierLocked(v bool) *UserUpdateOne {
+	_u.mutation.SetVipTierLocked(v)
+	return _u
+}
+
+// SetNillableVipTierLocked sets the "vip_tier_locked" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableVipTierLocked(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetVipTierLocked(*v)
+	}
+	return _u
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_u *UserUpdateOne) AddAPIKeyIDs(ids ...int64) *UserUpdateOne {
 	_u.mutation.AddAPIKeyIDs(ids...)
@@ -2804,6 +3040,36 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.AddedRpmLimit(); ok {
 		_spec.AddField(user.FieldRpmLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.TotalPaidUsd(); ok {
+		_spec.SetField(user.FieldTotalPaidUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedTotalPaidUsd(); ok {
+		_spec.AddField(user.FieldTotalPaidUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.VipQualifyingSpend(); ok {
+		_spec.SetField(user.FieldVipQualifyingSpend, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedVipQualifyingSpend(); ok {
+		_spec.AddField(user.FieldVipQualifyingSpend, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.VipTierID(); ok {
+		_spec.SetField(user.FieldVipTierID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedVipTierID(); ok {
+		_spec.AddField(user.FieldVipTierID, field.TypeInt64, value)
+	}
+	if _u.mutation.VipTierIDCleared() {
+		_spec.ClearField(user.FieldVipTierID, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.VipExpiresAt(); ok {
+		_spec.SetField(user.FieldVipExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.VipExpiresAtCleared() {
+		_spec.ClearField(user.FieldVipExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.VipTierLocked(); ok {
+		_spec.SetField(user.FieldVipTierLocked, field.TypeBool, value)
 	}
 	if _u.mutation.APIKeysCleared() {
 		edge := &sqlgraph.EdgeSpec{

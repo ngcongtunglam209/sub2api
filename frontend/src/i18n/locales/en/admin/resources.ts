@@ -383,6 +383,37 @@ export default {
       deleteConfirm: 'Are you sure you want to delete this announcement? This action cannot be undone.'
     },
 
+    // VIP Tiers
+    vipTiers: {
+      title: 'VIP Tiers',
+      description: 'Tiers earned by paid spend; each grants a billing discount and a higher concurrency ceiling',
+      ladderHint: 'A higher tier must require more spend and bill less than the one below it',
+      create: 'Add Tier',
+      createTitle: 'Add VIP Tier',
+      editTitle: 'Edit VIP Tier',
+      deleteTitle: 'Delete VIP Tier',
+      deleteMessage: 'Delete {name}? Users on this tier become unranked until their next order.',
+      discountOf: '{percent}% off',
+      saved: 'VIP tier saved',
+      saveFailed: 'Failed to save VIP tier',
+      deleted: 'VIP tier deleted',
+      deleteFailed: 'Failed to delete VIP tier',
+      loadFailed: 'Failed to load VIP tiers',
+      fields: {
+        level: 'Level',
+        name: 'Name',
+        minSpend: 'Spend required (USD)',
+        rateMultiplier: 'Billing multiplier',
+        rateMultiplierHint: '0.9 means the user is billed 90% of the normal rate',
+        concurrency: 'Concurrency',
+        graceDays: 'Valid for (days)',
+        graceDaysHint: 'Extended by this many days on every completed order',
+        badgeColor: 'Badge color',
+        enabled: 'Enabled',
+        enabledHint: 'Disabled tiers keep their current members but accept no new ones'
+      }
+    },
+
     // Promo Codes
     promo: {
       title: 'Promo Code Management',

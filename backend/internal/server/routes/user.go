@@ -119,6 +119,13 @@ func RegisterUserRoutes(
 			announcements.POST("/:id/read", h.Announcement.MarkRead)
 		}
 
+		// VIP 等级（用户可见）
+		vip := authenticated.Group("/vip")
+		{
+			vip.GET("/status", h.VIP.Status)
+			vip.GET("/tiers", h.VIP.Tiers)
+		}
+
 		// 卡密兑换
 		redeem := authenticated.Group("/redeem")
 		{

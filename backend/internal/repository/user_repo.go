@@ -33,6 +33,10 @@ type userRepository struct {
 }
 
 var _ service.RedeemUserAdjustmentRepository = (*userRepository)(nil)
+var _ service.VIPSpendRepository = (*userRepository)(nil)
+var _ service.VIPRateRepository = (*userRepository)(nil)
+var _ service.VIPTierBenefitRepository = (*userRepository)(nil)
+var _ service.VIPExpiryRepository = (*userRepository)(nil)
 
 func NewUserRepository(client *dbent.Client, sqlDB *sql.DB) service.UserRepository {
 	return newUserRepositoryWithSQL(client, sqlDB)
@@ -831,6 +835,130 @@ func (r *userRepository) UpdateBalance(ctx context.Context, id int64, amount flo
 		return service.ErrUserNotFound
 	}
 	return nil
+}
+
+// AddVIPSpend adds a completed order's USD amount to the two VIP counters.
+//
+// Deliberately separate from UpdateBalance: that one also feeds
+// total_recharged, which every positive balance movement touches (admin
+// top-ups, promo bonuses, affiliate withdrawals), and which subscription
+// orders never reach at all. VIP grading needs the paid-order figure alone.
+func (r *userRepository) AddVIPSpend(ctx context.Context, id int64, amountUSD float64) error {
+	if amountUSD <= 0 {
+		return nil
+	}
+	client := clientFromContext(ctx, r.client)
+	n, err := client.User.Update().
+		Where(dbuser.IDEQ(id)).
+		AddTotalPaidUsd(amountUSD).
+		AddVipQualifyingSpend(amountUSD).
+		Save(ctx)
+	if err != nil {
+		return translatePersistenceError(err, service.ErrUserNotFound, nil)
+	}
+	if n == 0 {
+		return service.ErrUserNotFound
+	}
+	return nil
+}
+
+// GetVIPRateMultiplier returns the billing multiplier of a user's active tier.
+//
+// Returns 1 — full price — when the user has no tier, when the tier lapsed, or
+// when the row was deleted out from under them. A lapsed tier is treated as
+// gone here rather than waiting for the expiry sweep, so a delayed or stopped
+// sweep cannot keep handing out a discount indefinitely.
+//
+// A locked tier is an admin decision and ignores the expiry entirely.
+func (r *userRepository) GetVIPRateMultiplier(ctx context.Context, userID int64) (float64, error) {
+	tier, err := r.activeVIPTier(ctx, userID)
+	if err != nil || tier == nil || tier.RateMultiplier <= 0 {
+		return 1, err
+	}
+	return tier.RateMultiplier, nil
+}
+
+// GetVIPConcurrency returns the concurrency floor of the user's active tier,
+// or 0 when they hold none.
+func (r *userRepository) GetVIPConcurrency(ctx context.Context, userID int64) (int, error) {
+	tier, err := r.activeVIPTier(ctx, userID)
+	if err != nil || tier == nil || tier.Concurrency <= 0 {
+		return 0, err
+	}
+	return tier.Concurrency, nil
+}
+
+// ListExpiredVIPUserIDs returns users whose tier lapsed at or before now.
+//
+// Locked tiers are excluded: they are an admin decision and carry no expiry.
+func (r *userRepository) ListExpiredVIPUserIDs(ctx context.Context, now time.Time, limit int) ([]int64, error) {
+	if limit <= 0 {
+		limit = 500
+	}
+	client := clientFromContext(ctx, r.client)
+	return client.User.Query().
+		Where(
+			dbuser.VipTierIDNotNil(),
+			dbuser.VipTierLockedEQ(false),
+			dbuser.VipExpiresAtNotNil(),
+			dbuser.VipExpiresAtLTE(now),
+		).
+		Order(dbent.Asc(dbuser.FieldID)).
+		Limit(limit).
+		IDs(ctx)
+}
+
+// ExpireVIPTiers retires the given users' tiers.
+//
+// vip_qualifying_spend resets so the next cycle is earned again; total_paid_usd
+// is left alone because it is the lifetime figure reports read. Without the
+// reset a user who spent once and went quiet would climb straight back to their
+// old tier on their next small order.
+func (r *userRepository) ExpireVIPTiers(ctx context.Context, ids []int64) (int, error) {
+	if len(ids) == 0 {
+		return 0, nil
+	}
+	client := clientFromContext(ctx, r.client)
+	return client.User.Update().
+		Where(
+			dbuser.IDIn(ids...),
+			dbuser.VipTierLockedEQ(false),
+		).
+		ClearVipTierID().
+		ClearVipExpiresAt().
+		SetVipQualifyingSpend(0).
+		Save(ctx)
+}
+
+// activeVIPTier loads the tier a user currently holds, or nil.
+//
+// A lapsed tier counts as gone here rather than waiting for the expiry sweep,
+// so a sweep that stalls or gets disabled cannot keep handing out perks. A
+// locked tier is an admin decision and ignores the expiry entirely. A tier row
+// deleted out from under the user also reads as no tier.
+func (r *userRepository) activeVIPTier(ctx context.Context, userID int64) (*dbent.VIPTier, error) {
+	client := clientFromContext(ctx, r.client)
+	u, err := client.User.Query().
+		Where(dbuser.IDEQ(userID)).
+		Select(dbuser.FieldVipTierID, dbuser.FieldVipExpiresAt, dbuser.FieldVipTierLocked).
+		Only(ctx)
+	if err != nil {
+		return nil, translatePersistenceError(err, service.ErrUserNotFound, nil)
+	}
+	if u.VipTierID == nil {
+		return nil, nil
+	}
+	if !u.VipTierLocked && (u.VipExpiresAt == nil || !u.VipExpiresAt.After(time.Now())) {
+		return nil, nil
+	}
+	tier, err := client.VIPTier.Get(ctx, *u.VipTierID)
+	if err != nil {
+		if dbent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return tier, nil
 }
 
 func (r *userRepository) ApplyRedeemBalanceAdjustment(ctx context.Context, id int64, delta float64) error {

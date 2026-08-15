@@ -21,6 +21,7 @@
           :is-simple="authStore.isSimpleMode"
           :platform-quotas="platformQuotas"
         />
+        <UserVIPStatusCard />
         <UserDashboardCharts
           v-model:startDate="startDate"
           v-model:endDate="endDate"
@@ -55,6 +56,7 @@ import UserDashboardStats from '@/components/user/dashboard/UserDashboardStats.v
 import UserDashboardCharts from '@/components/user/dashboard/UserDashboardCharts.vue'
 import UserDashboardRecentUsage from '@/components/user/dashboard/UserDashboardRecentUsage.vue'
 import UserDashboardQuickActions from '@/components/user/dashboard/UserDashboardQuickActions.vue'
+import UserVIPStatusCard from '@/components/user/dashboard/UserVIPStatusCard.vue'
 import type { UsageLog, TrendDataPoint, ModelStat, PlatformQuotaItem } from '@/types'
 import { getMyPlatformQuotas } from '@/api/user'
 import { formatDateLocalInput } from '@/utils/format'

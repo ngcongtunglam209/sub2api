@@ -750,6 +750,7 @@ type GatewayService struct {
 	userGroupRateResolver *userGroupRateResolver
 	userGroupRateCache    *gocache.Cache
 	userGroupRateSF       singleflight.Group
+	vipRateResolver       *vipRateResolver
 	modelsListCache       *gocache.Cache
 	modelsListCacheTTL    time.Duration
 	settingService        *SettingService
@@ -840,6 +841,9 @@ func NewGatewayService(
 		&svc.userGroupRateSF,
 		"service.gateway",
 	)
+	if vipRepo, ok := userRepo.(VIPRateRepository); ok {
+		svc.vipRateResolver = newVIPRateResolver(vipRepo, userGroupRateTTL)
+	}
 	svc.debugModelRouting.Store(parseDebugEnvBool(os.Getenv("SUB2API_DEBUG_MODEL_ROUTING")))
 	svc.debugClaudeMimic.Store(parseDebugEnvBool(os.Getenv("SUB2API_DEBUG_CLAUDE_MIMIC")))
 	if path := strings.TrimSpace(os.Getenv(debugGatewayBodyEnv)); path != "" {

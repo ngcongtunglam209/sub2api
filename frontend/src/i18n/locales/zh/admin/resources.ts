@@ -377,6 +377,37 @@ export default {
       deleteConfirm: '确定要删除该公告吗？此操作无法撤销。'
     },
 
+    // VIP 等级
+    vipTiers: {
+      title: 'VIP 等级',
+      description: '按真实付费金额定级，每级给出计费折扣与更高并发上限',
+      ladderHint: '等级越高，所需消费必须更多、计费必须更低',
+      create: '新增等级',
+      createTitle: '新增 VIP 等级',
+      editTitle: '编辑 VIP 等级',
+      deleteTitle: '删除 VIP 等级',
+      deleteMessage: '确定删除 {name}？该等级的用户会退回无等级，直到下一笔订单重新定级。',
+      discountOf: '省 {percent}%',
+      saved: 'VIP 等级已保存',
+      saveFailed: 'VIP 等级保存失败',
+      deleted: 'VIP 等级已删除',
+      deleteFailed: 'VIP 等级删除失败',
+      loadFailed: 'VIP 等级加载失败',
+      fields: {
+        level: '等级序号',
+        name: '名称',
+        minSpend: '所需消费（美元）',
+        rateMultiplier: '计费倍率',
+        rateMultiplierHint: '0.9 表示只按正常费用的 90% 计费',
+        concurrency: '并发数',
+        graceDays: '有效期（天）',
+        graceDaysHint: '每完成一笔订单顺延这么多天',
+        badgeColor: '徽章颜色',
+        enabled: '启用',
+        enabledHint: '停用后已在该等级的用户保留到过期，新用户不再进入'
+      }
+    },
+
     // Promo Codes
     promo: {
       title: '优惠码管理',
