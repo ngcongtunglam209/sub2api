@@ -730,6 +730,15 @@
                 {{ t('admin.users.balanceHistory') }}
               </button>
 
+              <!-- VIP Tier -->
+              <button
+                @click="handleVIPTier(user); closeActionMenu()"
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-ink-secondary hover:bg-surface-hover"
+              >
+                <Icon name="trophy" size="sm" class="text-ink-tertiary" :stroke-width="2" />
+                {{ t('admin.users.vipTier.menuItem') }}
+              </button>
+
               <div class="my-1 border-t border-line-subtle"></div>
 
               <!-- Delete (not for admin) -->
@@ -750,6 +759,12 @@
     <ConfirmDialog :show="showDeleteDialog" :title="t('admin.users.deleteUser')" :message="t('admin.users.deleteConfirm', { email: deletingUser?.email })" :danger="true" @confirm="confirmDelete" @cancel="showDeleteDialog = false" />
     <UserCreateModal :show="showCreateModal" @close="showCreateModal = false" @success="loadUsers" />
     <UserEditModal :show="showEditModal" :user="editingUser" @close="closeEditModal" @success="loadUsers" />
+    <UserVIPTierModal
+      :show="showVIPTierModal"
+      :user="vipTierUser"
+      @close="closeVIPTierModal"
+      @success="loadUsers"
+    />
     <BulkEditUserModal
       :show="showBulkEditModal"
       :selected-ids="selectedIds"
@@ -803,6 +818,7 @@ import PlatformCostCell from '@/components/user/PlatformCostCell.vue'
 import UserPlatformQuotaCell from '@/components/user/UserPlatformQuotaCell.vue'
 import UserCreateModal from '@/components/admin/user/UserCreateModal.vue'
 import UserEditModal from '@/components/admin/user/UserEditModal.vue'
+import UserVIPTierModal from '@/components/admin/user/UserVIPTierModal.vue'
 import BulkEditUserModal from '@/components/admin/user/BulkEditUserModal.vue'
 import UserPlatformQuotaModal from '@/components/admin/user/UserPlatformQuotaModal.vue'
 import UserApiKeysModal from '@/components/admin/user/UserApiKeysModal.vue'
@@ -1326,6 +1342,8 @@ const showApiKeysModal = ref(false)
 const showAttributesModal = ref(false)
 const showPlatformQuotaModal = ref(false)
 const editingUser = ref<AdminUser | null>(null)
+const showVIPTierModal = ref(false)
+const vipTierUser = ref<AdminUser | null>(null)
 const deletingUser = ref<AdminUser | null>(null)
 const viewingUser = ref<AdminUser | null>(null)
 const platformQuotaUser = ref<AdminUser | null>(null)
@@ -1712,6 +1730,16 @@ const applyFilter = () => {
 const handleEdit = (user: AdminUser) => {
   editingUser.value = user
   showEditModal.value = true
+}
+
+const handleVIPTier = (user: AdminUser) => {
+  vipTierUser.value = user
+  showVIPTierModal.value = true
+}
+
+const closeVIPTierModal = () => {
+  showVIPTierModal.value = false
+  vipTierUser.value = null
 }
 
 const closeEditModal = () => {
