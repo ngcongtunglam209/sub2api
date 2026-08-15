@@ -367,7 +367,6 @@ export default {
         menuItem: 'VIP 等级',
         title: 'VIP 等级',
         hint: '等级由已完成订单自动评定。锁定等级会覆盖自动评定，且永不过期。',
-        unranked: '无等级',
         pinned: '已锁定',
         qualifyingSpend: '计入消费',
         totalPaid: '累计付费',

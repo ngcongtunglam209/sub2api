@@ -25,7 +25,12 @@
             >
               {{ status.tier.name }}
             </span>
-            <span v-else class="text-sm text-ink-tertiary">{{ t('admin.users.vipTier.unranked') }}</span>
+            <span
+              v-else
+              class="inline-flex items-center rounded-sm border border-line bg-surface px-2 py-0.5 text-2xs font-medium uppercase tracking-[0.04em] text-ink-secondary"
+            >
+              {{ t('vip.baseTier') }}
+            </span>
 
             <span
               v-if="status?.locked"

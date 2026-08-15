@@ -74,7 +74,8 @@ export default {
 
   // Announcements Page
   vip: {
-    noTier: '暂无等级',
+    // 等级名，与已配置的等级名一样按原文显示。
+    baseTier: 'BASE',
     pinned: '管理员已锁定',
     expiresOn: '有效期至 {date}',
     qualifyingSpend: '计入等级的消费',

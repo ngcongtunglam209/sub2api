@@ -9,8 +9,19 @@
           class="inline-block h-3 w-3 rounded-full"
           :style="{ backgroundColor: status.tier?.badge_color || '#9ca3af' }"
         ></span>
-        <span class="text-base font-bold text-ink">
-          {{ status.tier?.name || t('vip.noTier') }}
+        <span v-if="status.tier" class="text-base font-bold text-ink">
+          {{ status.tier.name }}
+        </span>
+        <!--
+          Unranked reads as a starting rank, not as missing data. "No tier yet"
+          framed the common case as an absence; BASE names it, so the ladder
+          starts somewhere the user already stands.
+        -->
+        <span
+          v-else
+          class="inline-flex items-center rounded-sm border border-line bg-surface-sunken px-2 py-0.5 text-2xs font-semibold uppercase tracking-[0.08em] text-ink-secondary"
+        >
+          {{ t('vip.baseTier') }}
         </span>
         <span v-if="discountLabel" class="badge badge-success">{{ discountLabel }}</span>
       </div>
