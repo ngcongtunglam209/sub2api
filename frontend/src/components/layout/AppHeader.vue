@@ -142,7 +142,10 @@
             </span>
             <span class="hidden text-left md:block">
               <span class="block text-sm font-medium text-ink">{{ displayName }}</span>
-              <span class="block text-2xs uppercase tracking-wide text-ink-tertiary">{{ user.role }}</span>
+              <span class="flex items-center gap-1.5">
+                <span class="text-2xs uppercase tracking-wide text-ink-tertiary">{{ user.role }}</span>
+                <VipTierBadge />
+              </span>
             </span>
             <Icon name="chevronDown" size="sm" class="hidden text-ink-tertiary md:block" />
           </button>
@@ -150,7 +153,11 @@
           <transition name="dropdown">
             <div v-if="openMenu === 'user'" class="dropdown right-0 mt-2 w-56" role="menu">
               <div class="border-b border-line px-4 py-3">
-                <div class="text-sm font-medium text-ink">{{ displayName }}</div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-sm font-medium text-ink">{{ displayName }}</span>
+                  <!-- The inline badge is hidden below `md`; this keeps the rank reachable on phones. -->
+                  <VipTierBadge class="md:hidden" />
+                </div>
                 <div class="truncate text-xs text-ink-tertiary">{{ user.email }}</div>
               </div>
 
@@ -224,6 +231,7 @@ import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import SubscriptionProgressMini from '@/components/common/SubscriptionProgressMini.vue'
 import AnnouncementBell from '@/components/common/AnnouncementBell.vue'
 import StatusDot from '@/components/common/StatusDot.vue'
+import VipTierBadge from '@/components/common/VipTierBadge.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { sanitizeUrl } from '@/utils/url'
 import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
