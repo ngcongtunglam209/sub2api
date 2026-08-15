@@ -112,7 +112,9 @@ func TestFoldOpenAIFlatReasoningEffortMap(t *testing.T) {
 
 		require.NotContains(t, reqBody, "reasoning_effort")
 		require.NotContains(t, reqBody, "reasoningEffort")
-		require.Equal(t, "low", reqBody["reasoning"].(map[string]any)["effort"])
+		reasoning, ok := reqBody["reasoning"].(map[string]any)
+		require.True(t, ok)
+		require.Equal(t, "low", reasoning["effort"])
 	})
 
 	t.Run("body without flat key is untouched", func(t *testing.T) {
