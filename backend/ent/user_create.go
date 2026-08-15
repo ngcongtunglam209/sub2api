@@ -354,6 +354,76 @@ func (_c *UserCreate) SetNillableRpmLimit(v *int) *UserCreate {
 	return _c
 }
 
+// SetTotalPaidUsd sets the "total_paid_usd" field.
+func (_c *UserCreate) SetTotalPaidUsd(v float64) *UserCreate {
+	_c.mutation.SetTotalPaidUsd(v)
+	return _c
+}
+
+// SetNillableTotalPaidUsd sets the "total_paid_usd" field if the given value is not nil.
+func (_c *UserCreate) SetNillableTotalPaidUsd(v *float64) *UserCreate {
+	if v != nil {
+		_c.SetTotalPaidUsd(*v)
+	}
+	return _c
+}
+
+// SetVipQualifyingSpend sets the "vip_qualifying_spend" field.
+func (_c *UserCreate) SetVipQualifyingSpend(v float64) *UserCreate {
+	_c.mutation.SetVipQualifyingSpend(v)
+	return _c
+}
+
+// SetNillableVipQualifyingSpend sets the "vip_qualifying_spend" field if the given value is not nil.
+func (_c *UserCreate) SetNillableVipQualifyingSpend(v *float64) *UserCreate {
+	if v != nil {
+		_c.SetVipQualifyingSpend(*v)
+	}
+	return _c
+}
+
+// SetVipTierID sets the "vip_tier_id" field.
+func (_c *UserCreate) SetVipTierID(v int64) *UserCreate {
+	_c.mutation.SetVipTierID(v)
+	return _c
+}
+
+// SetNillableVipTierID sets the "vip_tier_id" field if the given value is not nil.
+func (_c *UserCreate) SetNillableVipTierID(v *int64) *UserCreate {
+	if v != nil {
+		_c.SetVipTierID(*v)
+	}
+	return _c
+}
+
+// SetVipExpiresAt sets the "vip_expires_at" field.
+func (_c *UserCreate) SetVipExpiresAt(v time.Time) *UserCreate {
+	_c.mutation.SetVipExpiresAt(v)
+	return _c
+}
+
+// SetNillableVipExpiresAt sets the "vip_expires_at" field if the given value is not nil.
+func (_c *UserCreate) SetNillableVipExpiresAt(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetVipExpiresAt(*v)
+	}
+	return _c
+}
+
+// SetVipTierLocked sets the "vip_tier_locked" field.
+func (_c *UserCreate) SetVipTierLocked(v bool) *UserCreate {
+	_c.mutation.SetVipTierLocked(v)
+	return _c
+}
+
+// SetNillableVipTierLocked sets the "vip_tier_locked" field if the given value is not nil.
+func (_c *UserCreate) SetNillableVipTierLocked(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetVipTierLocked(*v)
+	}
+	return _c
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_c *UserCreate) AddAPIKeyIDs(ids ...int64) *UserCreate {
 	_c.mutation.AddAPIKeyIDs(ids...)
@@ -656,6 +726,18 @@ func (_c *UserCreate) defaults() error {
 		v := user.DefaultRpmLimit
 		_c.mutation.SetRpmLimit(v)
 	}
+	if _, ok := _c.mutation.TotalPaidUsd(); !ok {
+		v := user.DefaultTotalPaidUsd
+		_c.mutation.SetTotalPaidUsd(v)
+	}
+	if _, ok := _c.mutation.VipQualifyingSpend(); !ok {
+		v := user.DefaultVipQualifyingSpend
+		_c.mutation.SetVipQualifyingSpend(v)
+	}
+	if _, ok := _c.mutation.VipTierLocked(); !ok {
+		v := user.DefaultVipTierLocked
+		_c.mutation.SetVipTierLocked(v)
+	}
 	return nil
 }
 
@@ -744,6 +826,15 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.RpmLimit(); !ok {
 		return &ValidationError{Name: "rpm_limit", err: errors.New(`ent: missing required field "User.rpm_limit"`)}
+	}
+	if _, ok := _c.mutation.TotalPaidUsd(); !ok {
+		return &ValidationError{Name: "total_paid_usd", err: errors.New(`ent: missing required field "User.total_paid_usd"`)}
+	}
+	if _, ok := _c.mutation.VipQualifyingSpend(); !ok {
+		return &ValidationError{Name: "vip_qualifying_spend", err: errors.New(`ent: missing required field "User.vip_qualifying_spend"`)}
+	}
+	if _, ok := _c.mutation.VipTierLocked(); !ok {
+		return &ValidationError{Name: "vip_tier_locked", err: errors.New(`ent: missing required field "User.vip_tier_locked"`)}
 	}
 	return nil
 }
@@ -867,6 +958,26 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.RpmLimit(); ok {
 		_spec.SetField(user.FieldRpmLimit, field.TypeInt, value)
 		_node.RpmLimit = value
+	}
+	if value, ok := _c.mutation.TotalPaidUsd(); ok {
+		_spec.SetField(user.FieldTotalPaidUsd, field.TypeFloat64, value)
+		_node.TotalPaidUsd = value
+	}
+	if value, ok := _c.mutation.VipQualifyingSpend(); ok {
+		_spec.SetField(user.FieldVipQualifyingSpend, field.TypeFloat64, value)
+		_node.VipQualifyingSpend = value
+	}
+	if value, ok := _c.mutation.VipTierID(); ok {
+		_spec.SetField(user.FieldVipTierID, field.TypeInt64, value)
+		_node.VipTierID = &value
+	}
+	if value, ok := _c.mutation.VipExpiresAt(); ok {
+		_spec.SetField(user.FieldVipExpiresAt, field.TypeTime, value)
+		_node.VipExpiresAt = &value
+	}
+	if value, ok := _c.mutation.VipTierLocked(); ok {
+		_spec.SetField(user.FieldVipTierLocked, field.TypeBool, value)
+		_node.VipTierLocked = value
 	}
 	if nodes := _c.mutation.APIKeysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -1480,6 +1591,96 @@ func (u *UserUpsert) AddRpmLimit(v int) *UserUpsert {
 	return u
 }
 
+// SetTotalPaidUsd sets the "total_paid_usd" field.
+func (u *UserUpsert) SetTotalPaidUsd(v float64) *UserUpsert {
+	u.Set(user.FieldTotalPaidUsd, v)
+	return u
+}
+
+// UpdateTotalPaidUsd sets the "total_paid_usd" field to the value that was provided on create.
+func (u *UserUpsert) UpdateTotalPaidUsd() *UserUpsert {
+	u.SetExcluded(user.FieldTotalPaidUsd)
+	return u
+}
+
+// AddTotalPaidUsd adds v to the "total_paid_usd" field.
+func (u *UserUpsert) AddTotalPaidUsd(v float64) *UserUpsert {
+	u.Add(user.FieldTotalPaidUsd, v)
+	return u
+}
+
+// SetVipQualifyingSpend sets the "vip_qualifying_spend" field.
+func (u *UserUpsert) SetVipQualifyingSpend(v float64) *UserUpsert {
+	u.Set(user.FieldVipQualifyingSpend, v)
+	return u
+}
+
+// UpdateVipQualifyingSpend sets the "vip_qualifying_spend" field to the value that was provided on create.
+func (u *UserUpsert) UpdateVipQualifyingSpend() *UserUpsert {
+	u.SetExcluded(user.FieldVipQualifyingSpend)
+	return u
+}
+
+// AddVipQualifyingSpend adds v to the "vip_qualifying_spend" field.
+func (u *UserUpsert) AddVipQualifyingSpend(v float64) *UserUpsert {
+	u.Add(user.FieldVipQualifyingSpend, v)
+	return u
+}
+
+// SetVipTierID sets the "vip_tier_id" field.
+func (u *UserUpsert) SetVipTierID(v int64) *UserUpsert {
+	u.Set(user.FieldVipTierID, v)
+	return u
+}
+
+// UpdateVipTierID sets the "vip_tier_id" field to the value that was provided on create.
+func (u *UserUpsert) UpdateVipTierID() *UserUpsert {
+	u.SetExcluded(user.FieldVipTierID)
+	return u
+}
+
+// AddVipTierID adds v to the "vip_tier_id" field.
+func (u *UserUpsert) AddVipTierID(v int64) *UserUpsert {
+	u.Add(user.FieldVipTierID, v)
+	return u
+}
+
+// ClearVipTierID clears the value of the "vip_tier_id" field.
+func (u *UserUpsert) ClearVipTierID() *UserUpsert {
+	u.SetNull(user.FieldVipTierID)
+	return u
+}
+
+// SetVipExpiresAt sets the "vip_expires_at" field.
+func (u *UserUpsert) SetVipExpiresAt(v time.Time) *UserUpsert {
+	u.Set(user.FieldVipExpiresAt, v)
+	return u
+}
+
+// UpdateVipExpiresAt sets the "vip_expires_at" field to the value that was provided on create.
+func (u *UserUpsert) UpdateVipExpiresAt() *UserUpsert {
+	u.SetExcluded(user.FieldVipExpiresAt)
+	return u
+}
+
+// ClearVipExpiresAt clears the value of the "vip_expires_at" field.
+func (u *UserUpsert) ClearVipExpiresAt() *UserUpsert {
+	u.SetNull(user.FieldVipExpiresAt)
+	return u
+}
+
+// SetVipTierLocked sets the "vip_tier_locked" field.
+func (u *UserUpsert) SetVipTierLocked(v bool) *UserUpsert {
+	u.Set(user.FieldVipTierLocked, v)
+	return u
+}
+
+// UpdateVipTierLocked sets the "vip_tier_locked" field to the value that was provided on create.
+func (u *UserUpsert) UpdateVipTierLocked() *UserUpsert {
+	u.SetExcluded(user.FieldVipTierLocked)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -1928,6 +2129,111 @@ func (u *UserUpsertOne) AddRpmLimit(v int) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateRpmLimit() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateRpmLimit()
+	})
+}
+
+// SetTotalPaidUsd sets the "total_paid_usd" field.
+func (u *UserUpsertOne) SetTotalPaidUsd(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetTotalPaidUsd(v)
+	})
+}
+
+// AddTotalPaidUsd adds v to the "total_paid_usd" field.
+func (u *UserUpsertOne) AddTotalPaidUsd(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddTotalPaidUsd(v)
+	})
+}
+
+// UpdateTotalPaidUsd sets the "total_paid_usd" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateTotalPaidUsd() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateTotalPaidUsd()
+	})
+}
+
+// SetVipQualifyingSpend sets the "vip_qualifying_spend" field.
+func (u *UserUpsertOne) SetVipQualifyingSpend(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetVipQualifyingSpend(v)
+	})
+}
+
+// AddVipQualifyingSpend adds v to the "vip_qualifying_spend" field.
+func (u *UserUpsertOne) AddVipQualifyingSpend(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddVipQualifyingSpend(v)
+	})
+}
+
+// UpdateVipQualifyingSpend sets the "vip_qualifying_spend" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateVipQualifyingSpend() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateVipQualifyingSpend()
+	})
+}
+
+// SetVipTierID sets the "vip_tier_id" field.
+func (u *UserUpsertOne) SetVipTierID(v int64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetVipTierID(v)
+	})
+}
+
+// AddVipTierID adds v to the "vip_tier_id" field.
+func (u *UserUpsertOne) AddVipTierID(v int64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddVipTierID(v)
+	})
+}
+
+// UpdateVipTierID sets the "vip_tier_id" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateVipTierID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateVipTierID()
+	})
+}
+
+// ClearVipTierID clears the value of the "vip_tier_id" field.
+func (u *UserUpsertOne) ClearVipTierID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearVipTierID()
+	})
+}
+
+// SetVipExpiresAt sets the "vip_expires_at" field.
+func (u *UserUpsertOne) SetVipExpiresAt(v time.Time) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetVipExpiresAt(v)
+	})
+}
+
+// UpdateVipExpiresAt sets the "vip_expires_at" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateVipExpiresAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateVipExpiresAt()
+	})
+}
+
+// ClearVipExpiresAt clears the value of the "vip_expires_at" field.
+func (u *UserUpsertOne) ClearVipExpiresAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearVipExpiresAt()
+	})
+}
+
+// SetVipTierLocked sets the "vip_tier_locked" field.
+func (u *UserUpsertOne) SetVipTierLocked(v bool) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetVipTierLocked(v)
+	})
+}
+
+// UpdateVipTierLocked sets the "vip_tier_locked" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateVipTierLocked() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateVipTierLocked()
 	})
 }
 
@@ -2545,6 +2851,111 @@ func (u *UserUpsertBulk) AddRpmLimit(v int) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateRpmLimit() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateRpmLimit()
+	})
+}
+
+// SetTotalPaidUsd sets the "total_paid_usd" field.
+func (u *UserUpsertBulk) SetTotalPaidUsd(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetTotalPaidUsd(v)
+	})
+}
+
+// AddTotalPaidUsd adds v to the "total_paid_usd" field.
+func (u *UserUpsertBulk) AddTotalPaidUsd(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddTotalPaidUsd(v)
+	})
+}
+
+// UpdateTotalPaidUsd sets the "total_paid_usd" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateTotalPaidUsd() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateTotalPaidUsd()
+	})
+}
+
+// SetVipQualifyingSpend sets the "vip_qualifying_spend" field.
+func (u *UserUpsertBulk) SetVipQualifyingSpend(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetVipQualifyingSpend(v)
+	})
+}
+
+// AddVipQualifyingSpend adds v to the "vip_qualifying_spend" field.
+func (u *UserUpsertBulk) AddVipQualifyingSpend(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddVipQualifyingSpend(v)
+	})
+}
+
+// UpdateVipQualifyingSpend sets the "vip_qualifying_spend" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateVipQualifyingSpend() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateVipQualifyingSpend()
+	})
+}
+
+// SetVipTierID sets the "vip_tier_id" field.
+func (u *UserUpsertBulk) SetVipTierID(v int64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetVipTierID(v)
+	})
+}
+
+// AddVipTierID adds v to the "vip_tier_id" field.
+func (u *UserUpsertBulk) AddVipTierID(v int64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddVipTierID(v)
+	})
+}
+
+// UpdateVipTierID sets the "vip_tier_id" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateVipTierID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateVipTierID()
+	})
+}
+
+// ClearVipTierID clears the value of the "vip_tier_id" field.
+func (u *UserUpsertBulk) ClearVipTierID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearVipTierID()
+	})
+}
+
+// SetVipExpiresAt sets the "vip_expires_at" field.
+func (u *UserUpsertBulk) SetVipExpiresAt(v time.Time) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetVipExpiresAt(v)
+	})
+}
+
+// UpdateVipExpiresAt sets the "vip_expires_at" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateVipExpiresAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateVipExpiresAt()
+	})
+}
+
+// ClearVipExpiresAt clears the value of the "vip_expires_at" field.
+func (u *UserUpsertBulk) ClearVipExpiresAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearVipExpiresAt()
+	})
+}
+
+// SetVipTierLocked sets the "vip_tier_locked" field.
+func (u *UserUpsertBulk) SetVipTierLocked(v bool) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetVipTierLocked(v)
+	})
+}
+
+// UpdateVipTierLocked sets the "vip_tier_locked" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateVipTierLocked() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateVipTierLocked()
 	})
 }
 

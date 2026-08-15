@@ -65,6 +65,16 @@ type User struct {
 	TotalRecharged float64 `json:"total_recharged,omitempty"`
 	// RpmLimit holds the value of the "rpm_limit" field.
 	RpmLimit int `json:"rpm_limit,omitempty"`
+	// TotalPaidUsd holds the value of the "total_paid_usd" field.
+	TotalPaidUsd float64 `json:"total_paid_usd,omitempty"`
+	// VipQualifyingSpend holds the value of the "vip_qualifying_spend" field.
+	VipQualifyingSpend float64 `json:"vip_qualifying_spend,omitempty"`
+	// VipTierID holds the value of the "vip_tier_id" field.
+	VipTierID *int64 `json:"vip_tier_id,omitempty"`
+	// VipExpiresAt holds the value of the "vip_expires_at" field.
+	VipExpiresAt *time.Time `json:"vip_expires_at,omitempty"`
+	// VipTierLocked holds the value of the "vip_tier_locked" field.
+	VipTierLocked bool `json:"vip_tier_locked,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -237,15 +247,15 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldTotpEnabled, user.FieldBalanceNotifyEnabled:
+		case user.FieldTotpEnabled, user.FieldBalanceNotifyEnabled, user.FieldVipTierLocked:
 			values[i] = new(sql.NullBool)
-		case user.FieldBalance, user.FieldFrozenBalance, user.FieldBalanceNotifyThreshold, user.FieldTotalRecharged:
+		case user.FieldBalance, user.FieldFrozenBalance, user.FieldBalanceNotifyThreshold, user.FieldTotalRecharged, user.FieldTotalPaidUsd, user.FieldVipQualifyingSpend:
 			values[i] = new(sql.NullFloat64)
-		case user.FieldID, user.FieldConcurrency, user.FieldRpmLimit:
+		case user.FieldID, user.FieldConcurrency, user.FieldRpmLimit, user.FieldVipTierID:
 			values[i] = new(sql.NullInt64)
 		case user.FieldEmail, user.FieldPasswordHash, user.FieldRole, user.FieldStatus, user.FieldUsername, user.FieldNotes, user.FieldTotpSecretEncrypted, user.FieldSignupSource, user.FieldBalanceNotifyThresholdType, user.FieldBalanceNotifyExtraEmails:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldTotpEnabledAt, user.FieldLastLoginAt, user.FieldLastActiveAt:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldTotpEnabledAt, user.FieldLastLoginAt, user.FieldLastActiveAt, user.FieldVipExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -417,6 +427,38 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field rpm_limit", values[i])
 			} else if value.Valid {
 				_m.RpmLimit = int(value.Int64)
+			}
+		case user.FieldTotalPaidUsd:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field total_paid_usd", values[i])
+			} else if value.Valid {
+				_m.TotalPaidUsd = value.Float64
+			}
+		case user.FieldVipQualifyingSpend:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field vip_qualifying_spend", values[i])
+			} else if value.Valid {
+				_m.VipQualifyingSpend = value.Float64
+			}
+		case user.FieldVipTierID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field vip_tier_id", values[i])
+			} else if value.Valid {
+				_m.VipTierID = new(int64)
+				*_m.VipTierID = value.Int64
+			}
+		case user.FieldVipExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field vip_expires_at", values[i])
+			} else if value.Valid {
+				_m.VipExpiresAt = new(time.Time)
+				*_m.VipExpiresAt = value.Time
+			}
+		case user.FieldVipTierLocked:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field vip_tier_locked", values[i])
+			} else if value.Valid {
+				_m.VipTierLocked = value.Bool
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -607,6 +649,25 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("rpm_limit=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RpmLimit))
+	builder.WriteString(", ")
+	builder.WriteString("total_paid_usd=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TotalPaidUsd))
+	builder.WriteString(", ")
+	builder.WriteString("vip_qualifying_spend=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VipQualifyingSpend))
+	builder.WriteString(", ")
+	if v := _m.VipTierID; v != nil {
+		builder.WriteString("vip_tier_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.VipExpiresAt; v != nil {
+		builder.WriteString("vip_expires_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("vip_tier_locked=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VipTierLocked))
 	builder.WriteByte(')')
 	return builder.String()
 }

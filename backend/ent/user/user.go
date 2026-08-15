@@ -63,6 +63,16 @@ const (
 	FieldTotalRecharged = "total_recharged"
 	// FieldRpmLimit holds the string denoting the rpm_limit field in the database.
 	FieldRpmLimit = "rpm_limit"
+	// FieldTotalPaidUsd holds the string denoting the total_paid_usd field in the database.
+	FieldTotalPaidUsd = "total_paid_usd"
+	// FieldVipQualifyingSpend holds the string denoting the vip_qualifying_spend field in the database.
+	FieldVipQualifyingSpend = "vip_qualifying_spend"
+	// FieldVipTierID holds the string denoting the vip_tier_id field in the database.
+	FieldVipTierID = "vip_tier_id"
+	// FieldVipExpiresAt holds the string denoting the vip_expires_at field in the database.
+	FieldVipExpiresAt = "vip_expires_at"
+	// FieldVipTierLocked holds the string denoting the vip_tier_locked field in the database.
+	FieldVipTierLocked = "vip_tier_locked"
 	// EdgeAPIKeys holds the string denoting the api_keys edge name in mutations.
 	EdgeAPIKeys = "api_keys"
 	// EdgeRedeemCodes holds the string denoting the redeem_codes edge name in mutations.
@@ -218,6 +228,11 @@ var Columns = []string{
 	FieldBalanceNotifyExtraEmails,
 	FieldTotalRecharged,
 	FieldRpmLimit,
+	FieldTotalPaidUsd,
+	FieldVipQualifyingSpend,
+	FieldVipTierID,
+	FieldVipExpiresAt,
+	FieldVipTierLocked,
 }
 
 var (
@@ -290,6 +305,12 @@ var (
 	DefaultTotalRecharged float64
 	// DefaultRpmLimit holds the default value on creation for the "rpm_limit" field.
 	DefaultRpmLimit int
+	// DefaultTotalPaidUsd holds the default value on creation for the "total_paid_usd" field.
+	DefaultTotalPaidUsd float64
+	// DefaultVipQualifyingSpend holds the default value on creation for the "vip_qualifying_spend" field.
+	DefaultVipQualifyingSpend float64
+	// DefaultVipTierLocked holds the default value on creation for the "vip_tier_locked" field.
+	DefaultVipTierLocked bool
 )
 
 // OrderOption defines the ordering options for the User queries.
@@ -418,6 +439,31 @@ func ByTotalRecharged(opts ...sql.OrderTermOption) OrderOption {
 // ByRpmLimit orders the results by the rpm_limit field.
 func ByRpmLimit(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRpmLimit, opts...).ToFunc()
+}
+
+// ByTotalPaidUsd orders the results by the total_paid_usd field.
+func ByTotalPaidUsd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTotalPaidUsd, opts...).ToFunc()
+}
+
+// ByVipQualifyingSpend orders the results by the vip_qualifying_spend field.
+func ByVipQualifyingSpend(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVipQualifyingSpend, opts...).ToFunc()
+}
+
+// ByVipTierID orders the results by the vip_tier_id field.
+func ByVipTierID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVipTierID, opts...).ToFunc()
+}
+
+// ByVipExpiresAt orders the results by the vip_expires_at field.
+func ByVipExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVipExpiresAt, opts...).ToFunc()
+}
+
+// ByVipTierLocked orders the results by the vip_tier_locked field.
+func ByVipTierLocked(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVipTierLocked, opts...).ToFunc()
 }
 
 // ByAPIKeysCount orders the results by api_keys count.

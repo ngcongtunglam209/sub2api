@@ -115,6 +115,34 @@ func (User) Fields() []ent.Field {
 		// 用户级每分钟请求数上限（0 = 不限制）。仅当所在分组未设置 rpm_limit 时作为兜底生效。
 		field.Int("rpm_limit").
 			Default(0),
+
+		// VIP 等级相关字段。
+		//
+		// 这里刻意不复用 total_recharged：那个字段在 UpdateBalance 里累加，
+		// 因此管理员手动加款、促销赠送、兑换码和联盟返佣提现都会计入，而订阅
+		// 订单反倒完全不计（订阅履约不走余额）。用它定级等于让人靠返佣刷等级，
+		// 又漏掉真正花钱买套餐的用户。
+		//
+		// total_paid_usd 永久累计，仅统计真实支付完成的订单，用于报表；
+		// vip_qualifying_spend 是定级口径，等级过期时清零，否则用户一年前
+		// 花过的钱会让他永远停在最高档，有效期就失去意义。
+		field.Float("total_paid_usd").
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}).
+			Default(0),
+		field.Float("vip_qualifying_spend").
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}).
+			Default(0),
+		// 当前等级；为空表示 VIP0（无等级）。
+		field.Int64("vip_tier_id").
+			Optional().
+			Nillable(),
+		field.Time("vip_expires_at").
+			SchemaType(map[string]string{dialect.Postgres: "timestamptz"}).
+			Optional().
+			Nillable(),
+		// 管理员锁定的等级不随消费升降，也不过期。
+		field.Bool("vip_tier_locked").
+			Default(false),
 	}
 }
 
