@@ -1,7 +1,17 @@
 package service
 
 import (
+	"database/sql"
+	"fmt"
+	"strings"
 	"testing"
+
+	dbent "github.com/Wei-Shaw/sub2api/ent"
+	"github.com/Wei-Shaw/sub2api/ent/enttest"
+
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	_ "modernc.org/sqlite"
 )
 
 func TestPcParseFloat(t *testing.T) {
@@ -59,4 +69,31 @@ func TestPcParseInt(t *testing.T) {
 			}
 		})
 	}
+}
+
+// newPaymentConfigServiceTestClient is used by the //go:build unit tests, which
+// the linter does not build.
+//
+//nolint:unused // used by payment_fulfillment_test.go
+func newPaymentConfigServiceTestClient(t *testing.T) *dbent.Client {
+	t.Helper()
+
+	dbName := fmt.Sprintf(
+		"file:%s?mode=memory&cache=shared",
+		strings.NewReplacer("/", "_", " ", "_").Replace(t.Name()),
+	)
+	db, err := sql.Open("sqlite", dbName)
+	if err != nil {
+		t.Fatalf("open sqlite: %v", err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+
+	if _, err := db.Exec("PRAGMA foreign_keys = ON"); err != nil {
+		t.Fatalf("enable foreign keys: %v", err)
+	}
+
+	drv := entsql.OpenDB(dialect.SQLite, db)
+	client := enttest.NewClient(t, enttest.WithOptions(dbent.Driver(drv)))
+	t.Cleanup(func() { _ = client.Close() })
+	return client
 }
