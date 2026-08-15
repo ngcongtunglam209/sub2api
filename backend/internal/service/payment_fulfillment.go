@@ -392,6 +392,11 @@ func (s *PaymentService) markCompleted(ctx context.Context, o *dbent.PaymentOrde
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit completion: %w", err)
 	}
+	// After the commit, never before: the cached snapshot must be dropped only
+	// once the tier it disagrees with is actually durable.
+	if s.authCacheInvalidator != nil {
+		s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, o.UserID)
+	}
 	if !s.hasAuditLog(ctx, o.ID, auditAction) {
 		s.writeAuditLog(ctx, o.ID, auditAction, "system", map[string]any{
 			"rechargeCode":   o.RechargeCode,
@@ -421,7 +426,9 @@ func (s *PaymentService) addVIPSpendForOrder(ctx context.Context, o *dbent.Payme
 	if err := s.vipSpendRepo.AddVIPSpend(ctx, o.UserID, o.Amount); err != nil {
 		return fmt.Errorf("add vip spend: %w", err)
 	}
-	return nil
+	// Re-grade in the same transaction as the spend that earned it, so the
+	// customer's tier is already correct on the page they land on after paying.
+	return s.applyVIPTierForUser(ctx, o.UserID)
 }
 
 func (s *PaymentService) dispatchPaymentFulfillmentNotification(o *dbent.PaymentOrder, auditAction string) {
