@@ -358,20 +358,39 @@ func (s *PaymentService) markCompleted(ctx context.Context, o *dbent.PaymentOrde
 		return errors.New("missing payment fulfillment lease")
 	}
 	now := time.Now()
-	updated, err := s.entClient.PaymentOrder.Update().Where(
+	tx, err := s.entClient.Tx(ctx)
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+	txCtx := dbent.NewTxContext(ctx, tx)
+	updated, err := tx.PaymentOrder.Update().Where(
 		paymentorder.IDEQ(o.ID),
 		paymentorder.StatusEQ(OrderStatusRecharging),
 		paymentorder.UpdatedAtEQ(lease.version),
-	).SetStatus(OrderStatusCompleted).SetCompletedAt(now).Save(ctx)
+	).SetStatus(OrderStatusCompleted).SetCompletedAt(now).Save(txCtx)
 	if err != nil {
 		return fmt.Errorf("mark completed: %w", err)
 	}
 	if updated == 0 {
-		current, getErr := s.entClient.PaymentOrder.Get(ctx, o.ID)
+		// Read through the open transaction rather than the pooled client: a
+		// second connection would sit behind this transaction's row lock.
+		current, getErr := tx.PaymentOrder.Get(txCtx, o.ID)
 		if getErr == nil && current.Status == OrderStatusCompleted {
 			return nil
 		}
 		return infraerrors.Conflict("CONFLICT", "fulfillment lease was lost before completion")
+	}
+	// VIP spend rides in the same transaction as the status flip. The lease
+	// version in the WHERE above lets exactly one attempt do the flip, so
+	// committing both together is what keeps a retried fulfillment from
+	// counting the order twice — and keeps the counter from being silently
+	// dropped when the process dies between the two writes.
+	if err := s.addVIPSpendForOrder(txCtx, o); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit completion: %w", err)
 	}
 	if !s.hasAuditLog(ctx, o.ID, auditAction) {
 		s.writeAuditLog(ctx, o.ID, auditAction, "system", map[string]any{
@@ -380,6 +399,27 @@ func (s *PaymentService) markCompleted(ctx context.Context, o *dbent.PaymentOrde
 			"payAmount":      o.PayAmount,
 		})
 		s.dispatchPaymentFulfillmentNotification(o, auditAction)
+	}
+	return nil
+}
+
+// addVIPSpendForOrder credits a completed order towards the user's VIP totals.
+//
+// o.Amount is the right figure to use: it is the credited USD amount, the same
+// unit every other cross-order total is kept in (see createOrderInTx in
+// payment_order.go). PayAmount is settled in the provider's currency — dong on
+// a SePay channel — so summing that would mix currencies.
+//
+// One consequence worth knowing: on balance orders Amount already includes the
+// recharge bonus multiplier, so a site running a 1.1x bonus lets a user reach
+// the 20 USD tier after paying 18.20. Charging the tier off real cash instead
+// would mean storing a converted USD figure on the order at creation time.
+func (s *PaymentService) addVIPSpendForOrder(ctx context.Context, o *dbent.PaymentOrder) error {
+	if s.vipSpendRepo == nil || o == nil || o.Amount <= 0 {
+		return nil
+	}
+	if err := s.vipSpendRepo.AddVIPSpend(ctx, o.UserID, o.Amount); err != nil {
+		return fmt.Errorf("add vip spend: %w", err)
 	}
 	return nil
 }

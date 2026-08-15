@@ -33,6 +33,7 @@ type userRepository struct {
 }
 
 var _ service.RedeemUserAdjustmentRepository = (*userRepository)(nil)
+var _ service.VIPSpendRepository = (*userRepository)(nil)
 
 func NewUserRepository(client *dbent.Client, sqlDB *sql.DB) service.UserRepository {
 	return newUserRepositoryWithSQL(client, sqlDB)
@@ -824,6 +825,31 @@ func (r *userRepository) UpdateBalance(ctx context.Context, id int64, amount flo
 		update = update.AddTotalRecharged(amount)
 	}
 	n, err := update.Save(ctx)
+	if err != nil {
+		return translatePersistenceError(err, service.ErrUserNotFound, nil)
+	}
+	if n == 0 {
+		return service.ErrUserNotFound
+	}
+	return nil
+}
+
+// AddVIPSpend adds a completed order's USD amount to the two VIP counters.
+//
+// Deliberately separate from UpdateBalance: that one also feeds
+// total_recharged, which every positive balance movement touches (admin
+// top-ups, promo bonuses, affiliate withdrawals), and which subscription
+// orders never reach at all. VIP grading needs the paid-order figure alone.
+func (r *userRepository) AddVIPSpend(ctx context.Context, id int64, amountUSD float64) error {
+	if amountUSD <= 0 {
+		return nil
+	}
+	client := clientFromContext(ctx, r.client)
+	n, err := client.User.Update().
+		Where(dbuser.IDEQ(id)).
+		AddTotalPaidUsd(amountUSD).
+		AddVipQualifyingSpend(amountUSD).
+		Save(ctx)
 	if err != nil {
 		return translatePersistenceError(err, service.ErrUserNotFound, nil)
 	}

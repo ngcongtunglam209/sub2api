@@ -196,6 +196,16 @@ type RedeemUserAdjustmentRepository interface {
 	ApplyRedeemConcurrencyAdjustment(ctx context.Context, id int64, delta int) error
 }
 
+// VIPSpendRepository accumulates the paid-order total that VIP tiers are
+// graded on. Kept out of UserRepository for the same reason as the redeem
+// adjustments above: only the payment fulfillment path may write it, and no
+// test stub of an unrelated service should have to implement it.
+type VIPSpendRepository interface {
+	// AddVIPSpend adds amountUSD to both the lifetime paid total and the
+	// tier-qualifying total. Callers must pass an amount in USD.
+	AddVIPSpend(ctx context.Context, id int64, amountUSD float64) error
+}
+
 type UserAuthIdentityRecord struct {
 	ProviderType    string
 	ProviderKey     string

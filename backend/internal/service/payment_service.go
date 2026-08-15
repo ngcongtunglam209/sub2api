@@ -184,6 +184,7 @@ type PaymentService struct {
 	subscriptionSvc          *SubscriptionService
 	configService            *PaymentConfigService
 	userRepo                 UserRepository
+	vipSpendRepo             VIPSpendRepository
 	groupRepo                GroupRepository
 	resumeService            *PaymentResumeService
 	affiliateService         *AffiliateService
@@ -191,7 +192,8 @@ type PaymentService struct {
 }
 
 func NewPaymentService(entClient *dbent.Client, registry *payment.Registry, loadBalancer payment.LoadBalancer, redeemService *RedeemService, subscriptionSvc *SubscriptionService, configService *PaymentConfigService, userRepo UserRepository, groupRepo GroupRepository, affiliateService *AffiliateService) *PaymentService {
-	svc := &PaymentService{entClient: entClient, registry: registry, loadBalancer: loadBalancer, redeemService: redeemService, subscriptionSvc: subscriptionSvc, configService: configService, userRepo: userRepo, groupRepo: groupRepo, affiliateService: affiliateService}
+	vipSpendRepo, _ := userRepo.(VIPSpendRepository)
+	svc := &PaymentService{entClient: entClient, registry: registry, loadBalancer: loadBalancer, redeemService: redeemService, subscriptionSvc: subscriptionSvc, configService: configService, userRepo: userRepo, vipSpendRepo: vipSpendRepo, groupRepo: groupRepo, affiliateService: affiliateService}
 	svc.resumeService = psNewPaymentResumeService(configService)
 	return svc
 }
