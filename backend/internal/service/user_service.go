@@ -196,6 +196,16 @@ type RedeemUserAdjustmentRepository interface {
 	ApplyRedeemConcurrencyAdjustment(ctx context.Context, id int64, delta int) error
 }
 
+// VIPTierBenefitRepository reads the perks a user's active tier grants. Split
+// from VIPRateRepository because the auth snapshot needs the concurrency floor
+// while the billing hot path needs the multiplier, and neither should pull the
+// other's query along.
+type VIPTierBenefitRepository interface {
+	// GetVIPConcurrency returns the concurrency floor of the user's active
+	// tier, or 0 when they have none.
+	GetVIPConcurrency(ctx context.Context, userID int64) (int, error)
+}
+
 // VIPSpendRepository accumulates the paid-order total that VIP tiers are
 // graded on. Kept out of UserRepository for the same reason as the redeem
 // adjustments above: only the payment fulfillment path may write it, and no

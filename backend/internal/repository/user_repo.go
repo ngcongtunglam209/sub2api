@@ -34,6 +34,8 @@ type userRepository struct {
 
 var _ service.RedeemUserAdjustmentRepository = (*userRepository)(nil)
 var _ service.VIPSpendRepository = (*userRepository)(nil)
+var _ service.VIPRateRepository = (*userRepository)(nil)
+var _ service.VIPTierBenefitRepository = (*userRepository)(nil)
 
 func NewUserRepository(client *dbent.Client, sqlDB *sql.DB) service.UserRepository {
 	return newUserRepositoryWithSQL(client, sqlDB)
@@ -857,6 +859,63 @@ func (r *userRepository) AddVIPSpend(ctx context.Context, id int64, amountUSD fl
 		return service.ErrUserNotFound
 	}
 	return nil
+}
+
+// GetVIPRateMultiplier returns the billing multiplier of a user's active tier.
+//
+// Returns 1 — full price — when the user has no tier, when the tier lapsed, or
+// when the row was deleted out from under them. A lapsed tier is treated as
+// gone here rather than waiting for the expiry sweep, so a delayed or stopped
+// sweep cannot keep handing out a discount indefinitely.
+//
+// A locked tier is an admin decision and ignores the expiry entirely.
+func (r *userRepository) GetVIPRateMultiplier(ctx context.Context, userID int64) (float64, error) {
+	tier, err := r.activeVIPTier(ctx, userID)
+	if err != nil || tier == nil || tier.RateMultiplier <= 0 {
+		return 1, err
+	}
+	return tier.RateMultiplier, nil
+}
+
+// GetVIPConcurrency returns the concurrency floor of the user's active tier,
+// or 0 when they hold none.
+func (r *userRepository) GetVIPConcurrency(ctx context.Context, userID int64) (int, error) {
+	tier, err := r.activeVIPTier(ctx, userID)
+	if err != nil || tier == nil || tier.Concurrency <= 0 {
+		return 0, err
+	}
+	return tier.Concurrency, nil
+}
+
+// activeVIPTier loads the tier a user currently holds, or nil.
+//
+// A lapsed tier counts as gone here rather than waiting for the expiry sweep,
+// so a sweep that stalls or gets disabled cannot keep handing out perks. A
+// locked tier is an admin decision and ignores the expiry entirely. A tier row
+// deleted out from under the user also reads as no tier.
+func (r *userRepository) activeVIPTier(ctx context.Context, userID int64) (*dbent.VIPTier, error) {
+	client := clientFromContext(ctx, r.client)
+	u, err := client.User.Query().
+		Where(dbuser.IDEQ(userID)).
+		Select(dbuser.FieldVipTierID, dbuser.FieldVipExpiresAt, dbuser.FieldVipTierLocked).
+		Only(ctx)
+	if err != nil {
+		return nil, translatePersistenceError(err, service.ErrUserNotFound, nil)
+	}
+	if u.VipTierID == nil {
+		return nil, nil
+	}
+	if !u.VipTierLocked && (u.VipExpiresAt == nil || !u.VipExpiresAt.After(time.Now())) {
+		return nil, nil
+	}
+	tier, err := client.VIPTier.Get(ctx, *u.VipTierID)
+	if err != nil {
+		if dbent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return tier, nil
 }
 
 func (r *userRepository) ApplyRedeemBalanceAdjustment(ctx context.Context, id int64, delta float64) error {

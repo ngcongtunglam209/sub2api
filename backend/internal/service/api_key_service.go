@@ -288,6 +288,7 @@ type APIKeyService struct {
 	groupRepo                 GroupRepository
 	userSubRepo               UserSubscriptionRepository
 	userGroupRateRepo         UserGroupRateRepository
+	vipBenefitRepo            VIPTierBenefitRepository
 	cache                     APIKeyCache
 	rateLimitCacheInvalid     RateLimitCacheInvalidator // optional: invalidate Redis rate limit cache
 	concurrencyService        *ConcurrencyService
@@ -348,6 +349,9 @@ func NewAPIKeyService(
 		userGroupRateRepo: userGroupRateRepo,
 		cache:             cache,
 		cfg:               cfg,
+	}
+	if vipRepo, ok := userRepo.(VIPTierBenefitRepository); ok {
+		svc.vipBenefitRepo = vipRepo
 	}
 	svc.initAuthCache(cfg)
 	lookupConcurrency := defaultAuthLookupConcurrency

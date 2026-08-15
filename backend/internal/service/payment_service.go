@@ -189,6 +189,7 @@ type PaymentService struct {
 	resumeService            *PaymentResumeService
 	affiliateService         *AffiliateService
 	notificationEmailService *NotificationEmailService
+	authCacheInvalidator     APIKeyAuthCacheInvalidator
 }
 
 func NewPaymentService(entClient *dbent.Client, registry *payment.Registry, loadBalancer payment.LoadBalancer, redeemService *RedeemService, subscriptionSvc *SubscriptionService, configService *PaymentConfigService, userRepo UserRepository, groupRepo GroupRepository, affiliateService *AffiliateService) *PaymentService {
@@ -200,6 +201,13 @@ func NewPaymentService(entClient *dbent.Client, registry *payment.Registry, load
 
 func (s *PaymentService) SetNotificationEmailService(notificationEmailService *NotificationEmailService) {
 	s.notificationEmailService = notificationEmailService
+}
+
+// SetAuthCacheInvalidator lets a completed order drop the caller's cached auth
+// snapshot. Without it a customer who just bought their way into a tier keeps
+// the old concurrency ceiling until the snapshot ages out on its own.
+func (s *PaymentService) SetAuthCacheInvalidator(invalidator APIKeyAuthCacheInvalidator) {
+	s.authCacheInvalidator = invalidator
 }
 
 // --- Provider Registry ---

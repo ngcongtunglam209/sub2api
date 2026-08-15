@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/enttest"
@@ -84,4 +85,89 @@ func TestAddVIPSpend_UnknownUser(t *testing.T) {
 
 	err := repo.AddVIPSpend(ctx, 987654, 10)
 	require.ErrorIs(t, err, service.ErrUserNotFound)
+}
+
+func mustCreateVIPTier(t *testing.T, ctx context.Context, client *dbent.Client, level int, rate float64, concurrency int) int64 {
+	t.Helper()
+	tier, err := client.VIPTier.Create().
+		SetLevel(level).
+		SetName("VIP").
+		SetMinSpendUsd(20).
+		SetRateMultiplier(rate).
+		SetConcurrency(concurrency).
+		Save(ctx)
+	require.NoError(t, err)
+	return tier.ID
+}
+
+// The perks read here gate real money and real capacity, so every way a tier
+// can be absent has to land on "no discount, no extra slots".
+func TestActiveVIPTierBenefits(t *testing.T) {
+	ctx := context.Background()
+	repo, client := newVIPSpendRepoSQLite(t)
+	tierID := mustCreateVIPTier(t, ctx, client, 2, 0.9, 12)
+
+	t.Run("no tier", func(t *testing.T) {
+		id := mustCreateVIPSpendUser(t, ctx, client, "vip-none@example.com")
+		rate, err := repo.GetVIPRateMultiplier(ctx, id)
+		require.NoError(t, err)
+		require.InDelta(t, 1, rate, 1e-9)
+		concurrency, err := repo.GetVIPConcurrency(ctx, id)
+		require.NoError(t, err)
+		require.Zero(t, concurrency)
+	})
+
+	t.Run("active tier", func(t *testing.T) {
+		id := mustCreateVIPSpendUser(t, ctx, client, "vip-active@example.com")
+		require.NoError(t, client.User.UpdateOneID(id).
+			SetVipTierID(tierID).
+			SetVipExpiresAt(time.Now().Add(24*time.Hour)).
+			Exec(ctx))
+
+		rate, err := repo.GetVIPRateMultiplier(ctx, id)
+		require.NoError(t, err)
+		require.InDelta(t, 0.9, rate, 1e-9)
+		concurrency, err := repo.GetVIPConcurrency(ctx, id)
+		require.NoError(t, err)
+		require.Equal(t, 12, concurrency)
+	})
+
+	// Read time, not sweep time, decides: a stalled expiry job must not keep
+	// handing out a discount forever.
+	t.Run("lapsed tier", func(t *testing.T) {
+		id := mustCreateVIPSpendUser(t, ctx, client, "vip-lapsed@example.com")
+		require.NoError(t, client.User.UpdateOneID(id).
+			SetVipTierID(tierID).
+			SetVipExpiresAt(time.Now().Add(-time.Hour)).
+			Exec(ctx))
+
+		rate, err := repo.GetVIPRateMultiplier(ctx, id)
+		require.NoError(t, err)
+		require.InDelta(t, 1, rate, 1e-9)
+	})
+
+	t.Run("locked tier ignores expiry", func(t *testing.T) {
+		id := mustCreateVIPSpendUser(t, ctx, client, "vip-locked@example.com")
+		require.NoError(t, client.User.UpdateOneID(id).
+			SetVipTierID(tierID).
+			SetVipExpiresAt(time.Now().Add(-time.Hour)).
+			SetVipTierLocked(true).
+			Exec(ctx))
+
+		rate, err := repo.GetVIPRateMultiplier(ctx, id)
+		require.NoError(t, err)
+		require.InDelta(t, 0.9, rate, 1e-9)
+	})
+
+	t.Run("tier row deleted", func(t *testing.T) {
+		id := mustCreateVIPSpendUser(t, ctx, client, "vip-dangling@example.com")
+		require.NoError(t, client.User.UpdateOneID(id).
+			SetVipTierID(999999).
+			SetVipExpiresAt(time.Now().Add(24*time.Hour)).
+			Exec(ctx))
+
+		rate, err := repo.GetVIPRateMultiplier(ctx, id)
+		require.NoError(t, err)
+		require.InDelta(t, 1, rate, 1e-9)
+	})
 }

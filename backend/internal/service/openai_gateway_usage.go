@@ -110,6 +110,11 @@ func (s *OpenAIGatewayService) ResolveUserGroupRateMultiplier(ctx context.Contex
 	if s == nil {
 		return groupDefaultMultiplier
 	}
+	// Same layering as the Anthropic path: VIP scales the group default, an
+	// explicit (user, group) override replaces it outright. Both gateways have
+	// to agree or the same customer gets two different bills depending on which
+	// endpoint they call.
+	groupDefaultMultiplier *= s.vipRateResolver.Resolve(ctx, userID)
 	resolver := s.userGroupRateResolver
 	if resolver == nil {
 		resolver = newUserGroupRateResolver(nil, nil, resolveUserGroupRateCacheTTL(s.cfg), nil, "service.openai_gateway")

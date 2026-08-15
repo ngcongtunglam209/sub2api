@@ -16,6 +16,12 @@ func (s *GatewayService) getUserGroupRateMultiplier(ctx context.Context, userID,
 	if s == nil {
 		return groupDefaultMultiplier
 	}
+	// VIP scales the group default, not the resolved value: an explicit
+	// (user, group) override is an admin decision about this exact pair, so it
+	// replaces the discounted default rather than stacking on top of it. Two
+	// discounts multiplying into a number nobody chose is how a gateway ends up
+	// billing below cost.
+	groupDefaultMultiplier *= s.vipRateResolver.Resolve(ctx, userID)
 	resolver := s.userGroupRateResolver
 	if resolver == nil {
 		resolver = newUserGroupRateResolver(

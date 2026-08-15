@@ -418,6 +418,7 @@ type OpenAIGatewayService struct {
 	rateLimitService      *RateLimitService
 	billingCacheService   *BillingCacheService
 	userGroupRateResolver *userGroupRateResolver
+	vipRateResolver       *vipRateResolver
 	httpUpstream          HTTPUpstream
 	deferredService       *DeferredService
 	openAITokenProvider   *OpenAITokenProvider
@@ -531,6 +532,9 @@ func NewOpenAIGatewayService(
 		responseHeaderFilter:  compileResponseHeaderFilter(cfg),
 		codexSnapshotThrottle: newAccountWriteThrottle(openAICodexSnapshotPersistMinInterval),
 		openaiModelTransient:  newOpenAIAccountModelTransientState(openAIModelTransientDefaultMax),
+	}
+	if vipRepo, ok := userRepo.(VIPRateRepository); ok {
+		svc.vipRateResolver = newVIPRateResolver(vipRepo, resolveUserGroupRateCacheTTL(cfg))
 	}
 	if rateLimitService != nil {
 		rateLimitService.SetAccountRuntimeBlocker(svc)
