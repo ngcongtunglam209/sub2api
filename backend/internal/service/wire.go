@@ -358,6 +358,13 @@ func ProvideSubscriptionExpiryService(userSubRepo UserSubscriptionRepository, se
 	return svc
 }
 
+// ProvideVIPTierService creates the admin/user facing VIP tier service.
+func ProvideVIPTierService(entClient *dbent.Client, invalidator APIKeyAuthCacheInvalidator) *VIPTierService {
+	svc := NewVIPTierService(entClient)
+	svc.SetAuthCacheInvalidator(invalidator)
+	return svc
+}
+
 // ProvideVIPExpiryService creates and starts VIPExpiryService.
 //
 // Runs every five minutes rather than every minute: a lapsed tier already
@@ -856,6 +863,7 @@ var ProviderSet = wire.NewSet(
 	ProvideProxyExpiryService,
 	ProvideSubscriptionExpiryService,
 	ProvideVIPExpiryService,
+	ProvideVIPTierService,
 	ProvideTimingWheelService,
 	ProvideDashboardAggregationService,
 	ProvideUsageCleanupService,

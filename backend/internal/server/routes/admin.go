@@ -312,6 +312,8 @@ func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		// User attribute values
 		users.GET("/:id/attributes", h.Admin.UserAttribute.GetUserAttributes)
 		users.PUT("/:id/attributes", h.Admin.UserAttribute.UpdateUserAttributes)
+		users.GET("/:id/vip-tier", h.Admin.VIPTier.GetUserStatus)
+		users.PUT("/:id/vip-tier", h.Admin.VIPTier.SetUserTier)
 	}
 }
 
@@ -520,6 +522,14 @@ func registerRedeemCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 }
 
 func registerPromoCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	vipTiers := admin.Group("/vip-tiers")
+	{
+		vipTiers.GET("", h.Admin.VIPTier.List)
+		vipTiers.POST("", h.Admin.VIPTier.Create)
+		vipTiers.PUT("/:id", h.Admin.VIPTier.Update)
+		vipTiers.DELETE("/:id", h.Admin.VIPTier.Delete)
+	}
+
 	promoCodes := admin.Group("/promo-codes")
 	{
 		promoCodes.GET("", h.Admin.Promo.List)
