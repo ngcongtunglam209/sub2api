@@ -363,7 +363,6 @@ export default {
         menuItem: 'VIP Tier',
         title: 'VIP Tier',
         hint: 'Tiers are graded automatically from completed orders. Pinning a tier overrides that grading and never expires.',
-        unranked: 'Unranked',
         pinned: 'Pinned',
         qualifyingSpend: 'Qualifying spend',
         totalPaid: 'Lifetime paid',

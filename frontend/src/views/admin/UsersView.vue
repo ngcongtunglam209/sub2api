@@ -615,7 +615,12 @@
                 :title="t('admin.users.vipTier.pinned')"
               />
             </div>
-            <span v-else class="text-sm text-ink-tertiary">-</span>
+            <span
+              v-else
+              class="inline-flex items-center rounded-sm border border-line bg-surface-sunken px-1.5 py-0.5 text-2xs font-medium uppercase tracking-[0.04em] text-ink-tertiary"
+            >
+              {{ t('vip.baseTier') }}
+            </span>
           </template>
 
           <template #cell-actions="{ row }">

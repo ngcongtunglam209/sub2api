@@ -75,7 +75,8 @@ export default {
 
   // Announcements Page
   vip: {
-    noTier: 'No tier yet',
+    // Rank name, shown verbatim in both locales like the configured tier names.
+    baseTier: 'BASE',
     pinned: 'Pinned by an admin',
     expiresOn: 'Valid until {date}',
     qualifyingSpend: 'Spend counted towards your tier',
