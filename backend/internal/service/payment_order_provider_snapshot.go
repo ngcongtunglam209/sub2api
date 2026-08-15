@@ -161,14 +161,3 @@ func validateProviderSnapshotMetadata(order *dbent.PaymentOrder, providerKey str
 
 	return nil
 }
-
-func providerMerchantIdentityMetadata(prov payment.Provider) map[string]string {
-	if prov == nil {
-		return nil
-	}
-	reporter, ok := prov.(payment.MerchantIdentityProvider)
-	if !ok {
-		return nil
-	}
-	return reporter.MerchantIdentityMetadata()
-}

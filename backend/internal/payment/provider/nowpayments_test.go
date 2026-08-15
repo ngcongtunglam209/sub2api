@@ -64,7 +64,7 @@ func signIPN(t *testing.T, body string) string {
 		t.Fatalf("nowPaymentsCanonicalJSON() error: %v", err)
 	}
 	mac := hmac.New(sha512.New, []byte(testIPNSecret))
-	mac.Write(canonical)
+	_, _ = mac.Write(canonical)
 	return hex.EncodeToString(mac.Sum(nil))
 }
 

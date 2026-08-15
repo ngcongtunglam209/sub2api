@@ -30,7 +30,7 @@ func NormalizeTransferContent(raw string) string {
 	b.Grow(len(raw))
 	for _, ch := range strings.ToUpper(raw) {
 		if (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') {
-			b.WriteRune(ch)
+			_, _ = b.WriteRune(ch)
 		}
 	}
 	return b.String()

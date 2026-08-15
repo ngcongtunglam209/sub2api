@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 
@@ -275,18 +274,6 @@ func (s *PaymentConfigService) parsePaymentConfig(vals map[string]string) *Payme
 		cfg.EnabledTypes = types
 	}
 	return cfg
-}
-
-func pcEnvBoolOverride(key string, fallback bool) bool {
-	raw, ok := os.LookupEnv(key)
-	if !ok || strings.TrimSpace(raw) == "" {
-		return fallback
-	}
-	value, err := strconv.ParseBool(strings.TrimSpace(raw))
-	if err != nil {
-		return fallback
-	}
-	return value
 }
 
 // UpdatePaymentConfig updates the payment configuration settings.
