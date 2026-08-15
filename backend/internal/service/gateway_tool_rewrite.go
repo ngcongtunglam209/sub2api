@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -252,7 +251,10 @@ func applyToolNameRewriteToBody(body []byte, rw *ToolNameRewrite) []byte {
 // 断点，对齐 Parrot `tools[-1]["cache_control"] = {"type":"ephemeral","ttl":"1h"}`
 // 行为，但 ttl 按本仓规则：
 //   - 客户端已为该 tool 显式设置 cache_control.ttl → 完全透传不覆盖
-//   - 否则注入 {"type":"ephemeral","ttl": claude.DefaultCacheControlTTL}
+//   - 否则注入 {"type":"ephemeral","ttl": resolveRequestCacheControlTTL(body)}
+//
+// ttl 取自整个请求而不是写死默认值：tools 在上游的判定顺序里排第一，这里落一个
+// 5m 断点会让客户端后面的 1h 块被判为 ttl 递增，整个请求 400。
 //
 // 纯副作用函数，tools 不存在或为空数组时 no-op。
 func applyToolsLastCacheBreakpoint(body []byte) []byte {
@@ -271,14 +273,15 @@ func applyToolsLastCacheBreakpoint(body []byte) []byte {
 		return body
 	}
 
+	ttl := resolveRequestCacheControlTTL(body)
 	if existingCC.Exists() {
-		if next, err := sjson.SetBytes(body, fmt.Sprintf("tools.%d.cache_control.ttl", lastIdx), claude.DefaultCacheControlTTL); err == nil {
+		if next, err := sjson.SetBytes(body, fmt.Sprintf("tools.%d.cache_control.ttl", lastIdx), ttl); err == nil {
 			body = next
 		}
 		return body
 	}
 
-	raw := fmt.Sprintf(`{"type":"ephemeral","ttl":%q}`, claude.DefaultCacheControlTTL)
+	raw := fmt.Sprintf(`{"type":"ephemeral","ttl":%q}`, ttl)
 	if next, err := sjson.SetRawBytes(body, fmt.Sprintf("tools.%d.cache_control", lastIdx), []byte(raw)); err == nil {
 		body = next
 	}

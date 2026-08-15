@@ -299,10 +299,17 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 		logger.LegacyPrintf("service.gateway", "Model mapping applied: %s -> %s (account: %s, source=%s)", originalModel, mappedModel, account.Name, mappingSource)
 	}
 
+	// cache_control ttl 统一化。上游按 tools → system → messages 顺序判定，ttl 一旦
+	// 递增就整体 400，而断点是分几个阶段打上去的（system prompt 注入、messages 断点、
+	// tools[-1] 断点），任一阶段单独用默认值都可能和客户端自带的 ttl 撞车。
+	// 这里在所有改写之后把 ephemeral 块收敛到同一个 ttl：开关开启时强制 1h，
+	// 否则跟随本请求解析出的 ttl。
 	if s.shouldInjectAnthropicCacheTTL1h(ctx, account) {
 		if err := replaceBody(injectAnthropicCacheControlTTL1h(body)); err != nil {
 			return nil, err
 		}
+	} else if err := replaceBody(normalizeCacheControlTTLUniform(body)); err != nil {
+		return nil, err
 	}
 
 	// 获取凭证
