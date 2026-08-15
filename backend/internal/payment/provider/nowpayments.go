@@ -484,7 +484,7 @@ func (n *NOWPayments) verifySignature(rawBody string, headers map[string]string)
 		return fmt.Errorf("nowpayments verify notification: %w", err)
 	}
 	mac := hmac.New(sha512.New, []byte(secret))
-	mac.Write(canonical)
+	_, _ = mac.Write(canonical)
 	expected := hex.EncodeToString(mac.Sum(nil))
 	if !hmac.Equal([]byte(strings.ToLower(presented)), []byte(expected)) {
 		return fmt.Errorf("nowpayments verify notification: signature mismatch")
@@ -521,32 +521,32 @@ func writeCanonicalJSON(buf *bytes.Buffer, value any) error {
 			keys = append(keys, key)
 		}
 		sort.Strings(keys)
-		buf.WriteByte('{')
+		_ = buf.WriteByte('{')
 		for i, key := range keys {
 			if i > 0 {
-				buf.WriteByte(',')
+				_ = buf.WriteByte(',')
 			}
 			if err := writeCanonicalScalar(buf, key); err != nil {
 				return err
 			}
-			buf.WriteByte(':')
+			_ = buf.WriteByte(':')
 			if err := writeCanonicalJSON(buf, typed[key]); err != nil {
 				return err
 			}
 		}
-		buf.WriteByte('}')
+		_ = buf.WriteByte('}')
 		return nil
 	case []any:
-		buf.WriteByte('[')
+		_ = buf.WriteByte('[')
 		for i, item := range typed {
 			if i > 0 {
-				buf.WriteByte(',')
+				_ = buf.WriteByte(',')
 			}
 			if err := writeCanonicalJSON(buf, item); err != nil {
 				return err
 			}
 		}
-		buf.WriteByte(']')
+		_ = buf.WriteByte(']')
 		return nil
 	default:
 		return writeCanonicalScalar(buf, value)

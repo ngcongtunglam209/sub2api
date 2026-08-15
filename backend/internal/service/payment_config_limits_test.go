@@ -2,8 +2,6 @@ package service
 
 import (
 	"testing"
-
-	dbent "github.com/Wei-Shaw/sub2api/ent"
 )
 
 func TestUnionFloat(t *testing.T) {
@@ -38,15 +36,5 @@ func TestUnionFloat(t *testing.T) {
 					gotAgg, gotLimited, tt.wantAgg, tt.wantLimited)
 			}
 		})
-	}
-}
-
-func makeInstance(id int64, providerKey, supportedTypes, limits string) *dbent.PaymentProviderInstance {
-	return &dbent.PaymentProviderInstance{
-		ID:             id,
-		ProviderKey:    providerKey,
-		SupportedTypes: supportedTypes,
-		Limits:         limits,
-		Enabled:        true,
 	}
 }

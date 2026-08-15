@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -72,6 +71,10 @@ func TestPcParseInt(t *testing.T) {
 	}
 }
 
+// newPaymentConfigServiceTestClient is used by the //go:build unit tests, which
+// the linter does not build.
+//
+//nolint:unused // used by payment_fulfillment_test.go
 func newPaymentConfigServiceTestClient(t *testing.T) *dbent.Client {
 	t.Helper()
 
@@ -93,38 +96,4 @@ func newPaymentConfigServiceTestClient(t *testing.T) *dbent.Client {
 	client := enttest.NewClient(t, enttest.WithOptions(dbent.Driver(drv)))
 	t.Cleanup(func() { _ = client.Close() })
 	return client
-}
-
-type paymentConfigSettingRepoStub struct {
-	values  map[string]string
-	updates map[string]string
-}
-
-func (s *paymentConfigSettingRepoStub) Get(context.Context, string) (*Setting, error) {
-	return nil, nil
-}
-func (s *paymentConfigSettingRepoStub) GetValue(_ context.Context, key string) (string, error) {
-	return s.values[key], nil
-}
-func (s *paymentConfigSettingRepoStub) Set(context.Context, string, string) error { return nil }
-func (s *paymentConfigSettingRepoStub) GetMultiple(_ context.Context, keys []string) (map[string]string, error) {
-	out := make(map[string]string, len(keys))
-	for _, key := range keys {
-		out[key] = s.values[key]
-	}
-	return out, nil
-}
-func (s *paymentConfigSettingRepoStub) SetMultiple(_ context.Context, values map[string]string) error {
-	s.updates = make(map[string]string, len(values))
-	for key, value := range values {
-		s.updates[key] = value
-		if s.values == nil {
-			s.values = map[string]string{}
-		}
-		s.values[key] = value
-	}
-	return nil
-}
-func (s *paymentConfigSettingRepoStub) GetAll(context.Context) (map[string]string, error) {
-	return s.values, nil
 }
