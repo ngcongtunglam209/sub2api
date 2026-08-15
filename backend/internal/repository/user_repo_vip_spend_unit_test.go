@@ -87,6 +87,86 @@ func TestAddVIPSpend_UnknownUser(t *testing.T) {
 	require.ErrorIs(t, err, service.ErrUserNotFound)
 }
 
+// The sweep is what makes an expired tier have to be re-earned. Getting the
+// filters wrong either strands users on a tier forever or wipes the spend of
+// customers who are still paying.
+func TestExpireVIPTiers(t *testing.T) {
+	ctx := context.Background()
+	repo, client := newVIPSpendRepoSQLite(t)
+	tierID := mustCreateVIPTier(t, ctx, client, 5, 0.8, 16)
+
+	newGraded := func(email string, expiresAt time.Time, locked bool) int64 {
+		id := mustCreateVIPSpendUser(t, ctx, client, email)
+		require.NoError(t, client.User.UpdateOneID(id).
+			SetVipTierID(tierID).
+			SetVipExpiresAt(expiresAt).
+			SetVipTierLocked(locked).
+			SetVipQualifyingSpend(500).
+			SetTotalPaidUsd(500).
+			Exec(ctx))
+		return id
+	}
+
+	lapsed := newGraded("vip-sweep-lapsed@example.com", time.Now().Add(-time.Hour), false)
+	active := newGraded("vip-sweep-active@example.com", time.Now().Add(time.Hour), false)
+	locked := newGraded("vip-sweep-locked@example.com", time.Now().Add(-time.Hour), true)
+
+	ids, err := repo.ListExpiredVIPUserIDs(ctx, time.Now(), 100)
+	require.NoError(t, err)
+	require.Equal(t, []int64{lapsed}, ids, "only lapsed, unlocked tiers may be swept")
+
+	n, err := repo.ExpireVIPTiers(ctx, ids)
+	require.NoError(t, err)
+	require.Equal(t, 1, n)
+
+	cleared, err := client.User.Get(ctx, lapsed)
+	require.NoError(t, err)
+	require.Nil(t, cleared.VipTierID)
+	require.Nil(t, cleared.VipExpiresAt)
+	require.InDelta(t, 0, cleared.VipQualifyingSpend, 1e-9)
+	// The lifetime figure is what reports read; only the grading counter resets.
+	require.InDelta(t, 500, cleared.TotalPaidUsd, 1e-9)
+
+	for _, id := range []int64{active, locked} {
+		kept, err := client.User.Get(ctx, id)
+		require.NoError(t, err)
+		require.NotNil(t, kept.VipTierID)
+		require.InDelta(t, 500, kept.VipQualifyingSpend, 1e-9)
+	}
+}
+
+// A locked id slipping into the batch (raced with an admin lock) must still be
+// filtered by the UPDATE itself, not just by the SELECT that produced it.
+func TestExpireVIPTiers_SkipsLockedEvenWhenAsked(t *testing.T) {
+	ctx := context.Background()
+	repo, client := newVIPSpendRepoSQLite(t)
+	tierID := mustCreateVIPTier(t, ctx, client, 6, 0.8, 16)
+
+	id := mustCreateVIPSpendUser(t, ctx, client, "vip-sweep-race@example.com")
+	require.NoError(t, client.User.UpdateOneID(id).
+		SetVipTierID(tierID).
+		SetVipExpiresAt(time.Now().Add(-time.Hour)).
+		SetVipTierLocked(true).
+		Exec(ctx))
+
+	n, err := repo.ExpireVIPTiers(ctx, []int64{id})
+	require.NoError(t, err)
+	require.Zero(t, n)
+
+	kept, err := client.User.Get(ctx, id)
+	require.NoError(t, err)
+	require.NotNil(t, kept.VipTierID)
+}
+
+func TestExpireVIPTiers_EmptyInput(t *testing.T) {
+	ctx := context.Background()
+	repo, _ := newVIPSpendRepoSQLite(t)
+
+	n, err := repo.ExpireVIPTiers(ctx, nil)
+	require.NoError(t, err)
+	require.Zero(t, n)
+}
+
 func mustCreateVIPTier(t *testing.T, ctx context.Context, client *dbent.Client, level int, rate float64, concurrency int) int64 {
 	t.Helper()
 	tier, err := client.VIPTier.Create().

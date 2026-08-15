@@ -36,6 +36,7 @@ var _ service.RedeemUserAdjustmentRepository = (*userRepository)(nil)
 var _ service.VIPSpendRepository = (*userRepository)(nil)
 var _ service.VIPRateRepository = (*userRepository)(nil)
 var _ service.VIPTierBenefitRepository = (*userRepository)(nil)
+var _ service.VIPExpiryRepository = (*userRepository)(nil)
 
 func NewUserRepository(client *dbent.Client, sqlDB *sql.DB) service.UserRepository {
 	return newUserRepositoryWithSQL(client, sqlDB)
@@ -885,6 +886,48 @@ func (r *userRepository) GetVIPConcurrency(ctx context.Context, userID int64) (i
 		return 0, err
 	}
 	return tier.Concurrency, nil
+}
+
+// ListExpiredVIPUserIDs returns users whose tier lapsed at or before now.
+//
+// Locked tiers are excluded: they are an admin decision and carry no expiry.
+func (r *userRepository) ListExpiredVIPUserIDs(ctx context.Context, now time.Time, limit int) ([]int64, error) {
+	if limit <= 0 {
+		limit = 500
+	}
+	client := clientFromContext(ctx, r.client)
+	return client.User.Query().
+		Where(
+			dbuser.VipTierIDNotNil(),
+			dbuser.VipTierLockedEQ(false),
+			dbuser.VipExpiresAtNotNil(),
+			dbuser.VipExpiresAtLTE(now),
+		).
+		Order(dbent.Asc(dbuser.FieldID)).
+		Limit(limit).
+		IDs(ctx)
+}
+
+// ExpireVIPTiers retires the given users' tiers.
+//
+// vip_qualifying_spend resets so the next cycle is earned again; total_paid_usd
+// is left alone because it is the lifetime figure reports read. Without the
+// reset a user who spent once and went quiet would climb straight back to their
+// old tier on their next small order.
+func (r *userRepository) ExpireVIPTiers(ctx context.Context, ids []int64) (int, error) {
+	if len(ids) == 0 {
+		return 0, nil
+	}
+	client := clientFromContext(ctx, r.client)
+	return client.User.Update().
+		Where(
+			dbuser.IDIn(ids...),
+			dbuser.VipTierLockedEQ(false),
+		).
+		ClearVipTierID().
+		ClearVipExpiresAt().
+		SetVipQualifyingSpend(0).
+		Save(ctx)
 }
 
 // activeVIPTier loads the tier a user currently holds, or nil.

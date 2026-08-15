@@ -206,6 +206,16 @@ type VIPTierBenefitRepository interface {
 	GetVIPConcurrency(ctx context.Context, userID int64) (int, error)
 }
 
+// VIPExpiryRepository backs the sweep that retires lapsed tiers.
+type VIPExpiryRepository interface {
+	// ListExpiredVIPUserIDs returns up to limit users whose tier lapsed at or
+	// before now. Locked tiers are never returned.
+	ListExpiredVIPUserIDs(ctx context.Context, now time.Time, limit int) ([]int64, error)
+	// ExpireVIPTiers clears the tier and resets the qualifying spend of the
+	// given users, leaving their lifetime paid total intact.
+	ExpireVIPTiers(ctx context.Context, ids []int64) (int, error)
+}
+
 // VIPSpendRepository accumulates the paid-order total that VIP tiers are
 // graded on. Kept out of UserRepository for the same reason as the redeem
 // adjustments above: only the payment fulfillment path may write it, and no

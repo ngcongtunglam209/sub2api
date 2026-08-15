@@ -358,6 +358,24 @@ func ProvideSubscriptionExpiryService(userSubRepo UserSubscriptionRepository, se
 	return svc
 }
 
+// ProvideVIPExpiryService creates and starts VIPExpiryService.
+//
+// Runs every five minutes rather than every minute: a lapsed tier already
+// stops granting perks the moment it is read, so this sweep only has to reset
+// the qualifying spend eventually. Returns nil when the user repository has no
+// VIP capability, which keeps the service optional.
+func ProvideVIPExpiryService(userRepo UserRepository, invalidator APIKeyAuthCacheInvalidator, lockCache LeaderLockCache, db *sql.DB) *VIPExpiryService {
+	repo, ok := userRepo.(VIPExpiryRepository)
+	if !ok {
+		return nil
+	}
+	svc := NewVIPExpiryService(repo, 5*time.Minute)
+	svc.SetAuthCacheInvalidator(invalidator)
+	svc.SetLeaderLock(lockCache, db)
+	svc.Start()
+	return svc
+}
+
 // ProvideTimingWheelService creates and starts TimingWheelService
 func ProvideTimingWheelService() (*TimingWheelService, error) {
 	svc, err := NewTimingWheelService()
@@ -837,6 +855,7 @@ var ProviderSet = wire.NewSet(
 	ProvideOpenAICodexVersionSyncService,
 	ProvideProxyExpiryService,
 	ProvideSubscriptionExpiryService,
+	ProvideVIPExpiryService,
 	ProvideTimingWheelService,
 	ProvideDashboardAggregationService,
 	ProvideUsageCleanupService,
