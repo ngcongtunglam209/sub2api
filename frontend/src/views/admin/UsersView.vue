@@ -599,6 +599,25 @@
             </span>
           </template>
 
+          <template #cell-vip_tier="{ row }">
+            <div v-if="vipTierOf(row)" class="flex items-center gap-1.5">
+              <span
+                class="inline-flex items-center rounded-sm px-1.5 py-0.5 text-2xs font-medium uppercase tracking-[0.04em] text-white"
+                :style="{ backgroundColor: vipTierOf(row)!.badge_color }"
+              >
+                {{ vipTierOf(row)!.name }}
+              </span>
+              <Icon
+                v-if="row.vip_tier_locked"
+                name="lock"
+                size="xs"
+                class="text-ink-tertiary"
+                :title="t('admin.users.vipTier.pinned')"
+              />
+            </div>
+            <span v-else class="text-sm text-ink-tertiary">-</span>
+          </template>
+
           <template #cell-actions="{ row }">
             <div class="flex items-center gap-1">
               <!-- Edit Button -->
@@ -797,7 +816,7 @@ import Icon from '@/components/icons/Icon.vue'
 
 const { t } = useI18n()
 import { adminAPI } from '@/api/admin'
-import type { AdminUser, AdminGroup, UserAttributeDefinition } from '@/types'
+import type { AdminUser, AdminGroup, UserAttributeDefinition, VIPTier } from '@/types'
 import type { BatchUserUsageStats } from '@/api/admin/dashboard'
 import type { PlatformQuotaItem } from '@/api/admin/users'
 import type { Column } from '@/components/common/types'
@@ -893,6 +912,7 @@ const allColumns = computed<Column[]>(() => [
   { key: 'usage_openai', label: t('admin.users.columns.usageOpenAI'), sortable: false },
   { key: 'usage_gemini', label: t('admin.users.columns.usageGemini'), sortable: false },
   { key: 'usage_antigravity', label: t('admin.users.columns.usageAntigravity'), sortable: false },
+  { key: 'vip_tier', label: t('admin.users.columns.vipTier'), sortable: false },
   { key: 'concurrency', label: t('admin.users.columns.concurrency'), sortable: true },
   { key: 'status', label: t('admin.users.columns.status'), sortable: true },
   { key: 'last_active_at', label: t('admin.users.columns.lastActive'), sortable: true },
@@ -1344,6 +1364,24 @@ const showPlatformQuotaModal = ref(false)
 const editingUser = ref<AdminUser | null>(null)
 const showVIPTierModal = ref(false)
 const vipTierUser = ref<AdminUser | null>(null)
+
+// Tiers are a handful of rows shared by every user, so fetch the list once and
+// resolve names and colours client-side. Embedding the tier in each user row,
+// or fetching per row, would both pay for the same few records repeatedly.
+const vipTiers = ref<VIPTier[]>([])
+const vipTierByID = computed(() => new Map(vipTiers.value.map(tier => [tier.id, tier])))
+const vipTierOf = (user: AdminUser): VIPTier | null =>
+  user.vip_tier_id != null ? (vipTierByID.value.get(user.vip_tier_id) ?? null) : null
+
+const loadVIPTiers = async () => {
+  try {
+    vipTiers.value = await adminAPI.vipTiers.list()
+  } catch {
+    // A failed tier fetch must not blank the user list; the column simply
+    // falls back to "-" until the next load.
+    vipTiers.value = []
+  }
+}
 const deletingUser = ref<AdminUser | null>(null)
 const viewingUser = ref<AdminUser | null>(null)
 const platformQuotaUser = ref<AdminUser | null>(null)
@@ -1864,6 +1902,7 @@ onMounted(async () => {
   loadSavedFilters()
   loadSavedColumns()
   loadUsers()
+  loadVIPTiers()
   if (hasVisibleGroupsColumn.value || visibleFilters.has('group')) {
     loadAllGroups()
   }

@@ -48,6 +48,12 @@ type AdminUser struct {
 	// GroupRates 用户专属分组倍率配置
 	// map[groupID]rateMultiplier
 	GroupRates map[int64]float64 `json:"group_rates,omitempty"`
+
+	// VIP 等级标识。只回传 ID 而非整份等级配置：列表一页几十行，等级只有数个，
+	// 前端拉一次 /admin/vip-tiers 建映射即可，重复内嵌等级只是放大响应体。
+	VIPTierID     *int64     `json:"vip_tier_id"`
+	VIPExpiresAt  *time.Time `json:"vip_expires_at"`
+	VIPTierLocked bool       `json:"vip_tier_locked"`
 }
 
 type APIKey struct {

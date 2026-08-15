@@ -293,6 +293,7 @@ export default {
         usageOpenAI: 'Usage (OpenAI)',
         usageGemini: 'Usage (Gemini)',
         usageAntigravity: 'Usage (Antigravity)',
+        vipTier: 'VIP',
         concurrency: 'Concurrency',
         status: 'Status',
         lastActive: 'Last Active',

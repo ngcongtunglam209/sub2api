@@ -109,6 +109,11 @@ export interface AdminUser extends User {
   group_rates?: Record<number, number>
   // 当前并发数（仅管理员列表接口返回）
   current_concurrency?: number
+  /** Tier id only; resolve names and colours from the tier list. null = unranked. */
+  vip_tier_id?: number | null
+  vip_expires_at?: string | null
+  /** Pinned by an admin: never expires, never re-graded. */
+  vip_tier_locked?: boolean
 }
 
 export interface LoginRequest {

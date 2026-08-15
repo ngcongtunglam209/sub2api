@@ -51,6 +51,12 @@ type User struct {
 	BalanceNotifyExtraEmails   []NotifyEmailEntry
 	TotalRecharged             float64
 
+	// VIP 等级快照。只读投影，供管理端列表按等级扫视；等级的评定与过期仍由
+	// VIPTierGrader / VIPExpiryService 负责写入。nil = 无等级。
+	VipTierID     *int64
+	VipExpiresAt  *time.Time
+	VipTierLocked bool
+
 	// RPMLimit 用户级每分钟请求数上限（0 = 不限制）。仅在所用分组未设置 rpm_limit
 	// 且该 (用户, 分组) 无 rpm_override 时作为全局兜底生效，计数键 rpm:u:{userID}:{min}。
 	RPMLimit int
