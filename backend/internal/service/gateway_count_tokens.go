@@ -78,6 +78,12 @@ func (s *GatewayService) ForwardCountTokens(ctx context.Context, c *gin.Context,
 				return err
 			}
 		}
+
+		// 与 Forward 一致：断点分阶段打完后把 ephemeral 块收敛到同一个 ttl，
+		// 否则上游按 tools → system → messages 判定 ttl 递增并拒绝请求。
+		if err := replaceBody(normalizeCacheControlTTLUniform(body)); err != nil {
+			return err
+		}
 	}
 
 	// Antigravity 账户不支持 count_tokens，返回 404 让客户端 fallback 到本地估算。

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -54,7 +53,10 @@ func stripMessageCacheControl(body []byte) []byte {
 //
 // cache_control ttl 策略：
 //   - 若目标 block 已有 cache_control.ttl → 不覆盖
-//   - 否则写入 {"type":"ephemeral","ttl": claude.DefaultCacheControlTTL}
+//   - 否则写入 {"type":"ephemeral","ttl": resolveRequestCacheControlTTL(body)}，
+//     即跟随客户端在本请求里已经要求的 ttl，客户端没要求时才回落到 5m 默认值。
+//     不能在这里写死默认值：客户端（Claude Code）用 1h 时，代理再打一个 5m 断点
+//     就会让上游按 tools → system → messages 顺序判定 ttl 递增而拒绝整个请求。
 //
 // 调用前应先 stripMessageCacheControl 以保证幂等和稳定。
 func addMessageCacheBreakpoints(body []byte) []byte {
@@ -112,12 +114,13 @@ func (s *GatewayService) isRewriteMessageCacheControlEnabled(ctx context.Context
 // msg 是调用方已持有的 gjson.Result 快照，用于省一次 GetBytes。
 func injectCacheControlOnLastContentBlock(body []byte, idx int, msg *gjson.Result) []byte {
 	content := msg.Get("content")
+	ttl := resolveRequestCacheControlTTL(body)
 
 	if content.Type == gjson.String {
 		text := content.String()
 		blockRaw := fmt.Sprintf(
 			`[{"type":"text","text":%s,"cache_control":{"type":"ephemeral","ttl":%q}}]`,
-			mustJSONString(text), claude.DefaultCacheControlTTL,
+			mustJSONString(text), ttl,
 		)
 		if next, err := sjson.SetRawBytes(body, fmt.Sprintf("messages.%d.content", idx), []byte(blockRaw)); err == nil {
 			body = next
@@ -142,12 +145,12 @@ func injectCacheControlOnLastContentBlock(body []byte, idx int, msg *gjson.Resul
 	pathPrefix := fmt.Sprintf("messages.%d.content.%d.cache_control", idx, lastBlockIdx)
 	existingCC := lastBlock.Get("cache_control")
 	if existingCC.Exists() {
-		if next, err := sjson.SetBytes(body, pathPrefix+".ttl", claude.DefaultCacheControlTTL); err == nil {
+		if next, err := sjson.SetBytes(body, pathPrefix+".ttl", ttl); err == nil {
 			body = next
 		}
 		return body
 	}
-	raw := fmt.Sprintf(`{"type":"ephemeral","ttl":%q}`, claude.DefaultCacheControlTTL)
+	raw := fmt.Sprintf(`{"type":"ephemeral","ttl":%q}`, ttl)
 	if next, err := sjson.SetRawBytes(body, pathPrefix, []byte(raw)); err == nil {
 		body = next
 	}
