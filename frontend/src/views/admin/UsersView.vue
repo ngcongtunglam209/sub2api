@@ -599,6 +599,25 @@
             </span>
           </template>
 
+          <template #cell-vip_tier="{ row }">
+            <div v-if="vipTierOf(row)" class="flex items-center gap-1.5">
+              <span
+                class="inline-flex items-center rounded-sm px-1.5 py-0.5 text-2xs font-medium uppercase tracking-[0.04em] text-white"
+                :style="{ backgroundColor: vipTierOf(row)!.badge_color }"
+              >
+                {{ vipTierOf(row)!.name }}
+              </span>
+              <Icon
+                v-if="row.vip_tier_locked"
+                name="lock"
+                size="xs"
+                class="text-ink-tertiary"
+                :title="t('admin.users.vipTier.pinned')"
+              />
+            </div>
+            <span v-else class="text-sm text-ink-tertiary">-</span>
+          </template>
+
           <template #cell-actions="{ row }">
             <div class="flex items-center gap-1">
               <!-- Edit Button -->
@@ -730,6 +749,15 @@
                 {{ t('admin.users.balanceHistory') }}
               </button>
 
+              <!-- VIP Tier -->
+              <button
+                @click="handleVIPTier(user); closeActionMenu()"
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-ink-secondary hover:bg-surface-hover"
+              >
+                <Icon name="trophy" size="sm" class="text-ink-tertiary" :stroke-width="2" />
+                {{ t('admin.users.vipTier.menuItem') }}
+              </button>
+
               <div class="my-1 border-t border-line-subtle"></div>
 
               <!-- Delete (not for admin) -->
@@ -750,6 +778,12 @@
     <ConfirmDialog :show="showDeleteDialog" :title="t('admin.users.deleteUser')" :message="t('admin.users.deleteConfirm', { email: deletingUser?.email })" :danger="true" @confirm="confirmDelete" @cancel="showDeleteDialog = false" />
     <UserCreateModal :show="showCreateModal" @close="showCreateModal = false" @success="loadUsers" />
     <UserEditModal :show="showEditModal" :user="editingUser" @close="closeEditModal" @success="loadUsers" />
+    <UserVIPTierModal
+      :show="showVIPTierModal"
+      :user="vipTierUser"
+      @close="closeVIPTierModal"
+      @success="loadUsers"
+    />
     <BulkEditUserModal
       :show="showBulkEditModal"
       :selected-ids="selectedIds"
@@ -782,7 +816,7 @@ import Icon from '@/components/icons/Icon.vue'
 
 const { t } = useI18n()
 import { adminAPI } from '@/api/admin'
-import type { AdminUser, AdminGroup, UserAttributeDefinition } from '@/types'
+import type { AdminUser, AdminGroup, UserAttributeDefinition, VIPTier } from '@/types'
 import type { BatchUserUsageStats } from '@/api/admin/dashboard'
 import type { PlatformQuotaItem } from '@/api/admin/users'
 import type { Column } from '@/components/common/types'
@@ -803,6 +837,7 @@ import PlatformCostCell from '@/components/user/PlatformCostCell.vue'
 import UserPlatformQuotaCell from '@/components/user/UserPlatformQuotaCell.vue'
 import UserCreateModal from '@/components/admin/user/UserCreateModal.vue'
 import UserEditModal from '@/components/admin/user/UserEditModal.vue'
+import UserVIPTierModal from '@/components/admin/user/UserVIPTierModal.vue'
 import BulkEditUserModal from '@/components/admin/user/BulkEditUserModal.vue'
 import UserPlatformQuotaModal from '@/components/admin/user/UserPlatformQuotaModal.vue'
 import UserApiKeysModal from '@/components/admin/user/UserApiKeysModal.vue'
@@ -877,6 +912,7 @@ const allColumns = computed<Column[]>(() => [
   { key: 'usage_openai', label: t('admin.users.columns.usageOpenAI'), sortable: false },
   { key: 'usage_gemini', label: t('admin.users.columns.usageGemini'), sortable: false },
   { key: 'usage_antigravity', label: t('admin.users.columns.usageAntigravity'), sortable: false },
+  { key: 'vip_tier', label: t('admin.users.columns.vipTier'), sortable: false },
   { key: 'concurrency', label: t('admin.users.columns.concurrency'), sortable: true },
   { key: 'status', label: t('admin.users.columns.status'), sortable: true },
   { key: 'last_active_at', label: t('admin.users.columns.lastActive'), sortable: true },
@@ -1326,6 +1362,26 @@ const showApiKeysModal = ref(false)
 const showAttributesModal = ref(false)
 const showPlatformQuotaModal = ref(false)
 const editingUser = ref<AdminUser | null>(null)
+const showVIPTierModal = ref(false)
+const vipTierUser = ref<AdminUser | null>(null)
+
+// Tiers are a handful of rows shared by every user, so fetch the list once and
+// resolve names and colours client-side. Embedding the tier in each user row,
+// or fetching per row, would both pay for the same few records repeatedly.
+const vipTiers = ref<VIPTier[]>([])
+const vipTierByID = computed(() => new Map(vipTiers.value.map(tier => [tier.id, tier])))
+const vipTierOf = (user: AdminUser): VIPTier | null =>
+  user.vip_tier_id != null ? (vipTierByID.value.get(user.vip_tier_id) ?? null) : null
+
+const loadVIPTiers = async () => {
+  try {
+    vipTiers.value = await adminAPI.vipTiers.list()
+  } catch {
+    // A failed tier fetch must not blank the user list; the column simply
+    // falls back to "-" until the next load.
+    vipTiers.value = []
+  }
+}
 const deletingUser = ref<AdminUser | null>(null)
 const viewingUser = ref<AdminUser | null>(null)
 const platformQuotaUser = ref<AdminUser | null>(null)
@@ -1714,6 +1770,16 @@ const handleEdit = (user: AdminUser) => {
   showEditModal.value = true
 }
 
+const handleVIPTier = (user: AdminUser) => {
+  vipTierUser.value = user
+  showVIPTierModal.value = true
+}
+
+const closeVIPTierModal = () => {
+  showVIPTierModal.value = false
+  vipTierUser.value = null
+}
+
 const closeEditModal = () => {
   showEditModal.value = false
   editingUser.value = null
@@ -1836,6 +1902,7 @@ onMounted(async () => {
   loadSavedFilters()
   loadSavedColumns()
   loadUsers()
+  loadVIPTiers()
   if (hasVisibleGroupsColumn.value || visibleFilters.has('group')) {
     loadAllGroups()
   }
