@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
 
 import { DEFAULT_DOCS_SLUG, DOCS_PAGES, findDocsPage } from '../docsPages'
 
-const LOCALES = ['en', 'zh'] as const
+const LOCALES = ['en', 'zh', 'vi'] as const
 
 /** `[Text](/docs/slug)` and `[Text](/docs/slug#anchor)`. */
 const INTERNAL_LINK = /\]\(\/docs\/([a-z0-9-]+)/g

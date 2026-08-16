@@ -377,6 +377,10 @@ export const useAppStore = defineStore('app', () => {
         service_quota_enabled: false,
         affiliate_enabled: false,
         allow_user_view_error_requests: false,
+        // USD only: with no reachable backend there is no rate to trust, and
+        // showing an unconverted dollar figure beats showing a converted one
+        // built on a guess.
+        display_fx_rates: { USD: 1 },
       })
     }
 

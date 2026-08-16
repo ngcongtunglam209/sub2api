@@ -13,14 +13,14 @@
  * in `./index.ts`), so both readers always agree on what locale is active.
  */
 
-export type LocaleCode = 'en' | 'zh'
+export type LocaleCode = 'en' | 'zh' | 'vi'
 
 export const LOCALE_STORAGE_KEY = 'sub2api_locale'
 
 export const DEFAULT_LOCALE: LocaleCode = 'en'
 
 export function isLocaleCode(value: string): value is LocaleCode {
-  return value === 'en' || value === 'zh'
+  return value === 'en' || value === 'zh' || value === 'vi'
 }
 
 /**
@@ -36,6 +36,9 @@ export function getDefaultLocale(): LocaleCode {
   const browserLang = navigator.language.toLowerCase()
   if (browserLang.startsWith('zh')) {
     return 'zh'
+  }
+  if (browserLang.startsWith('vi')) {
+    return 'vi'
   }
 
   return DEFAULT_LOCALE

@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest'
 
 import en from '../locales/en'
+import vi from '../locales/vi'
 import zh from '../locales/zh'
 
 /**
- * en/zh key parity.
+ * Key parity of every locale against `en`.
  *
  * The repo already guards two i18n properties — top-level collisions
  * (`localesNoKeyCollision`) and message compilability (`localesMessageCompile`)
- * — but nothing checked that the two locales describe the same key set. A key
+ * — but nothing checked that the locales describe the same key set. `en` is the
+ * reference here: every other locale is diffed against it, so adding a fourth
+ * locale means one entry in `BUNDLES` below rather than a new spec. A key
  * present in `en` and absent in `zh` does not throw: vue-i18n renders the key
  * path itself, so a Chinese user sees `admin.accounts.form.priorityHint` where
  * a sentence should be.
@@ -39,42 +42,74 @@ function flatten(value: unknown, prefix = '', out: Set<string> = new Set()): Set
   return out
 }
 
-const enKeys = flatten(en)
-const zhKeys = flatten(zh)
+/** Every shipped locale. `en` is the reference the others are diffed against. */
+const BUNDLES = { en, zh, vi } as const
 
-const onlyEn = [...enKeys].filter((k) => !zhKeys.has(k)).sort()
-const onlyZh = [...zhKeys].filter((k) => !enKeys.has(k)).sort()
+type Locale = keyof typeof BUNDLES
+
+const REFERENCE: Locale = 'en'
+
+const KEYS = Object.fromEntries(
+  Object.entries(BUNDLES).map(([locale, messages]) => [locale, flatten(messages)])
+) as Record<Locale, Set<string>>
+
+const enKeys = KEYS[REFERENCE]
+
+const TRANSLATIONS = (Object.keys(BUNDLES) as Locale[]).filter((locale) => locale !== REFERENCE)
 
 /**
  * Pre-existing asymmetry, measured at the end of Tier 0. Shrink this; never
  * grow it. Each entry is a key that exists in exactly one locale.
+ *
+ * `GRANDFATHERED_ONLY_EN` holds keys the named locale is allowed to be missing;
+ * `GRANDFATHERED_ONLY_TRANSLATION` holds keys it is allowed to have on its own.
  */
-const GRANDFATHERED_ONLY_EN: string[] = []
-const GRANDFATHERED_ONLY_ZH: string[] = []
+const GRANDFATHERED_ONLY_EN: Record<Exclude<Locale, 'en'>, string[]> = {
+  zh: [],
+  vi: []
+}
+const GRANDFATHERED_ONLY_TRANSLATION: Record<Exclude<Locale, 'en'>, string[]> = {
+  zh: [],
+  vi: []
+}
 
-describe('i18n: en/zh parity', () => {
-  it('loads both locales', () => {
-    expect(enKeys.size).toBeGreaterThan(1000)
-    expect(zhKeys.size).toBeGreaterThan(1000)
+describe('i18n: locale parity against en', () => {
+  it('loads every locale', () => {
+    for (const locale of Object.keys(BUNDLES) as Locale[]) {
+      expect(KEYS[locale].size, `${locale} bundle looks empty`).toBeGreaterThan(1000)
+    }
   })
+})
 
-  it('has no en key missing from zh', () => {
-    const allowed = new Set(GRANDFATHERED_ONLY_EN)
+describe.each(TRANSLATIONS)('i18n: en/%s parity', (locale) => {
+  const localeKeys = KEYS[locale]
+  const onlyEn = [...enKeys].filter((k) => !localeKeys.has(k)).sort()
+  const onlyLocale = [...localeKeys].filter((k) => !enKeys.has(k)).sort()
+
+  it(`has no en key missing from ${locale}`, () => {
+    const allowed = new Set(GRANDFATHERED_ONLY_EN[locale])
     expect(
       onlyEn.filter((k) => !allowed.has(k)),
-      'add the zh translation in the same commit — a missing key renders as its own path'
+      `add the ${locale} translation in the same commit — a missing key renders as its own path`
     ).toEqual([])
   })
 
-  it('has no zh key missing from en', () => {
-    const allowed = new Set(GRANDFATHERED_ONLY_ZH)
-    expect(onlyZh.filter((k) => !allowed.has(k)), 'add the en translation').toEqual([])
+  it(`has no ${locale} key missing from en`, () => {
+    const allowed = new Set(GRANDFATHERED_ONLY_TRANSLATION[locale])
+    expect(onlyLocale.filter((k) => !allowed.has(k)), 'add the en translation').toEqual([])
   })
 
   it('keeps the grandfathered lists honest', () => {
-    const enFixed = GRANDFATHERED_ONLY_EN.filter((k) => zhKeys.has(k) || !enKeys.has(k)).sort()
-    const zhFixed = GRANDFATHERED_ONLY_ZH.filter((k) => enKeys.has(k) || !zhKeys.has(k)).sort()
-    expect(enFixed, 'no longer asymmetric — remove from GRANDFATHERED_ONLY_EN').toEqual([])
-    expect(zhFixed, 'no longer asymmetric — remove from GRANDFATHERED_ONLY_ZH').toEqual([])
+    const enFixed = GRANDFATHERED_ONLY_EN[locale]
+      .filter((k) => localeKeys.has(k) || !enKeys.has(k))
+      .sort()
+    const localeFixed = GRANDFATHERED_ONLY_TRANSLATION[locale]
+      .filter((k) => enKeys.has(k) || !localeKeys.has(k))
+      .sort()
+    expect(enFixed, `no longer asymmetric — remove from GRANDFATHERED_ONLY_EN.${locale}`).toEqual([])
+    expect(
+      localeFixed,
+      `no longer asymmetric — remove from GRANDFATHERED_ONLY_TRANSLATION.${locale}`
+    ).toEqual([])
   })
 })

@@ -162,6 +162,7 @@ func (s *VNDRateService) SyncOnce(ctx context.Context) (float64, error) {
 		return 0, err
 	}
 
+	boardRate := rate
 	rate = applyVNDRateMargin(rate, s.cfg.VNDRate.MarginPercent)
 	if rate <= 0 {
 		return 0, fmt.Errorf("computed rate is not positive: %v", rate)
@@ -175,7 +176,50 @@ func (s *VNDRateService) SyncOnce(ctx context.Context) (float64, error) {
 	}
 
 	logger.LegacyPrintf("service.vndrate", "[VNDRate] %s/%s %s = %s VND", currency, "VND", s.column(), stored)
+
+	s.syncDisplayCNYRate(ctx, body, currency, boardRate)
 	return rate, nil
+}
+
+// syncDisplayCNYRate derives the `zh` locale's display rate from the board this
+// tick already fetched, so a second currency costs no extra request to the bank.
+//
+// Failures here are logged and swallowed: the CNY rate only affects how prices
+// are *rendered*, and losing it must never fail the VND sync that prices real
+// charges. The previously stored value stays in force, exactly as it does when
+// the whole fetch fails.
+func (s *VNDRateService) syncDisplayCNYRate(ctx context.Context, body []byte, baseCurrency string, boardRate float64) {
+	// The cross rate is only meaningful when the board quote we just read is the
+	// dollar one. An operator who repoints VNDRate.Currency at some other
+	// currency is pricing checkout off that currency, and dividing it by the
+	// yuan quote would produce a number that is not USD→CNY at all.
+	if baseCurrency != DisplayCurrencyUSD {
+		return
+	}
+
+	vndPerCNY, err := parseVCBRate(body, DisplayCurrencyCNY, s.column())
+	if err != nil {
+		logger.LegacyPrintf("service.vndrate", "[VNDRate] CNY display rate unavailable, keeping stored value: %v", err)
+		return
+	}
+
+	cross := crossRateFromVND(boardRate, vndPerCNY)
+	if cross <= 0 {
+		logger.LegacyPrintf("service.vndrate", "[VNDRate] CNY cross rate is not positive (USD=%v CNY=%v), keeping stored value", boardRate, vndPerCNY)
+		return
+	}
+
+	// Same margin as the dong rate, so every non-USD price carries the operator's
+	// markup consistently rather than one locale seeing the raw board rate.
+	cross = applyVNDRateMargin(cross, s.cfg.VNDRate.MarginPercent)
+
+	stored := strconv.FormatFloat(cross, 'f', 4, 64)
+	if err := s.settingRepo.Set(ctx, SettingDisplayUSDToCNYRate, stored); err != nil {
+		logger.LegacyPrintf("service.vndrate", "[VNDRate] persist %s failed: %v", SettingDisplayUSDToCNYRate, err)
+		return
+	}
+
+	logger.LegacyPrintf("service.vndrate", "[VNDRate] USD/CNY %s = %s CNY", s.column(), stored)
 }
 
 func (s *VNDRateService) fetch(ctx context.Context) ([]byte, error) {

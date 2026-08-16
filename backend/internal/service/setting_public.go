@@ -237,6 +237,8 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeyAffiliateEnabled,
 		SettingKeyRiskControlEnabled,
 		SettingKeyAllowUserViewErrorRequests,
+		SettingSubscriptionUSDToVNDRate,
+		SettingDisplayUSDToCNYRate,
 	}
 
 	settings, err := s.settingRepo.GetMultiple(ctx, keys)
@@ -366,6 +368,11 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		RiskControlEnabled: settings[SettingKeyRiskControlEnabled] == "true",
 
 		AllowUserViewErrorRequests: settings[SettingKeyAllowUserViewErrorRequests] == "true",
+
+		DisplayFXRates: BuildDisplayFXRates(
+			parseDisplayRate(settings[SettingDisplayUSDToCNYRate]),
+			parseDisplayRate(settings[SettingSubscriptionUSDToVNDRate]),
+		),
 	}, nil
 }
 
@@ -612,6 +619,10 @@ type PublicSettingsInjectionPayload struct {
 	AffiliateEnabled             bool `json:"affiliate_enabled"`
 	RiskControlEnabled           bool `json:"risk_control_enabled"`
 	AllowUserViewErrorRequests   bool `json:"allow_user_view_error_requests"`
+	// Injected so the very first paint already prices in the reader's display
+	// currency. Without it a Vietnamese reader sees dollars for one frame and
+	// then watches every price on the page jump.
+	DisplayFXRates DisplayFXRates `json:"display_fx_rates"`
 }
 
 // GetPublicSettingsForInjection returns public settings in a format suitable for HTML injection.
@@ -691,6 +702,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		AffiliateEnabled:                     settings.AffiliateEnabled,
 		RiskControlEnabled:                   settings.RiskControlEnabled,
 		AllowUserViewErrorRequests:           settings.AllowUserViewErrorRequests,
+		DisplayFXRates:                       settings.DisplayFXRates,
 	}, nil
 }
 

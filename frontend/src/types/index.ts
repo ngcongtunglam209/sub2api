@@ -279,6 +279,12 @@ export interface PublicSettings {
   service_quota_enabled: boolean
   affiliate_enabled: boolean
   allow_user_view_error_requests?: boolean
+  /**
+   * Units of each display currency per 1 USD, keyed by ISO code. USD is always
+   * present at 1; a currency the backend has no usable rate for is absent, and
+   * the panel then renders USD rather than inventing a conversion.
+   */
+  display_fx_rates?: Record<string, number>
 }
 
 export interface AuthResponse {

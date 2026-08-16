@@ -63,6 +63,14 @@ describe('i18n/locale', () => {
     expect(getLocale()).toBe('zh')
   })
 
+  it('sniffs a Vietnamese browser when nothing was stored', async () => {
+    stubBrowserLanguage('vi-VN')
+
+    const { getLocale } = await freshLocaleModule()
+
+    expect(getLocale()).toBe('vi')
+  })
+
   it('ignores a stored value that is not a supported locale', async () => {
     localStorage.setItem('sub2api_locale', 'fr-FR')
 
@@ -95,6 +103,7 @@ describe('i18n/locale', () => {
 
     expect(isLocaleCode('en')).toBe(true)
     expect(isLocaleCode('zh')).toBe(true)
+    expect(isLocaleCode('vi')).toBe(true)
     expect(isLocaleCode('zh-CN')).toBe(false)
     expect(isLocaleCode('')).toBe(false)
   })

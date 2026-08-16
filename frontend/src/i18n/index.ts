@@ -19,7 +19,8 @@ export type { LocaleCode }
 
 const localeLoaders: Record<LocaleCode, () => Promise<{ default: LocaleMessages }>> = {
   en: () => import('./locales/en'),
-  zh: () => import('./locales/zh')
+  zh: () => import('./locales/zh'),
+  vi: () => import('./locales/vi')
 }
 
 export const i18n = createI18n({
@@ -93,7 +94,8 @@ export async function setLocale(locale: string): Promise<void> {
 
 export const availableLocales = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' }
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' }
 ] as const
 
 export default i18n

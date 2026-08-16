@@ -395,6 +395,13 @@ type PublicSettings struct {
 
 	// 允许终端用户在用量页查看自己的失败请求
 	AllowUserViewErrorRequests bool `json:"allow_user_view_error_requests"`
+
+	// Units of each display currency per 1 USD, keyed by ISO code. Always
+	// contains USD=1; other currencies appear only when a usable rate is stored,
+	// so the panel falls back to dollars instead of guessing. See
+	// display_currency.go for why display currency is separate from the currency
+	// a payment gateway collects.
+	DisplayFXRates DisplayFXRates `json:"display_fx_rates"`
 }
 
 type LoginAgreementDocument struct {
