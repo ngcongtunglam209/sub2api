@@ -112,6 +112,7 @@ export default {
       healthCondition: 'Tình trạng sức khỏe',
       healthHelp: 'Điểm sức khỏe tổng thể của hệ thống dựa trên SLA, tỷ lệ lỗi và mức sử dụng tài nguyên',
       healthyStatus: 'Khỏe mạnh',
+      degradedStatus: 'Suy giảm',
       riskyStatus: 'Có rủi ro',
       idleStatus: 'Rảnh',
       timeRange: {
