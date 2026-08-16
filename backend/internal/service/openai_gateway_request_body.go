@@ -707,6 +707,17 @@ func normalizeOpenAIPassthroughOAuthBody(body []byte, compact bool) ([]byte, boo
 	normalized := body
 	changed := false
 
+	// Preserve a client supplied flat reasoning_effort before the strip loop
+	// below removes it.
+	folded, foldChanged, err := foldOpenAIFlatReasoningEffort(normalized)
+	if err != nil {
+		return body, false, fmt.Errorf("normalize passthrough body reasoning effort: %w", err)
+	}
+	if foldChanged {
+		normalized = folded
+		changed = true
+	}
+
 	for _, field := range openAIChatGPTInternalUnsupportedFields {
 		if value := gjson.GetBytes(normalized, field); !value.Exists() {
 			continue
