@@ -456,6 +456,19 @@ const healthScoreClass = computed(() => {
   return 'text-red-500'
 })
 
+// Condition wording follows the same 90/60 bands as the ring colour. The label
+// used to be binary, so every yellow score between 60 and 89 was announced as
+// "At Risk" — a relay running at ~2% errors with reasoning-model TTFT scores in
+// the mid-80s and reads as an incident when nothing is actually wrong.
+const healthConditionLabel = computed(() => {
+  if (isSystemIdle.value) return t('admin.ops.idleStatus')
+  const score = healthScoreValue.value
+  if (score == null) return t('admin.ops.riskyStatus')
+  if (score >= 90) return t('admin.ops.healthyStatus')
+  if (score >= 60) return t('admin.ops.degradedStatus')
+  return t('admin.ops.riskyStatus')
+})
+
 const circleSize = computed(() => props.fullscreen ? 140 : 100)
 const strokeWidth = computed(() => props.fullscreen ? 10 : 8)
 const radius = computed(() => (circleSize.value - strokeWidth.value) / 2)
@@ -1097,13 +1110,7 @@ function handleToolbarRefresh() {
                 <HelpTooltip :content="t('admin.ops.healthHelp')" />
               </div>
               <div class="mt-1 text-xs font-bold" :class="healthScoreClass">
-                {{
-                  isSystemIdle
-                    ? t('admin.ops.idleStatus')
-                    : typeof overview.health_score === 'number' && overview.health_score >= 90
-                      ? t('admin.ops.healthyStatus')
-                      : t('admin.ops.riskyStatus')
-                }}
+                {{ healthConditionLabel }}
               </div>
             </div>
           </div>

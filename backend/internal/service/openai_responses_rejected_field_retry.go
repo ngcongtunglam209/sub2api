@@ -16,7 +16,7 @@ const maxOpenAIResponsesRejectedFieldRetries = 6
 
 var (
 	openAIResponsesRejectedNamespaceParamPattern = regexp.MustCompile(`(?i)^input\[(\d+)\]\.namespace$`)
-	openAIResponsesRejectedMessageParamPattern   = regexp.MustCompile(`(?i)(?:unknown|unsupported)[ _-]+parameter\s*(?::|=|is)?\s*["']?(max_output_tokens|input\[\d+\]\.namespace)(?:["']|\b)`)
+	openAIResponsesRejectedMessageParamPattern   = regexp.MustCompile(`(?i)(?:unknown|unsupported)[ _-]+parameter\s*(?::|=|is)?\s*["']?(max_output_tokens|reasoning_effort|reasoningeffort|input\[\d+\]\.namespace)(?:["']|\b)`)
 )
 
 type openAIResponsesRejectedFieldRetryState struct {
@@ -72,6 +72,19 @@ func normalizeOpenAIResponsesRejectedFieldRetryBody(statusCode int, body, respon
 	}
 	if index, ok := openAIResponsesRejectedNamespaceIndex(param); ok {
 		return removeOpenAIResponsesRejectedNamespaceAtIndex(body, index)
+	}
+	// Upstreams that only speak the Responses schema reject the Chat
+	// Completions style flat effort key. Fold it into reasoning.effort instead
+	// of dropping the caller's intent.
+	if param == "reasoning_effort" || param == "reasoningeffort" {
+		retryBody, changed, err := foldOpenAIFlatReasoningEffort(body)
+		if err != nil {
+			return nil, "", false, fmt.Errorf("fold rejected reasoning_effort: %w", err)
+		}
+		if !changed {
+			return nil, "", false, nil
+		}
+		return retryBody, "reasoning_effort parameter rejection", true, nil
 	}
 	if param == "max_output_tokens" && gjson.GetBytes(body, "max_output_tokens").Exists() {
 		retryBody, err := sjson.DeleteBytes(body, "max_output_tokens")

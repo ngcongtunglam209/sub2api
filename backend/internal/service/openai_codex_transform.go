@@ -129,6 +129,9 @@ var openAIChatGPTInternalUnsupportedFields = []string{
 	"prompt_cache_retention",
 	"safety_identifier",
 	"stream_options",
+	// Chat Completions style effort keys; folded into reasoning.effort first.
+	"reasoning_effort",
+	"reasoningEffort",
 }
 
 var openAICodexOAuthUnsupportedFields = append([]string{
@@ -185,6 +188,12 @@ func applyCodexOAuthTransformWithOptions(reqBody map[string]any, opts codexOAuth
 			reqBody["stream"] = true
 			result.Modified = true
 		}
+	}
+
+	// Preserve a client supplied flat reasoning_effort before the strip loop
+	// below removes it.
+	if foldOpenAIFlatReasoningEffortMap(reqBody) {
+		result.Modified = true
 	}
 
 	// Strip parameters unsupported by ChatGPT internal Codex endpoint.

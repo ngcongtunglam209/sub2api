@@ -152,6 +152,12 @@ async function fetchErrorLogs() {
   }
 
 
+// `immediate` because the dashboard can open this modal from the URL
+// (`?open_error_details=1&error_type=upstream`). That query is applied while the
+// dashboard's own setup runs, so `show` is already true by the time this
+// component exists and a plain watcher never sees an edge — the modal opened on
+// a deep link but never issued a request, and reported "Total: 0" on an hour
+// with a hundred upstream errors in it.
 watch(
   () => props.show,
   (open) => {
@@ -159,7 +165,8 @@ watch(
     page.value = 1
     pageSize.value = 10
     resetFilters()
-  }
+  },
+  { immediate: true }
 )
 
 watch(
