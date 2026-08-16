@@ -36,7 +36,7 @@
     <div class="mt-3 grid grid-cols-2 gap-3 text-xs text-ink-secondary sm:grid-cols-3">
       <div>
         <div class="text-ink-tertiary">{{ t('vip.qualifyingSpend') }}</div>
-        <div class="font-mono tabular-nums text-ink">${{ formatUsd(status.qualifying_spend) }}</div>
+        <div class="font-mono tabular-nums text-ink">{{ formatDisplay(status.qualifying_spend) }}</div>
       </div>
       <div v-if="status.tier">
         <div class="text-ink-tertiary">{{ t('vip.concurrency') }}</div>
@@ -44,14 +44,14 @@
       </div>
       <div>
         <div class="text-ink-tertiary">{{ t('vip.totalPaid') }}</div>
-        <div class="font-mono tabular-nums text-ink">${{ formatUsd(status.total_paid_usd) }}</div>
+        <div class="font-mono tabular-nums text-ink">{{ formatDisplay(status.total_paid_usd) }}</div>
       </div>
     </div>
 
     <div v-if="status.next_tier" class="mt-4">
       <div class="mb-1.5 flex items-center justify-between text-xs">
         <span class="text-ink-secondary">
-          {{ t('vip.spendToNext', { amount: formatUsd(status.spend_to_next_tier), tier: status.next_tier.name }) }}
+          {{ t('vip.spendToNext', { amount: formatDisplay(status.spend_to_next_tier), tier: status.next_tier.name }) }}
         </span>
         <span class="font-mono tabular-nums text-ink-tertiary">{{ progressPercent }}%</span>
       </div>
@@ -71,10 +71,20 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import vipAPI from '@/api/vip'
+import { useDisplayCurrency } from '@/composables/useDisplayCurrency'
 import { formatDateTime } from '@/utils/format'
 import type { VIPStatus } from '@/types'
 
 const { t } = useI18n()
+
+/*
+ * Spend thresholds, lifetime paid and the gap to the next rung are all stored
+ * USD that no gateway ever touched — they are accumulated ledger totals, not a
+ * charge. `format` carries the symbol, which is why the templates below (and
+ * the `vip.spendToNext` strings) no longer hardcode a `$`: a card that reads
+ * "$8,900,000" to a Vietnamese user is worse than one that reads "8.900.000 ₫".
+ */
+const { format: formatDisplay } = useDisplayCurrency()
 
 const status = ref<VIPStatus | null>(null)
 
@@ -96,10 +106,6 @@ const progressPercent = computed(() => {
   const progressed = s.qualifying_spend - floor
   return Math.min(100, Math.max(0, Math.round((progressed / span) * 100)))
 })
-
-function formatUsd(value: number): string {
-  return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
 
 onMounted(async () => {
   try {

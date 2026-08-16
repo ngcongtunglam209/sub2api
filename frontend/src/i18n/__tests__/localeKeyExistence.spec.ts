@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 import en from '../locales/en'
+import vi from '../locales/vi'
 import zh from '../locales/zh'
 
 /**
@@ -84,6 +85,10 @@ async function keysFromDisk(locale: string): Promise<Set<string>> {
 
 const enKeys = flatten(en)
 const zhKeys = flatten(zh)
+const viKeys = flatten(vi)
+
+/** Bundled keys per locale, for the on-disk comparison below. */
+const BUNDLED_KEYS: Record<string, Set<string>> = { en: enKeys, zh: zhKeys, vi: viKeys }
 
 /*
  * `t(...)` / `$t(...)` with a single-quoted, double-quoted, or uninterpolated
@@ -164,9 +169,9 @@ describe('i18n: every literal t() key exists', () => {
     expect(fixed, 'these resolve now — remove them from GRANDFATHERED').toEqual([])
   })
 
-  it.each(['en', 'zh'])('%s bundle contains exactly the modules on disk', async (locale) => {
+  it.each(['en', 'zh', 'vi'])('%s bundle contains exactly the modules on disk', async (locale) => {
     const onDisk = await keysFromDisk(locale)
-    const bundled = locale === 'en' ? enKeys : zhKeys
+    const bundled = BUNDLED_KEYS[locale]
     expect([...onDisk].filter((k) => !bundled.has(k)).sort(), 'module on disk not spread into index.ts').toEqual([])
     expect([...bundled].filter((k) => !onDisk.has(k)).sort(), 'bundled key has no module on disk').toEqual([])
   })

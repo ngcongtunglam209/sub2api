@@ -451,6 +451,7 @@ import Icon from '@/components/icons/Icon.vue'
 import { useTheme } from '@/composables/useTheme'
 import { useAppStore } from '@/stores'
 import { formatDateLocalInput } from '@/utils/format'
+import { intlLocaleFor } from '@/utils/displayCurrency'
 import { sanitizeUrl } from '@/utils/url'
 
 const { t, locale } = useI18n()
@@ -979,7 +980,7 @@ function formatDate(iso: string | null | undefined): string {
   if (!iso) return '–'
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return '–'
-  const loc = locale.value === 'zh' ? 'zh-CN' : 'en-US'
+  const loc = intlLocaleFor(locale.value)
   return d.toLocaleDateString(loc, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 

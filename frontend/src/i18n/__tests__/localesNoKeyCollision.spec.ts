@@ -18,6 +18,20 @@ import enCommon from '../locales/en/common'
 import enDashboard from '../locales/en/dashboard'
 import enLanding from '../locales/en/landing'
 import enMisc from '../locales/en/misc'
+import viAdminAccounts from '../locales/vi/admin/accounts'
+import viAdminAudit from '../locales/vi/admin/audit'
+import viAdminChannels from '../locales/vi/admin/channels'
+import viAdminOps from '../locales/vi/admin/ops'
+import viAdminOverview from '../locales/vi/admin/overview'
+import viAdminPromptAudit from '../locales/vi/admin/promptAudit'
+import viAdminResources from '../locales/vi/admin/resources'
+import viAdminSettings from '../locales/vi/admin/settings'
+import viBatchImage from '../locales/vi/batchImage'
+import viChannelMonitorV2 from '../locales/vi/channelMonitorV2'
+import viCommon from '../locales/vi/common'
+import viDashboard from '../locales/vi/dashboard'
+import viLanding from '../locales/vi/landing'
+import viMisc from '../locales/vi/misc'
 import zhAdminAccounts from '../locales/zh/admin/accounts'
 import zhAdminAudit from '../locales/zh/admin/audit'
 import zhAdminChannels from '../locales/zh/admin/channels'
@@ -69,6 +83,14 @@ const roots: Record<string, Modules> = {
     channelMonitorV2: enChannelMonitorV2,
     batchImage: enBatchImage,
     misc: enMisc
+  },
+  vi: {
+    landing: viLanding,
+    common: viCommon,
+    dashboard: viDashboard,
+    channelMonitorV2: viChannelMonitorV2,
+    batchImage: viBatchImage,
+    misc: viMisc
   }
 }
 
@@ -92,6 +114,16 @@ const admins: Record<string, Modules> = {
     settings: enAdminSettings,
     audit: enAdminAudit,
     promptAudit: enAdminPromptAudit
+  },
+  vi: {
+    overview: viAdminOverview,
+    channels: viAdminChannels,
+    accounts: viAdminAccounts,
+    resources: viAdminResources,
+    ops: viAdminOps,
+    settings: viAdminSettings,
+    audit: viAdminAudit,
+    promptAudit: viAdminPromptAudit
   }
 }
 

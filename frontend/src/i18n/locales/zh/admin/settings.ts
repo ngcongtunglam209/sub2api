@@ -655,6 +655,10 @@ export default {
         subscriptionUsdToVndRateHint:
           'VND 支付通道下，每 1 USD 收取多少 VND（如 26000），套餐价格与余额充值同样适用。0 或留空 = 不换算，按 USD 数值直接收款。启用后所有套餐 price 必须按 USD 定价',
         subscriptionUsdToVndRateDisabled: '未启用（按原数值直付）',
+        displayUsdToCnyRate: 'CNY 展示汇率',
+        displayUsdToCnyRateHint:
+          '中文界面下每 1 USD 展示为多少 CNY（如 7.1）。仅用于展示——本站不以 CNY 结算，因此不会影响任何支付通道的实际收款金额。0 或留空 = 直接展示 USD。启用银行汇率同步后，该字段会被自动覆盖',
+        displayUsdToCnyRateDisabled: '未启用（价格按 USD 展示）',
         rechargeFeeRate: '充值手续费率',
         rechargeFeeRateHint: '用户充值时额外收取的手续费百分比，0 表示不收取手续费',
         rechargeFeePreview: '预览：充值 100 元，手续费 {fee} 元',

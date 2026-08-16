@@ -85,12 +85,18 @@ type PaymentConfig struct {
 	BalanceRechargeMultiplier float64  `json:"balance_recharge_multiplier"`
 	// SubscriptionUSDToVNDRate is 0 when conversion is off (price charged as-is).
 	SubscriptionUSDToVNDRate float64 `json:"subscription_usd_to_vnd_rate"`
-	RechargeFeeRate          float64 `json:"recharge_fee_rate"`
-	LoadBalanceStrategy      string  `json:"load_balance_strategy"`
-	ProductNamePrefix        string  `json:"product_name_prefix"`
-	ProductNameSuffix        string  `json:"product_name_suffix"`
-	HelpImageURL             string  `json:"help_image_url"`
-	HelpText                 string  `json:"help_text"`
+	// DisplayUSDToCNYRate prices the `zh` panel locale. Unlike the dong rate it
+	// never reaches a gateway — nothing settles in yuan here — so 0 means the
+	// Chinese panel simply shows dollars. Editable by hand for operators who
+	// leave the bank sync off; the sync overwrites it when enabled, exactly as
+	// it does the dong rate.
+	DisplayUSDToCNYRate float64 `json:"display_usd_to_cny_rate"`
+	RechargeFeeRate     float64 `json:"recharge_fee_rate"`
+	LoadBalanceStrategy string  `json:"load_balance_strategy"`
+	ProductNamePrefix   string  `json:"product_name_prefix"`
+	ProductNameSuffix   string  `json:"product_name_suffix"`
+	HelpImageURL        string  `json:"help_image_url"`
+	HelpText            string  `json:"help_text"`
 
 	// Cancel rate limit settings
 	CancelRateLimitEnabled bool   `json:"cancel_rate_limit_enabled"`
@@ -112,6 +118,7 @@ type UpdatePaymentConfigRequest struct {
 	BalanceDisabled           *bool    `json:"balance_disabled"`
 	BalanceRechargeMultiplier *float64 `json:"balance_recharge_multiplier"`
 	SubscriptionUSDToVNDRate  *float64 `json:"subscription_usd_to_vnd_rate"`
+	DisplayUSDToCNYRate       *float64 `json:"display_usd_to_cny_rate"`
 	RechargeFeeRate           *float64 `json:"recharge_fee_rate"`
 	LoadBalanceStrategy       *string  `json:"load_balance_strategy"`
 	ProductNamePrefix         *string  `json:"product_name_prefix"`
@@ -223,7 +230,7 @@ func (s *PaymentConfigService) GetPaymentConfig(ctx context.Context) (*PaymentCo
 	keys := []string{
 		SettingPaymentEnabled, SettingMinRechargeAmount, SettingMaxRechargeAmount,
 		SettingDailyRechargeLimit, SettingOrderTimeoutMinutes, SettingMaxPendingOrders,
-		SettingEnabledPaymentTypes, SettingBalancePayDisabled, SettingBalanceRechargeMult, SettingSubscriptionUSDToVNDRate, SettingRechargeFeeRate, SettingLoadBalanceStrategy,
+		SettingEnabledPaymentTypes, SettingBalancePayDisabled, SettingBalanceRechargeMult, SettingSubscriptionUSDToVNDRate, SettingDisplayUSDToCNYRate, SettingRechargeFeeRate, SettingLoadBalanceStrategy,
 		SettingProductNamePrefix, SettingProductNameSuffix,
 		SettingHelpImageURL, SettingHelpText,
 		SettingCancelRateLimitOn, SettingCancelRateLimitMax,
@@ -247,6 +254,7 @@ func (s *PaymentConfigService) parsePaymentConfig(vals map[string]string) *Payme
 		BalanceDisabled:           vals[SettingBalancePayDisabled] == "true",
 		BalanceRechargeMultiplier: normalizeBalanceRechargeMultiplier(pcParseFloat(vals[SettingBalanceRechargeMult], defaultBalanceRechargeMultiplier)),
 		SubscriptionUSDToVNDRate:  normalizeUSDToVNDRate(pcParseFloat(vals[SettingSubscriptionUSDToVNDRate], 0)),
+		DisplayUSDToCNYRate:       parseDisplayRate(vals[SettingDisplayUSDToCNYRate]),
 		RechargeFeeRate:           pcParseFloat(vals[SettingRechargeFeeRate], 0),
 		LoadBalanceStrategy:       vals[SettingLoadBalanceStrategy],
 		ProductNamePrefix:         vals[SettingProductNamePrefix],
@@ -292,6 +300,12 @@ func (s *PaymentConfigService) UpdatePaymentConfig(ctx context.Context, req Upda
 			return infraerrors.BadRequest("INVALID_SUBSCRIPTION_USD_TO_VND_RATE", "subscription USD to VND rate must be 0 (disabled) or a positive number")
 		}
 	}
+	if req.DisplayUSDToCNYRate != nil {
+		v := *req.DisplayUSDToCNYRate
+		if math.IsNaN(v) || math.IsInf(v, 0) || v < 0 {
+			return infraerrors.BadRequest("INVALID_DISPLAY_USD_TO_CNY_RATE", "display USD to CNY rate must be 0 (show USD) or a positive number")
+		}
+	}
 	if req.RechargeFeeRate != nil {
 		v := *req.RechargeFeeRate
 		if math.IsNaN(v) || math.IsInf(v, 0) || v < 0 || v > 100 {
@@ -332,6 +346,9 @@ func (s *PaymentConfigService) UpdatePaymentConfig(ctx context.Context, req Upda
 	}
 	if req.SubscriptionUSDToVNDRate != nil {
 		m[SettingSubscriptionUSDToVNDRate] = formatPositiveFloatExact(req.SubscriptionUSDToVNDRate)
+	}
+	if req.DisplayUSDToCNYRate != nil {
+		m[SettingDisplayUSDToCNYRate] = formatPositiveFloatExact(req.DisplayUSDToCNYRate)
 	}
 	if req.RechargeFeeRate != nil {
 		m[SettingRechargeFeeRate] = formatNonNegativeFloat(req.RechargeFeeRate)

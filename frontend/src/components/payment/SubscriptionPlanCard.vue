@@ -41,16 +41,16 @@
 
       <div class="shrink-0 text-right">
         <div class="flex items-baseline justify-end gap-0.5 font-mono tabular-nums">
-          <span class="text-2xs text-ink-tertiary">{{ planCurrencySymbol }}</span>
-          <span class="text-xl font-semibold text-ink">{{ plan.price }}</span>
-          <span v-if="plan.currency" class="text-2xs font-normal text-ink-tertiary">{{ plan.currency }}</span>
+          <span class="text-2xs text-ink-tertiary">{{ priceSymbol }}</span>
+          <span class="text-xl font-semibold text-ink">{{ priceText }}</span>
+          <span v-if="priceCode" class="text-2xs font-normal text-ink-tertiary">{{ priceCode }}</span>
         </div>
         <div class="mt-1 flex items-center justify-end gap-1.5">
           <Badge caps class="shrink-0">{{ pLabel }}</Badge>
           <span class="text-2xs text-ink-tertiary">/ {{ validitySuffix }}</span>
         </div>
         <div v-if="plan.original_price" class="mt-1 flex items-center justify-end gap-1.5">
-          <span class="font-mono text-2xs tabular-nums text-ink-disabled line-through">{{ planCurrencySymbol }}{{ plan.original_price }}<template v-if="plan.currency"> {{ plan.currency }}</template></span>
+          <span class="font-mono text-2xs tabular-nums text-ink-disabled line-through">{{ priceSymbol }}{{ originalPriceText }}<template v-if="priceCode"> {{ priceCode }}</template></span>
           <span
             v-if="discountText"
             class="rounded-sm border border-line px-1 text-2xs font-medium text-ink-secondary"
@@ -137,6 +137,7 @@ import Badge from '@/components/common/Badge.vue'
 import Button from '@/components/common/Button.vue'
 import NumCell from '@/components/common/NumCell.vue'
 import { currencySymbol } from '@/components/payment/currency'
+import { useDisplayCurrency } from '@/composables/useDisplayCurrency'
 import { useAppStore } from '@/stores/app'
 import type { UserSubscription } from '@/types'
 import type { SubscriptionPlan } from '@/types/payment'
@@ -182,6 +183,50 @@ const hasNoLimit = computed(
 
 const appStore = useAppStore()
 const planCurrencySymbol = computed(() => currencySymbol(props.plan.currency || 'USD'))
+
+/*
+ * `plan.price` and `plan.original_price` are stored USD; `plan.currency` is only
+ * a LABEL an operator typed. So once the reader's locale resolves to a currency
+ * we hold a rate for, that label is not merely redundant, it is wrong — the
+ * digits on screen are no longer dollars. The display currency then owns all
+ * three spans (symbol, number, ISO code) and the operator label is dropped.
+ *
+ * With no usable rate `converted` is false and every branch below collapses to
+ * exactly what this card rendered before: the operator's symbol, the raw stored
+ * number, and the operator's label shown only when non-empty.
+ */
+const display = useDisplayCurrency()
+
+function formatDisplayNumber(amountUSD: number): string {
+  const digits = display.fractionDigits.value
+  try {
+    return new Intl.NumberFormat(display.intlLocale.value, {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(display.toDisplay(amountUSD))
+  } catch {
+    return display.toDisplay(amountUSD).toFixed(digits)
+  }
+}
+
+const priceSymbol = computed(() =>
+  display.converted.value ? display.symbol.value : planCurrencySymbol.value
+)
+
+/** Empty renders no code span at all — the `v-if` that guarded `plan.currency`. */
+const priceCode = computed(() =>
+  display.converted.value ? display.currency.value : props.plan.currency || ''
+)
+
+const priceText = computed(() =>
+  display.converted.value ? formatDisplayNumber(props.plan.price) : String(props.plan.price)
+)
+
+const originalPriceText = computed(() => {
+  const original = props.plan.original_price
+  if (original == null) return ''
+  return display.converted.value ? formatDisplayNumber(original) : String(original)
+})
 
 const hasPeakRate = computed(() => groupHasPeakRate(props.plan))
 

@@ -83,7 +83,7 @@ export default {
     totalPaid: 'Total paid',
     concurrency: 'Concurrency',
     discountBadge: '{percent}% off usage',
-    spendToNext: '${amount} more to reach {tier}',
+    spendToNext: '{amount} more to reach {tier}',
     topTier: 'You are on the highest tier'
   },
   announcements: {
@@ -263,6 +263,7 @@ export default {
     quickAmounts: 'Quick Amounts',
     customAmount: 'Custom Amount',
     enterAmount: 'Enter amount',
+    approxDisplayAmount: '≈ {amount} at the current rate',
     paymentMethod: 'Payment Method',
     fee: 'Fee',
     actualPay: 'Actual Payment',
