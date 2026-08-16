@@ -112,6 +112,7 @@ export default {
       healthCondition: '健康状况',
       healthHelp: '基于 SLA、错误率和资源使用情况的系统整体健康评分',
       healthyStatus: '健康',
+      degradedStatus: '亚健康',
       riskyStatus: '风险',
       idleStatus: '待机',
       timeRange: {
