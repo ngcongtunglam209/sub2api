@@ -68,8 +68,28 @@ func (s *ResellerPlanService) Update(ctx context.Context, id int64, in ResellerP
 	return s.repo.Update(ctx, &candidate)
 }
 
+// GetPlan returns one tier, or nil when no such tier exists.
+//
+// Exported for the self-service store, which has to read the price before it
+// can debit it. Deliberately a read: the store must not be able to reach the
+// repository's write side.
+func (s *ResellerPlanService) GetPlan(ctx context.Context, id int64) (*ResellerPlan, error) {
+	if s == nil || s.repo == nil {
+		return nil, nil
+	}
+	if id <= 0 {
+		return nil, infraerrors.BadRequest("INVALID_RESELLER_PLAN", "invalid reseller plan id")
+	}
+	return s.repo.GetByID(ctx, id)
+}
+
 // AssignPlan grants a purchased tier: stamps it on the user, sets its expiry,
 // and credits the agreed share of the price back as balance.
+//
+// Safe to call inside a caller's transaction: AssignToUser joins one carried
+// on the context when there is one. That is what lets the self-service store
+// debit the price and hand the tier over atomically without a second copy of
+// the expiry and credit arithmetic.
 func (s *ResellerPlanService) AssignPlan(ctx context.Context, userID, planID int64) (*ResellerPlanAssignment, error) {
 	if userID <= 0 {
 		return nil, infraerrors.BadRequest("INVALID_USER", "a reseller plan must be assigned to a user")

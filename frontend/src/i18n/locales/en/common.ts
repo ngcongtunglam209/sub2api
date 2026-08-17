@@ -230,6 +230,7 @@ export default {
     resellerPlans: 'Reseller Plans',
     resellerDomains: 'Reseller Domains',
     reseller: 'Reseller',
+    store: 'Add-on Store',
     settings: 'Settings',
     myAccount: 'My Account',
     lightMode: 'Light Mode',

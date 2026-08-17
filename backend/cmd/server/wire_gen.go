@@ -181,6 +181,10 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	resellerDomainHandler := handler.NewResellerDomainHandler(resellerDomainService)
 	resellerCodeRepository := repository.NewResellerCodeRepository(client)
 	resellerCodeHandler := handler.NewResellerCodeHandler(redeemService, resellerPlanService, resellerCodeRepository)
+	userAddonRepository := repository.NewUserAddonRepository(client)
+	addonPricingService := service.NewAddonPricingService(settingRepository)
+	addonService := service.ProvideAddonService(userAddonRepository, addonPricingService, resellerPlanService, apiKeyService, apiKeyAuthCacheInvalidator)
+	addonHandler := handler.NewAddonHandler(addonService)
 	channelMonitorRepository := repository.NewChannelMonitorRepository(client, db)
 	channelMonitorService := service.ProvideChannelMonitorService(channelMonitorRepository, secretEncryptor, settingService)
 	channelMonitorUserHandler := handler.NewChannelMonitorUserHandler(channelMonitorService, settingService)
@@ -289,7 +293,8 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	vipTierHandler := admin.NewVIPTierHandler(vipTierService)
 	vipHandler := handler.NewVIPHandler(vipTierService)
 	resellerHandler := admin.NewResellerHandler(resellerPlanService, resellerDomainService)
-	adminHandlers := handler.ProvideAdminHandlers(dashboardHandler, adminUserHandler, groupHandler, accountHandler, adminAnnouncementHandler, dataManagementHandler, backupHandler, oAuthHandler, openAIOAuthHandler, geminiOAuthHandler, antigravityOAuthHandler, grokOAuthHandler, proxyHandler, adminRedeemHandler, promoHandler, settingHandler, opsHandler, systemHandler, adminSubscriptionHandler, adminUsageHandler, userAttributeHandler, errorPassthroughHandler, tlsFingerprintProfileHandler, adminAPIKeyHandler, scheduledTestHandler, channelHandler, channelMonitorHandler, channelMonitorRequestTemplateHandler, contentModerationHandler, promptAdminHandler, paymentHandler, affiliateHandler, complianceHandler, auditLogHandler, vipTierHandler, resellerHandler, upstreamBillingProbeService, ollamaCloudUsageService)
+	addonPricingHandler := admin.NewAddonPricingHandler(addonPricingService)
+	adminHandlers := handler.ProvideAdminHandlers(dashboardHandler, adminUserHandler, groupHandler, accountHandler, adminAnnouncementHandler, dataManagementHandler, backupHandler, oAuthHandler, openAIOAuthHandler, geminiOAuthHandler, antigravityOAuthHandler, grokOAuthHandler, proxyHandler, adminRedeemHandler, promoHandler, settingHandler, opsHandler, systemHandler, adminSubscriptionHandler, adminUsageHandler, userAttributeHandler, errorPassthroughHandler, tlsFingerprintProfileHandler, adminAPIKeyHandler, scheduledTestHandler, channelHandler, channelMonitorHandler, channelMonitorRequestTemplateHandler, contentModerationHandler, promptAdminHandler, paymentHandler, affiliateHandler, complianceHandler, auditLogHandler, vipTierHandler, resellerHandler, addonPricingHandler, upstreamBillingProbeService, ollamaCloudUsageService)
 	usageRecordWorkerPool := service.NewUsageRecordWorkerPool(configConfig)
 	userMsgQueueCache := repository.NewUserMsgQueueCache(redisClient)
 	userMessageQueueService := service.ProvideUserMessageQueueService(userMsgQueueCache, rpmCache, configConfig)
@@ -323,7 +328,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	batchImageHandler := handler.ProvideBatchImageHandler(batchImagePublicService, batchImageDownloadService, batchImageCleanupService, openAIGatewayHandler)
 	idempotencyCoordinator := service.ProvideIdempotencyCoordinator(idempotencyRepository, configConfig)
 	idempotencyCleanupService := service.ProvideIdempotencyCleanupService(idempotencyRepository, configConfig)
-	handlers := handler.ProvideHandlers(authHandler, userHandler, apiKeyHandler, usageHandler, redeemHandler, subscriptionHandler, announcementHandler, channelMonitorUserHandler, channelMonitorV2Handler, adminHandlers, gatewayHandler, openAIGatewayHandler, handlerSettingHandler, totpHandler, passkeyHandler, handlerPaymentHandler, paymentWebhookHandler, availableChannelHandler, modelPlazaHandler, asyncImageHandler, batchImageHandler, vipHandler, resellerDomainHandler, resellerCodeHandler, resellerDomainService, idempotencyCoordinator, idempotencyCleanupService)
+	handlers := handler.ProvideHandlers(authHandler, userHandler, apiKeyHandler, usageHandler, redeemHandler, subscriptionHandler, announcementHandler, channelMonitorUserHandler, channelMonitorV2Handler, adminHandlers, gatewayHandler, openAIGatewayHandler, handlerSettingHandler, totpHandler, passkeyHandler, handlerPaymentHandler, paymentWebhookHandler, availableChannelHandler, modelPlazaHandler, asyncImageHandler, batchImageHandler, vipHandler, resellerDomainHandler, resellerCodeHandler, addonHandler, resellerDomainService, idempotencyCoordinator, idempotencyCleanupService)
 	jwtAuthMiddleware := middleware.NewJWTAuthMiddleware(authService, userService, settingService, auditLogService)
 	optionalJWTAuthMiddleware := middleware.NewOptionalJWTAuthMiddleware(authService, userService, settingService, auditLogService)
 	adminAuthMiddleware := middleware.NewAdminAuthMiddleware(authService, userService, settingService, auditLogService)
@@ -349,7 +354,8 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	channelMonitorV2Aggregator := service.ProvideChannelMonitorV2Aggregator(channelMonitorV2Repository, db, settingService)
 	userPlatformQuotaUsageFlusher := service.ProvideUserPlatformQuotaUsageFlusher(configConfig, billingCache, serviceUserPlatformQuotaRepository, timingWheelService)
 	vipExpiryService := service.ProvideVIPExpiryService(userRepository, apiKeyAuthCacheInvalidator, leaderLockCache, db)
-	v := provideCleanup(client, redisClient, opsMetricsCollector, opsAggregationService, opsAlertEvaluatorService, opsCleanupService, opsScheduledReportService, opsSystemLogSink, opsService, opsIngressRejectAggregator, apiKeyService, authCacheInvalidationWorker, schedulerSnapshotService, tokenRefreshService, accountExpiryService, openAICodexVersionSyncService, proxyExpiryService, subscriptionExpiryService, vipExpiryService, usageCleanupService, idempotencyCleanupService, batchImageCleanupService, batchImageWorkerRuntime, pricingService, emailQueueService, billingCacheService, usageRecordWorkerPool, subscriptionService, oAuthService, openAIOAuthService, geminiOAuthService, antigravityOAuthService, grokOAuthService, openAIGatewayService, scheduledTestRunnerService, backupService, paymentOrderExpiryService, channelMonitorRunner, channelMonitorV2Aggregator, userPlatformQuotaUsageFlusher, upstreamBillingProbeService, ollamaCloudUsageService, auditLogService, promptService)
+	addonExpiryService := service.ProvideAddonExpiryService(userAddonRepository, apiKeyAuthCacheInvalidator, leaderLockCache, db)
+	v := provideCleanup(client, redisClient, opsMetricsCollector, opsAggregationService, opsAlertEvaluatorService, opsCleanupService, opsScheduledReportService, opsSystemLogSink, opsService, opsIngressRejectAggregator, apiKeyService, authCacheInvalidationWorker, schedulerSnapshotService, tokenRefreshService, accountExpiryService, openAICodexVersionSyncService, proxyExpiryService, subscriptionExpiryService, vipExpiryService, addonExpiryService, usageCleanupService, idempotencyCleanupService, batchImageCleanupService, batchImageWorkerRuntime, pricingService, emailQueueService, billingCacheService, usageRecordWorkerPool, subscriptionService, oAuthService, openAIOAuthService, geminiOAuthService, antigravityOAuthService, grokOAuthService, openAIGatewayService, scheduledTestRunnerService, backupService, paymentOrderExpiryService, channelMonitorRunner, channelMonitorV2Aggregator, userPlatformQuotaUsageFlusher, upstreamBillingProbeService, ollamaCloudUsageService, auditLogService, promptService)
 	vndRateService := service.NewVNDRateService(configConfig, settingRepository)
 	application := &Application{
 		Server:      httpServer,
@@ -400,6 +406,7 @@ func provideCleanup(
 	proxyExpiry *service.ProxyExpiryService,
 	subscriptionExpiry *service.SubscriptionExpiryService,
 	vipExpiry *service.VIPExpiryService,
+	addonExpiry *service.AddonExpiryService,
 	usageCleanup *service.UsageCleanupService,
 	idempotencyCleanup *service.IdempotencyCleanupService,
 	batchImageCleanup *service.BatchImageCleanupService,
@@ -560,6 +567,10 @@ func provideCleanup(
 			}},
 			{"VIPExpiryService", func() error {
 				vipExpiry.Stop()
+				return nil
+			}},
+			{"AddonExpiryService", func() error {
+				addonExpiry.Stop()
 				return nil
 			}},
 			{"SubscriptionService", func() error {

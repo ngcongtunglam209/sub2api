@@ -44,6 +44,7 @@ type AdminHandlers struct {
 	AuditLog               *admin.AuditLogHandler
 	VIPTier                *admin.VIPTierHandler
 	Reseller               *admin.ResellerHandler
+	AddonPricing           *admin.AddonPricingHandler
 }
 
 // Handlers contains all HTTP handlers
@@ -57,6 +58,7 @@ type Handlers struct {
 	Announcement   *AnnouncementHandler
 	ResellerDomain *ResellerDomainHandler
 	ResellerCode   *ResellerCodeHandler
+	Addon          *AddonHandler
 	// ResellerDomainService is carried alongside its handler because the host
 	// guard is middleware, not a route: it needs the same allowlist the ask
 	// endpoint consults, and reaching it through a handler would be worse.

@@ -1869,6 +1869,34 @@ var (
 			},
 		},
 	}
+	// UserAddonsColumns holds the columns for the "user_addons" table.
+	UserAddonsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "kind", Type: field.TypeString, Size: 20},
+		{Name: "amount", Type: field.TypeInt, Default: 0},
+		{Name: "expires_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+	}
+	// UserAddonsTable holds the schema information for the "user_addons" table.
+	UserAddonsTable = &schema.Table{
+		Name:       "user_addons",
+		Columns:    UserAddonsColumns,
+		PrimaryKey: []*schema.Column{UserAddonsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "useraddon_user_id_kind",
+				Unique:  true,
+				Columns: []*schema.Column{UserAddonsColumns[3], UserAddonsColumns[4]},
+			},
+			{
+				Name:    "useraddon_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{UserAddonsColumns[6]},
+			},
+		},
+	}
 	// UserAllowedGroupsColumns holds the columns for the "user_allowed_groups" table.
 	UserAllowedGroupsColumns = []*schema.Column{
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
@@ -2189,6 +2217,7 @@ var (
 		UsageCleanupTasksTable,
 		UsageLogsTable,
 		UsersTable,
+		UserAddonsTable,
 		UserAllowedGroupsTable,
 		UserAttributeDefinitionsTable,
 		UserAttributeValuesTable,
@@ -2334,6 +2363,9 @@ func init() {
 	}
 	UsersTable.Annotation = &entsql.Annotation{
 		Table: "users",
+	}
+	UserAddonsTable.Annotation = &entsql.Annotation{
+		Table: "user_addons",
 	}
 	UserAllowedGroupsTable.ForeignKeys[0].RefTable = UsersTable
 	UserAllowedGroupsTable.ForeignKeys[1].RefTable = GroupsTable

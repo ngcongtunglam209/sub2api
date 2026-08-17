@@ -141,6 +141,65 @@ export default {
       disabled: '已停用'
     }
   },
+
+  // Add-on Store
+  store: {
+    title: '增值商店',
+    description: '使用余额购买额外配额和代理套餐',
+    balanceLabel: '当前余额',
+    loadFailed: '加载商店失败',
+    unitPriceLabel: '单价',
+    perUnitMonth: '每单位每月',
+    heldLabel: '已购配额',
+    heldNone: '尚未购买',
+    heldUntil: '有效期至 {date}',
+    capLabel: '购买后占用上限',
+    monthsLabel: '购买月数',
+    monthsHint: '该增值配额的生效时长',
+    totalLabel: '合计',
+    buy: '购买',
+    amountRequired: '请输入至少 1 的数量',
+    monthsRequired: '请输入至少 1 个月',
+    insufficientBalance: '余额不足以完成本次购买',
+    capExceeded: '本次购买将超出 {cap} 的上限',
+    purchaseSuccess: '购买成功',
+    purchaseFailed: '购买失败',
+    concurrency: {
+      title: '额外并发',
+      description: '在账号并发上限之外增加同时请求数',
+      amountLabel: '额外并发数',
+      amountHint: '按单个请求出售',
+      unit: '并发'
+    },
+    rpm: {
+      title: '额外速率上限',
+      description: '在账号速率上限之外增加每分钟请求数',
+      amountLabel: '{step} 次/分 的档数',
+      amountHint: '按每档 {step} 次/分 出售',
+      unit: '次/分'
+    },
+    plans: {
+      title: '代理套餐',
+      description: '使用余额购买代理等级',
+      loadFailed: '加载代理套餐失败',
+      empty: '当前没有在售的代理套餐',
+      price: '价格',
+      creditBack: '返还额度',
+      creditBackCaption: '购买后返还至你的余额',
+      concurrencyBonus: '并发加成',
+      rpmLimit: '速率上限',
+      perMinute: '次/分',
+      maxDomains: '域名数',
+      validity: '有效期 {days} 天',
+      buy: '购买套餐',
+      purchaseSuccess: '代理套餐已生效',
+      purchaseFailed: '购买代理套餐失败',
+      heldTitle: '你的代理套餐',
+      heldNotice: '你已持有代理套餐。重复购买会重复发放返还额度，因此在当前套餐有效期内服务端会拒绝。',
+      heldExpires: '有效期至 {date}',
+      heldNoExpiry: '该套餐不会过期'
+    }
+  },
   announcements: {
     title: '公告',
     markRead: '标记已读',

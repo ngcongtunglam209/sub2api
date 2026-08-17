@@ -365,6 +365,39 @@ func ProvideVIPTierService(entClient *dbent.Client, invalidator APIKeyAuthCacheI
 	return svc
 }
 
+// ProvideAddonService builds the self-service store and hands the API key
+// service the resolver it needs for the purchased limits.
+//
+// The resolver is injected here rather than taken as a constructor argument
+// for the same reason the reseller plan resolver is: this service is built
+// later in the graph than APIKeyService, and threading it through every
+// existing caller to reach one optional perk is not worth the churn.
+func ProvideAddonService(
+	repo UserAddonRepository,
+	pricing *AddonPricingService,
+	planService *ResellerPlanService,
+	apiKeyService *APIKeyService,
+	invalidator APIKeyAuthCacheInvalidator,
+) *AddonService {
+	svc := NewAddonService(repo, pricing, planService)
+	svc.SetAuthCacheInvalidator(invalidator)
+	apiKeyService.SetAddonResolver(svc)
+	return svc
+}
+
+// ProvideAddonExpiryService creates and starts AddonExpiryService.
+//
+// Every five minutes, like the VIP sweep and for the same reason: a lapsed
+// add-on already stops counting the moment it is read, so this only has to
+// tidy the rows and nudge the auth cache eventually.
+func ProvideAddonExpiryService(repo UserAddonRepository, invalidator APIKeyAuthCacheInvalidator, lockCache LeaderLockCache, db *sql.DB) *AddonExpiryService {
+	svc := NewAddonExpiryService(repo, 5*time.Minute)
+	svc.SetAuthCacheInvalidator(invalidator)
+	svc.SetLeaderLock(lockCache, db)
+	svc.Start()
+	return svc
+}
+
 // ProvideVIPExpiryService creates and starts VIPExpiryService.
 //
 // Runs every five minutes rather than every minute: a lapsed tier already
@@ -796,6 +829,8 @@ var ProviderSet = wire.NewSet(
 	NewAnnouncementService,
 	ProvideResellerDomainService,
 	NewResellerPlanService,
+	NewAddonPricingService,
+	ProvideAddonService,
 	NewAdminService,
 	NewGatewayService,
 	NewOpenAIGatewayService,
@@ -865,6 +900,7 @@ var ProviderSet = wire.NewSet(
 	ProvideProxyExpiryService,
 	ProvideSubscriptionExpiryService,
 	ProvideVIPExpiryService,
+	ProvideAddonExpiryService,
 	ProvideVIPTierService,
 	ProvideTimingWheelService,
 	ProvideDashboardAggregationService,

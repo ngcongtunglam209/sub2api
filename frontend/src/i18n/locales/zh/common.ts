@@ -228,6 +228,7 @@ export default {
     resellerPlans: '代理套餐',
     resellerDomains: '代理域名',
     reseller: '代理中心',
+    store: '增值商店',
     settings: '系统设置',
     myAccount: '我的账户',
     lightMode: '浅色模式',

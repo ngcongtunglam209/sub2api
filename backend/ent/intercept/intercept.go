@@ -45,6 +45,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/usagecleanuptask"
 	"github.com/Wei-Shaw/sub2api/ent/usagelog"
 	"github.com/Wei-Shaw/sub2api/ent/user"
+	"github.com/Wei-Shaw/sub2api/ent/useraddon"
 	"github.com/Wei-Shaw/sub2api/ent/userallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/userattributedefinition"
 	"github.com/Wei-Shaw/sub2api/ent/userattributevalue"
@@ -1081,6 +1082,33 @@ func (f TraverseUser) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.UserQuery", q)
 }
 
+// The UserAddonFunc type is an adapter to allow the use of ordinary function as a Querier.
+type UserAddonFunc func(context.Context, *ent.UserAddonQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f UserAddonFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.UserAddonQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.UserAddonQuery", q)
+}
+
+// The TraverseUserAddon type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseUserAddon func(context.Context, *ent.UserAddonQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseUserAddon) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseUserAddon) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.UserAddonQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.UserAddonQuery", q)
+}
+
 // The UserAllowedGroupFunc type is an adapter to allow the use of ordinary function as a Querier.
 type UserAllowedGroupFunc func(context.Context, *ent.UserAllowedGroupQuery) (ent.Value, error)
 
@@ -1318,6 +1346,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.UsageLogQuery, predicate.UsageLog, usagelog.OrderOption]{typ: ent.TypeUsageLog, tq: q}, nil
 	case *ent.UserQuery:
 		return &query[*ent.UserQuery, predicate.User, user.OrderOption]{typ: ent.TypeUser, tq: q}, nil
+	case *ent.UserAddonQuery:
+		return &query[*ent.UserAddonQuery, predicate.UserAddon, useraddon.OrderOption]{typ: ent.TypeUserAddon, tq: q}, nil
 	case *ent.UserAllowedGroupQuery:
 		return &query[*ent.UserAllowedGroupQuery, predicate.UserAllowedGroup, userallowedgroup.OrderOption]{typ: ent.TypeUserAllowedGroup, tq: q}, nil
 	case *ent.UserAttributeDefinitionQuery:

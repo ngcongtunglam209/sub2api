@@ -14,7 +14,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 )
 
-const apiKeyAuthSnapshotVersion = 19 // v19: group search/audio/video_model_prices billing fields (force refresh of pre-fix snapshots)
+const apiKeyAuthSnapshotVersion = 20 // v20: purchased add-on concurrency/RPM stack onto the user limits (force refresh of pre-store snapshots)
 
 type apiKeyAuthCacheConfig struct {
 	l1Size        int
@@ -407,6 +407,30 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 		if assignment, err := s.resellerPlanResolver.ResolveForUser(ctx, apiKey.UserID); err == nil && assignment.Active(time.Now()) {
 			if bonus := assignment.Plan.ConcurrencyBonus; bonus > 0 {
 				snapshot.User.Concurrency += bonus
+			}
+		}
+	}
+
+	// Add-ons bought from the self-service store are the third addend, resolved
+	// the same way and with the same failure posture: a lookup error leaves the
+	// plain limit rather than denying the request.
+	//
+	// Expiry is decided inside the resolver, on read, so a lapsed add-on stops
+	// counting the moment it lapses instead of waiting for the sweep — the
+	// sweep only tidies up rows.
+	//
+	// RPM is added only on top of an existing limit. `users.rpm_limit` of 0
+	// means *unlimited*, so adding a purchased 60 to it would convert "no cap"
+	// into "60 a minute" and throttle the very user who just paid to be
+	// throttled less. Somebody with no cap already has more than the store
+	// sells them.
+	if s.addonResolver != nil && apiKey.UserID > 0 {
+		if holdings, err := s.addonResolver.ResolveActiveAddons(ctx, apiKey.UserID); err == nil {
+			if holdings.Concurrency > 0 {
+				snapshot.User.Concurrency += holdings.Concurrency
+			}
+			if holdings.RPM > 0 && snapshot.User.RPMLimit > 0 {
+				snapshot.User.RPMLimit += holdings.RPM
 			}
 		}
 	}

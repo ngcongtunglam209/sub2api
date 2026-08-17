@@ -484,6 +484,60 @@ export interface GenerateResellerCodesResponse {
   count: number
 }
 
+// ==================== Add-on Store Types ====================
+
+/** The two quota dimensions a user can rent on top of their own limits. */
+export type AddonKind = 'concurrency' | 'rpm'
+
+/**
+ * Unit prices and ceilings for the add-on store, as published by
+ * `GET /addons`. Prices are monthly per unit and in USD like every other stored
+ * amount — the display-currency layer converts at render time only.
+ */
+export interface AddonPricing {
+  /** USD per extra concurrent request, per month. */
+  concurrency_unit_price: number
+  /** USD per `rpm_step` of extra requests per minute, per month. */
+  rpm_unit_price: number
+  /** RPM is sold in blocks of this size, never per single request. */
+  rpm_step: number
+  /** Most extra concurrency one user may hold at once, bought amount included. */
+  concurrency_cap: number
+  /** Most extra RPM one user may hold at once, bought amount included. */
+  rpm_cap: number
+}
+
+/**
+ * A live add-on the user already paid for. `amount` is the extra capacity in
+ * that dimension's own unit (concurrent requests, or requests per minute — not
+ * `rpm_step` blocks), so a cap check can compare it against the cap directly.
+ */
+export interface AddonHolding {
+  amount: number
+  expires_at: string
+}
+
+/** What `GET /addons` returns. A null holding means nothing is rented yet. */
+export interface AddonsResponse {
+  pricing: AddonPricing
+  held: {
+    concurrency: AddonHolding | null
+    rpm: AddonHolding | null
+  }
+}
+
+/**
+ * `amount` is counted in the kind's purchase unit: concurrent requests for
+ * `concurrency`, and `rpm_step`-sized blocks for `rpm`. The server bills
+ * `amount x unit_price x months` against the balance and returns the resulting
+ * holding.
+ */
+export interface PurchaseAddonRequest {
+  kind: AddonKind
+  amount: number
+  months: number
+}
+
 export interface Announcement {
   id: number
   title: string

@@ -42,6 +42,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/usagecleanuptask"
 	"github.com/Wei-Shaw/sub2api/ent/usagelog"
 	"github.com/Wei-Shaw/sub2api/ent/user"
+	"github.com/Wei-Shaw/sub2api/ent/useraddon"
 	"github.com/Wei-Shaw/sub2api/ent/userallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/userattributedefinition"
 	"github.com/Wei-Shaw/sub2api/ent/userattributevalue"
@@ -2356,6 +2357,45 @@ func init() {
 	userDescVipTierLocked := userFields[25].Descriptor()
 	// user.DefaultVipTierLocked holds the default value on creation for the vip_tier_locked field.
 	user.DefaultVipTierLocked = userDescVipTierLocked.Default.(bool)
+	useraddonMixin := schema.UserAddon{}.Mixin()
+	useraddonMixinFields0 := useraddonMixin[0].Fields()
+	_ = useraddonMixinFields0
+	useraddonFields := schema.UserAddon{}.Fields()
+	_ = useraddonFields
+	// useraddonDescCreatedAt is the schema descriptor for created_at field.
+	useraddonDescCreatedAt := useraddonMixinFields0[0].Descriptor()
+	// useraddon.DefaultCreatedAt holds the default value on creation for the created_at field.
+	useraddon.DefaultCreatedAt = useraddonDescCreatedAt.Default.(func() time.Time)
+	// useraddonDescUpdatedAt is the schema descriptor for updated_at field.
+	useraddonDescUpdatedAt := useraddonMixinFields0[1].Descriptor()
+	// useraddon.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	useraddon.DefaultUpdatedAt = useraddonDescUpdatedAt.Default.(func() time.Time)
+	// useraddon.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	useraddon.UpdateDefaultUpdatedAt = useraddonDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// useraddonDescKind is the schema descriptor for kind field.
+	useraddonDescKind := useraddonFields[1].Descriptor()
+	// useraddon.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	useraddon.KindValidator = func() func(string) error {
+		validators := useraddonDescKind.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(kind string) error {
+			for _, fn := range fns {
+				if err := fn(kind); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// useraddonDescAmount is the schema descriptor for amount field.
+	useraddonDescAmount := useraddonFields[2].Descriptor()
+	// useraddon.DefaultAmount holds the default value on creation for the amount field.
+	useraddon.DefaultAmount = useraddonDescAmount.Default.(int)
+	// useraddon.AmountValidator is a validator for the "amount" field. It is called by the builders before save.
+	useraddon.AmountValidator = useraddonDescAmount.Validators[0].(func(int) error)
 	userallowedgroupFields := schema.UserAllowedGroup{}.Fields()
 	_ = userallowedgroupFields
 	// userallowedgroupDescCreatedAt is the schema descriptor for created_at field.

@@ -230,6 +230,7 @@ export default {
     resellerPlans: 'Gói Đại Lý',
     resellerDomains: 'Tên Miền Đại Lý',
     reseller: 'Đại Lý',
+    store: 'Cửa Hàng Tiện Ích',
     settings: 'Cài đặt',
     myAccount: 'Tài khoản của tôi',
     lightMode: 'Chế độ sáng',
