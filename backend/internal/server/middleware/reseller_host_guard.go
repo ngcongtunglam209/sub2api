@@ -41,13 +41,6 @@ func ResellerHostGuard(cfg config.CustomDomainConfig, resellerDomainService *ser
 		return func(c *gin.Context) { c.Next() }
 	}
 
-	canonical := make(map[string]struct{}, len(cfg.CanonicalHosts))
-	for _, host := range cfg.CanonicalHosts {
-		if normalized := service.NormalizeDomain(host); normalized != "" {
-			canonical[normalized] = struct{}{}
-		}
-	}
-
 	return func(c *gin.Context) {
 		// Health and the ask endpoint itself must answer regardless of Host:
 		// the first is how Caddy decides the backend is alive, and the second
@@ -67,10 +60,9 @@ func ResellerHostGuard(cfg config.CustomDomainConfig, resellerDomainService *ser
 			c.Next()
 			return
 		}
-		if _, ok := canonical[host]; ok {
-			c.Next()
-			return
-		}
+		// The service owns both lists — canonical hosts from config and active
+		// resellers from the database. Keeping a second copy of the canonical
+		// set here is how the guard and the certificate check drift apart.
 		if resellerDomainService.IsAllowedHost(c.Request.Context(), host) {
 			c.Next()
 			return

@@ -780,8 +780,9 @@ token_refresh:
 # =============================================================================
 # Resellers CNAME their own hostname here so their customers never see this
 # deployment's domain. The allowlist lives in the `reseller_domains` table;
-# Caddy consults it through /internal/tls-check before issuing a certificate
-# (see deploy/Caddyfile).
+# Caddy consults it through /internal/tls-check before issuing a certificate.
+# The edge config for this lives in deploy/Caddyfile.reseller — swap it in for
+# deploy/Caddyfile, which has no on-demand TLS.
 #
 # 打开 enabled 后，未列入 canonical_hosts 且不在分销商白名单中的 Host 会被
 # 直接拒绝。这一层是必需的：ask 端点只管签发证书，停用分销商后已签发的证书

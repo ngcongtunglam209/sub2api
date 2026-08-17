@@ -37,7 +37,7 @@ func guardResponse(t *testing.T, cfg config.CustomDomainConfig, domains []string
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 
-	svc := service.NewResellerDomainService(&guardStubRepo{domains: domains})
+	svc := service.NewResellerDomainService(&guardStubRepo{domains: domains}, cfg.CanonicalHosts)
 	r := gin.New()
 	r.Use(ResellerHostGuard(cfg, svc))
 	r.GET("/health", func(c *gin.Context) { c.Status(http.StatusOK) })

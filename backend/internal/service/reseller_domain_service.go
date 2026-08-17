@@ -9,6 +9,7 @@ import (
 
 	"golang.org/x/sync/singleflight"
 
+	"github.com/Wei-Shaw/sub2api/internal/config"
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
 )
@@ -41,26 +42,52 @@ type resellerDomainSnapshot struct {
 type ResellerDomainService struct {
 	repo ResellerDomainRepository
 
+	// canonical holds this deployment's own hostnames, from config rather than
+	// the database on purpose: the shipped edge config routes every host —
+	// including the primary domain — through the ask endpoint, so answering for
+	// the primary domain must not depend on the database being reachable.
+	canonical map[string]struct{}
+
 	cache atomic.Value // resellerDomainSnapshot
 	sf    singleflight.Group
 }
 
-func NewResellerDomainService(repo ResellerDomainRepository) *ResellerDomainService {
-	return &ResellerDomainService{repo: repo}
+// ProvideResellerDomainService adapts the constructor for wire, which cannot
+// inject a bare []string.
+func ProvideResellerDomainService(repo ResellerDomainRepository, cfg *config.Config) *ResellerDomainService {
+	return NewResellerDomainService(repo, cfg.CustomDomain.CanonicalHosts)
 }
 
-// IsAllowedHost reports whether the hostname belongs to an active reseller.
-//
-// The caller is responsible for letting the deployment's own canonical domain
-// through: this service only knows about resellers, and answering "no" for the
-// primary domain would lock everyone out.
+func NewResellerDomainService(repo ResellerDomainRepository, canonicalHosts []string) *ResellerDomainService {
+	canonical := make(map[string]struct{}, len(canonicalHosts))
+	for _, host := range canonicalHosts {
+		if normalized := NormalizeDomain(host); normalized != "" {
+			canonical[normalized] = struct{}{}
+		}
+	}
+	return &ResellerDomainService{repo: repo, canonical: canonical}
+}
+
+// IsAllowedHost reports whether this deployment will serve the hostname —
+// either its own canonical domain or an active reseller's.
 func (s *ResellerDomainService) IsAllowedHost(ctx context.Context, host string) bool {
-	if s == nil || s.repo == nil {
+	if s == nil {
 		return false
 	}
 
 	domain := NormalizeDomain(host)
 	if domain == "" {
+		return false
+	}
+
+	// Canonical hosts answer from config, before any database work: this path
+	// also renews the primary domain's certificate, and coupling that to the
+	// database would turn a database outage into an expired certificate.
+	if _, ok := s.canonical[domain]; ok {
+		return true
+	}
+
+	if s.repo == nil {
 		return false
 	}
 

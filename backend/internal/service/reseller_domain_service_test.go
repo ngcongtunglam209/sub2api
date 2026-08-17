@@ -75,7 +75,7 @@ func TestNormalizeDomain(t *testing.T) {
 
 func TestResellerDomainServiceAllowsOnlyActiveDomains(t *testing.T) {
 	repo := &stubResellerDomainRepo{domains: []string{"api.brand.com", "gw.other.io"}}
-	svc := NewResellerDomainService(repo)
+	svc := NewResellerDomainService(repo, nil)
 
 	require.True(t, svc.IsAllowedHost(context.Background(), "api.brand.com"))
 	require.True(t, svc.IsAllowedHost(context.Background(), "API.Brand.com:443"))
@@ -88,7 +88,7 @@ func TestResellerDomainServiceAllowsOnlyActiveDomains(t *testing.T) {
 // prober floods — costs no database round trip.
 func TestResellerDomainServiceCachesTheWholeSet(t *testing.T) {
 	repo := &stubResellerDomainRepo{domains: []string{"api.brand.com"}}
-	svc := NewResellerDomainService(repo)
+	svc := NewResellerDomainService(repo, nil)
 
 	for i := 0; i < 50; i++ {
 		svc.IsAllowedHost(context.Background(), "api.brand.com")
@@ -100,7 +100,7 @@ func TestResellerDomainServiceCachesTheWholeSet(t *testing.T) {
 
 func TestResellerDomainServiceInvalidateForcesReload(t *testing.T) {
 	repo := &stubResellerDomainRepo{domains: []string{"api.brand.com"}}
-	svc := NewResellerDomainService(repo)
+	svc := NewResellerDomainService(repo, nil)
 
 	require.True(t, svc.IsAllowedHost(context.Background(), "api.brand.com"))
 	require.Equal(t, 1, repo.callCount())
@@ -116,7 +116,7 @@ func TestResellerDomainServiceInvalidateForcesReload(t *testing.T) {
 // at us mint certificates on our Let's Encrypt account while the DB is down.
 func TestResellerDomainServiceFailsClosedWithNoCachedSet(t *testing.T) {
 	repo := &stubResellerDomainRepo{err: errors.New("database unavailable")}
-	svc := NewResellerDomainService(repo)
+	svc := NewResellerDomainService(repo, nil)
 
 	require.False(t, svc.IsAllowedHost(context.Background(), "api.brand.com"))
 }
@@ -125,7 +125,7 @@ func TestResellerDomainServiceFailsClosedWithNoCachedSet(t *testing.T) {
 // offline — the stale set stands until the DB comes back.
 func TestResellerDomainServiceServesStaleSetOnRefreshFailure(t *testing.T) {
 	repo := &stubResellerDomainRepo{domains: []string{"api.brand.com"}}
-	svc := NewResellerDomainService(repo)
+	svc := NewResellerDomainService(repo, nil)
 
 	require.True(t, svc.IsAllowedHost(context.Background(), "api.brand.com"))
 

@@ -1,3 +1,23 @@
+# =============================================================================
+# 分销商自定义域名变体（可选，替换 deploy/Caddyfile 使用）
+# =============================================================================
+# 分销商把自己的域名 CNAME 到本机，其客户只看到分销商的域名，看不到上游是谁。
+#
+# 与 deploy/Caddyfile 的唯一区别：站点地址是 https:// 兜底块而不是写死的域名，
+# 证书按需签发。其余反代、压缩、日志配置逐字相同——canonical 版本受
+# deploy/test-caddyfile-cache.sh 约束（只允许一个 encode 块、禁止 import），
+# 所以这里是整份拷贝而不是抽 snippet 复用。改动其中一份时请同步另一份。
+#
+# 前置条件：
+#   1. 后端 custom_domain.enabled = true，且 custom_domain.canonical_hosts
+#      列全本站自己的域名。漏一个，那个域名连自己都进不来。
+#   2. 分销商域名写入 reseller_domains 表且 status = 'active'。
+#
+# 为什么主域名也走 on_demand：一个站点块只能有一份 encode 配置，拆成两块就会
+# 触发上面的策略检查。代价是主域名的证书签发/续期也要经过 ask 端点，因此
+# /internal/tls-check 对 canonical_hosts 的判断只读配置、不查数据库——数据库
+# 挂掉不会连累主域名的证书。
+
 {
 	servers {
 		max_header_size 64KB
@@ -6,10 +26,22 @@
 			idle 2m
 		}
 	}
+
+	# 陌生 host 第一次握手时先问后端该域名是否已登记，登记了才去签证书。
+	#
+	# ask 不是可选项：没有它，任何人把域名解析到这台机器都能逼我们签证书，
+	# 既是被滥用的入口，也会耗光 Let's Encrypt 的签发额度。
+	#
+	# 这里走 localhost 直连后端，不经过下面的站点块，因此块内对 /internal/*
+	# 的屏蔽不影响它。
+	on_demand_tls {
+		ask http://localhost:8080/internal/tls-check
+		interval 2m
+		burst 5
+	}
 }
 
-# 修改为你的域名
-api.sub2api.com {
+https:// {
 	# This baseline assumes clients connect directly to Caddy. When Caddy is
 	# behind a CDN, configure explicit trusted proxy CIDRs and {client_ip} as
 	# documented in EDGE_SECURITY.md; {remote_host} would otherwise be the CDN.
@@ -22,7 +54,18 @@ api.sub2api.com {
 
 		# 优先使用的加密套件
 		ciphers TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+
+		# 按需签发，白名单由上面的 ask 端点决定
+		on_demand
 	}
+
+	# =========================================================================
+	# 内部端点屏蔽
+	# =========================================================================
+	# /internal/* 只给 Caddy 自己经 localhost 调用。若从公网可达，外人就能
+	# 逐个探测哪些域名属于分销商。
+	@internal path /internal/*
+	respond @internal 404
 
 	# =========================================================================
 	# 反向代理配置
