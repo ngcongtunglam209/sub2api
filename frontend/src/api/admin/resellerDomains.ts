@@ -3,7 +3,12 @@
  */
 
 import { apiClient } from '../client'
-import type { CreateResellerDomainRequest, ResellerDomain, ResellerDomainStatus } from '@/types'
+import type {
+  CreateResellerDomainRequest,
+  ResellerDomain,
+  ResellerDomainStatus,
+  UpdateResellerDomainRequest
+} from '@/types'
 
 export async function list(options?: { signal?: AbortSignal }): Promise<ResellerDomain[]> {
   const { data } = await apiClient.get<ResellerDomain[]>('/admin/reseller-domains', {
@@ -18,12 +23,22 @@ export async function create(request: CreateResellerDomainRequest): Promise<Rese
 }
 
 /**
+ * Partial update. Every field is optional and an omitted one is left alone, so
+ * the branding editor and the status toggle can share one endpoint without
+ * either clobbering the other's fields. Sending `''` for a branding field
+ * clears the override — the host falls back to the platform's own branding.
+ */
+export async function update(id: number, request: UpdateResellerDomainRequest): Promise<ResellerDomain> {
+  const { data } = await apiClient.patch<ResellerDomain>(`/admin/reseller-domains/${id}`, request)
+  return data
+}
+
+/**
  * Flip a domain between active and disabled. Disabling is the reversible
- * alternative to deleting: the row and its notes survive.
+ * alternative to deleting: the row, its notes and its branding survive.
  */
 export async function setStatus(id: number, status: ResellerDomainStatus): Promise<ResellerDomain> {
-  const { data } = await apiClient.patch<ResellerDomain>(`/admin/reseller-domains/${id}`, { status })
-  return data
+  return update(id, { status })
 }
 
 export async function deleteDomain(id: number): Promise<{ message: string }> {
@@ -34,6 +49,7 @@ export async function deleteDomain(id: number): Promise<{ message: string }> {
 const resellerDomainsAPI = {
   list,
   create,
+  update,
   setStatus,
   delete: deleteDomain
 }

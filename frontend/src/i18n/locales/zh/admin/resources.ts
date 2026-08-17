@@ -471,7 +471,28 @@ export default {
         userIdHint: '用户管理页中显示的数字 ID',
         notes: '备注',
         status: '状态',
+        branding: '品牌',
         createdAt: '添加时间'
+      },
+      branding: {
+        editAction: '品牌设置',
+        title: '{domain} 的品牌设置',
+        intro: '该域名向访客展示的内容。留空则沿用平台自身的品牌。',
+        overrideBadge: '已白标',
+        inheritBadge: '沿用平台',
+        inheritPlaceholder: '留空则沿用平台品牌',
+        siteName: '站点名称',
+        siteNameHint: '替换页眉和浏览器标签页中的平台名称。',
+        siteSubtitle: '副标题',
+        siteSubtitleHint: '首页中显示在站点名称下方的一行文字。',
+        siteLogo: 'Logo 链接',
+        siteLogoPlaceholder: 'https://cdn.example.com/logo.svg',
+        siteLogoHint: '可填 https:// 绝对地址、以 / 开头的站内路径，或 data:image 链接。',
+        logoPreview: '预览',
+        logoInvalid: '这不是可用的图片链接——请使用 https://、/ 开头的路径或 data:image 链接。',
+        logoBroken: '该链接没有加载出图片，请在代理的客户发现之前先确认。',
+        saved: '品牌设置已更新',
+        saveFailed: '品牌设置更新失败'
       }
     },
 

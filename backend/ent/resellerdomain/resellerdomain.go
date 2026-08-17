@@ -25,6 +25,12 @@ const (
 	FieldStatus = "status"
 	// FieldNotes holds the string denoting the notes field in the database.
 	FieldNotes = "notes"
+	// FieldSiteName holds the string denoting the site_name field in the database.
+	FieldSiteName = "site_name"
+	// FieldSiteLogo holds the string denoting the site_logo field in the database.
+	FieldSiteLogo = "site_logo"
+	// FieldSiteSubtitle holds the string denoting the site_subtitle field in the database.
+	FieldSiteSubtitle = "site_subtitle"
 	// Table holds the table name of the resellerdomain in the database.
 	Table = "reseller_domains"
 )
@@ -38,6 +44,9 @@ var Columns = []string{
 	FieldUserID,
 	FieldStatus,
 	FieldNotes,
+	FieldSiteName,
+	FieldSiteLogo,
+	FieldSiteSubtitle,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -65,6 +74,16 @@ var (
 	StatusValidator func(string) error
 	// DefaultNotes holds the default value on creation for the "notes" field.
 	DefaultNotes string
+	// DefaultSiteName holds the default value on creation for the "site_name" field.
+	DefaultSiteName string
+	// SiteNameValidator is a validator for the "site_name" field. It is called by the builders before save.
+	SiteNameValidator func(string) error
+	// DefaultSiteLogo holds the default value on creation for the "site_logo" field.
+	DefaultSiteLogo string
+	// DefaultSiteSubtitle holds the default value on creation for the "site_subtitle" field.
+	DefaultSiteSubtitle string
+	// SiteSubtitleValidator is a validator for the "site_subtitle" field. It is called by the builders before save.
+	SiteSubtitleValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the ResellerDomain queries.
@@ -103,4 +122,19 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByNotes orders the results by the notes field.
 func ByNotes(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNotes, opts...).ToFunc()
+}
+
+// BySiteName orders the results by the site_name field.
+func BySiteName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSiteName, opts...).ToFunc()
+}
+
+// BySiteLogo orders the results by the site_logo field.
+func BySiteLogo(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSiteLogo, opts...).ToFunc()
+}
+
+// BySiteSubtitle orders the results by the site_subtitle field.
+func BySiteSubtitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSiteSubtitle, opts...).ToFunc()
 }

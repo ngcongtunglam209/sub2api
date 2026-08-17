@@ -36,11 +36,19 @@ type ResellerPlanAssignment struct {
 
 // ResellerDomain is a reseller-owned hostname pointed at this deployment.
 type ResellerDomain struct {
-	ID        int64     `json:"id"`
-	Domain    string    `json:"domain"`
-	UserID    int64     `json:"user_id"`
-	Status    string    `json:"status"`
-	Notes     string    `json:"notes"`
+	ID     int64  `json:"id"`
+	Domain string `json:"domain"`
+	UserID int64  `json:"user_id"`
+	Status string `json:"status"`
+	Notes  string `json:"notes"`
+
+	// Branding overrides for this hostname. Empty means "inherits the
+	// deployment's setting" — the admin UI renders that as a placeholder, not
+	// as a blank the operator has to fill in.
+	SiteName     string `json:"site_name"`
+	SiteLogo     string `json:"site_logo"`
+	SiteSubtitle string `json:"site_subtitle"`
+
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -108,13 +116,16 @@ func ResellerDomainFromService(d *service.ResellerDomain) *ResellerDomain {
 		return nil
 	}
 	return &ResellerDomain{
-		ID:        d.ID,
-		Domain:    d.Domain,
-		UserID:    d.UserID,
-		Status:    d.Status,
-		Notes:     d.Notes,
-		CreatedAt: d.CreatedAt,
-		UpdatedAt: d.UpdatedAt,
+		ID:           d.ID,
+		Domain:       d.Domain,
+		UserID:       d.UserID,
+		Status:       d.Status,
+		Notes:        d.Notes,
+		SiteName:     d.SiteName,
+		SiteLogo:     d.SiteLogo,
+		SiteSubtitle: d.SiteSubtitle,
+		CreatedAt:    d.CreatedAt,
+		UpdatedAt:    d.UpdatedAt,
 	}
 }
 

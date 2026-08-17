@@ -97,6 +97,66 @@ func (_u *ResellerDomainUpdate) SetNillableNotes(v *string) *ResellerDomainUpdat
 	return _u
 }
 
+// SetSiteName sets the "site_name" field.
+func (_u *ResellerDomainUpdate) SetSiteName(v string) *ResellerDomainUpdate {
+	_u.mutation.SetSiteName(v)
+	return _u
+}
+
+// SetNillableSiteName sets the "site_name" field if the given value is not nil.
+func (_u *ResellerDomainUpdate) SetNillableSiteName(v *string) *ResellerDomainUpdate {
+	if v != nil {
+		_u.SetSiteName(*v)
+	}
+	return _u
+}
+
+// ClearSiteName clears the value of the "site_name" field.
+func (_u *ResellerDomainUpdate) ClearSiteName() *ResellerDomainUpdate {
+	_u.mutation.ClearSiteName()
+	return _u
+}
+
+// SetSiteLogo sets the "site_logo" field.
+func (_u *ResellerDomainUpdate) SetSiteLogo(v string) *ResellerDomainUpdate {
+	_u.mutation.SetSiteLogo(v)
+	return _u
+}
+
+// SetNillableSiteLogo sets the "site_logo" field if the given value is not nil.
+func (_u *ResellerDomainUpdate) SetNillableSiteLogo(v *string) *ResellerDomainUpdate {
+	if v != nil {
+		_u.SetSiteLogo(*v)
+	}
+	return _u
+}
+
+// ClearSiteLogo clears the value of the "site_logo" field.
+func (_u *ResellerDomainUpdate) ClearSiteLogo() *ResellerDomainUpdate {
+	_u.mutation.ClearSiteLogo()
+	return _u
+}
+
+// SetSiteSubtitle sets the "site_subtitle" field.
+func (_u *ResellerDomainUpdate) SetSiteSubtitle(v string) *ResellerDomainUpdate {
+	_u.mutation.SetSiteSubtitle(v)
+	return _u
+}
+
+// SetNillableSiteSubtitle sets the "site_subtitle" field if the given value is not nil.
+func (_u *ResellerDomainUpdate) SetNillableSiteSubtitle(v *string) *ResellerDomainUpdate {
+	if v != nil {
+		_u.SetSiteSubtitle(*v)
+	}
+	return _u
+}
+
+// ClearSiteSubtitle clears the value of the "site_subtitle" field.
+func (_u *ResellerDomainUpdate) ClearSiteSubtitle() *ResellerDomainUpdate {
+	_u.mutation.ClearSiteSubtitle()
+	return _u
+}
+
 // Mutation returns the ResellerDomainMutation object of the builder.
 func (_u *ResellerDomainUpdate) Mutation() *ResellerDomainMutation {
 	return _u.mutation
@@ -150,6 +210,16 @@ func (_u *ResellerDomainUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "ResellerDomain.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SiteName(); ok {
+		if err := resellerdomain.SiteNameValidator(v); err != nil {
+			return &ValidationError{Name: "site_name", err: fmt.Errorf(`ent: validator failed for field "ResellerDomain.site_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SiteSubtitle(); ok {
+		if err := resellerdomain.SiteSubtitleValidator(v); err != nil {
+			return &ValidationError{Name: "site_subtitle", err: fmt.Errorf(`ent: validator failed for field "ResellerDomain.site_subtitle": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -182,6 +252,24 @@ func (_u *ResellerDomainUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if value, ok := _u.mutation.Notes(); ok {
 		_spec.SetField(resellerdomain.FieldNotes, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SiteName(); ok {
+		_spec.SetField(resellerdomain.FieldSiteName, field.TypeString, value)
+	}
+	if _u.mutation.SiteNameCleared() {
+		_spec.ClearField(resellerdomain.FieldSiteName, field.TypeString)
+	}
+	if value, ok := _u.mutation.SiteLogo(); ok {
+		_spec.SetField(resellerdomain.FieldSiteLogo, field.TypeString, value)
+	}
+	if _u.mutation.SiteLogoCleared() {
+		_spec.ClearField(resellerdomain.FieldSiteLogo, field.TypeString)
+	}
+	if value, ok := _u.mutation.SiteSubtitle(); ok {
+		_spec.SetField(resellerdomain.FieldSiteSubtitle, field.TypeString, value)
+	}
+	if _u.mutation.SiteSubtitleCleared() {
+		_spec.ClearField(resellerdomain.FieldSiteSubtitle, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -272,6 +360,66 @@ func (_u *ResellerDomainUpdateOne) SetNillableNotes(v *string) *ResellerDomainUp
 	return _u
 }
 
+// SetSiteName sets the "site_name" field.
+func (_u *ResellerDomainUpdateOne) SetSiteName(v string) *ResellerDomainUpdateOne {
+	_u.mutation.SetSiteName(v)
+	return _u
+}
+
+// SetNillableSiteName sets the "site_name" field if the given value is not nil.
+func (_u *ResellerDomainUpdateOne) SetNillableSiteName(v *string) *ResellerDomainUpdateOne {
+	if v != nil {
+		_u.SetSiteName(*v)
+	}
+	return _u
+}
+
+// ClearSiteName clears the value of the "site_name" field.
+func (_u *ResellerDomainUpdateOne) ClearSiteName() *ResellerDomainUpdateOne {
+	_u.mutation.ClearSiteName()
+	return _u
+}
+
+// SetSiteLogo sets the "site_logo" field.
+func (_u *ResellerDomainUpdateOne) SetSiteLogo(v string) *ResellerDomainUpdateOne {
+	_u.mutation.SetSiteLogo(v)
+	return _u
+}
+
+// SetNillableSiteLogo sets the "site_logo" field if the given value is not nil.
+func (_u *ResellerDomainUpdateOne) SetNillableSiteLogo(v *string) *ResellerDomainUpdateOne {
+	if v != nil {
+		_u.SetSiteLogo(*v)
+	}
+	return _u
+}
+
+// ClearSiteLogo clears the value of the "site_logo" field.
+func (_u *ResellerDomainUpdateOne) ClearSiteLogo() *ResellerDomainUpdateOne {
+	_u.mutation.ClearSiteLogo()
+	return _u
+}
+
+// SetSiteSubtitle sets the "site_subtitle" field.
+func (_u *ResellerDomainUpdateOne) SetSiteSubtitle(v string) *ResellerDomainUpdateOne {
+	_u.mutation.SetSiteSubtitle(v)
+	return _u
+}
+
+// SetNillableSiteSubtitle sets the "site_subtitle" field if the given value is not nil.
+func (_u *ResellerDomainUpdateOne) SetNillableSiteSubtitle(v *string) *ResellerDomainUpdateOne {
+	if v != nil {
+		_u.SetSiteSubtitle(*v)
+	}
+	return _u
+}
+
+// ClearSiteSubtitle clears the value of the "site_subtitle" field.
+func (_u *ResellerDomainUpdateOne) ClearSiteSubtitle() *ResellerDomainUpdateOne {
+	_u.mutation.ClearSiteSubtitle()
+	return _u
+}
+
 // Mutation returns the ResellerDomainMutation object of the builder.
 func (_u *ResellerDomainUpdateOne) Mutation() *ResellerDomainMutation {
 	return _u.mutation
@@ -338,6 +486,16 @@ func (_u *ResellerDomainUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "ResellerDomain.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SiteName(); ok {
+		if err := resellerdomain.SiteNameValidator(v); err != nil {
+			return &ValidationError{Name: "site_name", err: fmt.Errorf(`ent: validator failed for field "ResellerDomain.site_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SiteSubtitle(); ok {
+		if err := resellerdomain.SiteSubtitleValidator(v); err != nil {
+			return &ValidationError{Name: "site_subtitle", err: fmt.Errorf(`ent: validator failed for field "ResellerDomain.site_subtitle": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -387,6 +545,24 @@ func (_u *ResellerDomainUpdateOne) sqlSave(ctx context.Context) (_node *Reseller
 	}
 	if value, ok := _u.mutation.Notes(); ok {
 		_spec.SetField(resellerdomain.FieldNotes, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SiteName(); ok {
+		_spec.SetField(resellerdomain.FieldSiteName, field.TypeString, value)
+	}
+	if _u.mutation.SiteNameCleared() {
+		_spec.ClearField(resellerdomain.FieldSiteName, field.TypeString)
+	}
+	if value, ok := _u.mutation.SiteLogo(); ok {
+		_spec.SetField(resellerdomain.FieldSiteLogo, field.TypeString, value)
+	}
+	if _u.mutation.SiteLogoCleared() {
+		_spec.ClearField(resellerdomain.FieldSiteLogo, field.TypeString)
+	}
+	if value, ok := _u.mutation.SiteSubtitle(); ok {
+		_spec.SetField(resellerdomain.FieldSiteSubtitle, field.TypeString, value)
+	}
+	if _u.mutation.SiteSubtitleCleared() {
+		_spec.ClearField(resellerdomain.FieldSiteSubtitle, field.TypeString)
 	}
 	_node = &ResellerDomain{config: _u.config}
 	_spec.Assign = _node.assignValues

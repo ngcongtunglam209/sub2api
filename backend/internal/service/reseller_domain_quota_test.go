@@ -13,7 +13,13 @@ type quotaStubRepo struct {
 	created  int
 }
 
-func (s *quotaStubRepo) ListActiveDomains(context.Context) ([]string, error) { return nil, nil }
+func (s *quotaStubRepo) ListActiveDomains(context.Context) ([]ActiveResellerDomain, error) {
+	return nil, nil
+}
+
+func (s *quotaStubRepo) UpdateBranding(context.Context, int64, ResellerDomainBrandingUpdate) error {
+	return nil
+}
 
 func (s *quotaStubRepo) Create(_ context.Context, d *ResellerDomain) (*ResellerDomain, error) {
 	s.created++

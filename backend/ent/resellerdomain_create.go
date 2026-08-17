@@ -90,6 +90,48 @@ func (_c *ResellerDomainCreate) SetNillableNotes(v *string) *ResellerDomainCreat
 	return _c
 }
 
+// SetSiteName sets the "site_name" field.
+func (_c *ResellerDomainCreate) SetSiteName(v string) *ResellerDomainCreate {
+	_c.mutation.SetSiteName(v)
+	return _c
+}
+
+// SetNillableSiteName sets the "site_name" field if the given value is not nil.
+func (_c *ResellerDomainCreate) SetNillableSiteName(v *string) *ResellerDomainCreate {
+	if v != nil {
+		_c.SetSiteName(*v)
+	}
+	return _c
+}
+
+// SetSiteLogo sets the "site_logo" field.
+func (_c *ResellerDomainCreate) SetSiteLogo(v string) *ResellerDomainCreate {
+	_c.mutation.SetSiteLogo(v)
+	return _c
+}
+
+// SetNillableSiteLogo sets the "site_logo" field if the given value is not nil.
+func (_c *ResellerDomainCreate) SetNillableSiteLogo(v *string) *ResellerDomainCreate {
+	if v != nil {
+		_c.SetSiteLogo(*v)
+	}
+	return _c
+}
+
+// SetSiteSubtitle sets the "site_subtitle" field.
+func (_c *ResellerDomainCreate) SetSiteSubtitle(v string) *ResellerDomainCreate {
+	_c.mutation.SetSiteSubtitle(v)
+	return _c
+}
+
+// SetNillableSiteSubtitle sets the "site_subtitle" field if the given value is not nil.
+func (_c *ResellerDomainCreate) SetNillableSiteSubtitle(v *string) *ResellerDomainCreate {
+	if v != nil {
+		_c.SetSiteSubtitle(*v)
+	}
+	return _c
+}
+
 // Mutation returns the ResellerDomainMutation object of the builder.
 func (_c *ResellerDomainCreate) Mutation() *ResellerDomainMutation {
 	return _c.mutation
@@ -141,6 +183,18 @@ func (_c *ResellerDomainCreate) defaults() {
 		v := resellerdomain.DefaultNotes
 		_c.mutation.SetNotes(v)
 	}
+	if _, ok := _c.mutation.SiteName(); !ok {
+		v := resellerdomain.DefaultSiteName
+		_c.mutation.SetSiteName(v)
+	}
+	if _, ok := _c.mutation.SiteLogo(); !ok {
+		v := resellerdomain.DefaultSiteLogo
+		_c.mutation.SetSiteLogo(v)
+	}
+	if _, ok := _c.mutation.SiteSubtitle(); !ok {
+		v := resellerdomain.DefaultSiteSubtitle
+		_c.mutation.SetSiteSubtitle(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -172,6 +226,16 @@ func (_c *ResellerDomainCreate) check() error {
 	}
 	if _, ok := _c.mutation.Notes(); !ok {
 		return &ValidationError{Name: "notes", err: errors.New(`ent: missing required field "ResellerDomain.notes"`)}
+	}
+	if v, ok := _c.mutation.SiteName(); ok {
+		if err := resellerdomain.SiteNameValidator(v); err != nil {
+			return &ValidationError{Name: "site_name", err: fmt.Errorf(`ent: validator failed for field "ResellerDomain.site_name": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.SiteSubtitle(); ok {
+		if err := resellerdomain.SiteSubtitleValidator(v); err != nil {
+			return &ValidationError{Name: "site_subtitle", err: fmt.Errorf(`ent: validator failed for field "ResellerDomain.site_subtitle": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -223,6 +287,18 @@ func (_c *ResellerDomainCreate) createSpec() (*ResellerDomain, *sqlgraph.CreateS
 	if value, ok := _c.mutation.Notes(); ok {
 		_spec.SetField(resellerdomain.FieldNotes, field.TypeString, value)
 		_node.Notes = value
+	}
+	if value, ok := _c.mutation.SiteName(); ok {
+		_spec.SetField(resellerdomain.FieldSiteName, field.TypeString, value)
+		_node.SiteName = value
+	}
+	if value, ok := _c.mutation.SiteLogo(); ok {
+		_spec.SetField(resellerdomain.FieldSiteLogo, field.TypeString, value)
+		_node.SiteLogo = value
+	}
+	if value, ok := _c.mutation.SiteSubtitle(); ok {
+		_spec.SetField(resellerdomain.FieldSiteSubtitle, field.TypeString, value)
+		_node.SiteSubtitle = value
 	}
 	return _node, _spec
 }
@@ -339,6 +415,60 @@ func (u *ResellerDomainUpsert) SetNotes(v string) *ResellerDomainUpsert {
 // UpdateNotes sets the "notes" field to the value that was provided on create.
 func (u *ResellerDomainUpsert) UpdateNotes() *ResellerDomainUpsert {
 	u.SetExcluded(resellerdomain.FieldNotes)
+	return u
+}
+
+// SetSiteName sets the "site_name" field.
+func (u *ResellerDomainUpsert) SetSiteName(v string) *ResellerDomainUpsert {
+	u.Set(resellerdomain.FieldSiteName, v)
+	return u
+}
+
+// UpdateSiteName sets the "site_name" field to the value that was provided on create.
+func (u *ResellerDomainUpsert) UpdateSiteName() *ResellerDomainUpsert {
+	u.SetExcluded(resellerdomain.FieldSiteName)
+	return u
+}
+
+// ClearSiteName clears the value of the "site_name" field.
+func (u *ResellerDomainUpsert) ClearSiteName() *ResellerDomainUpsert {
+	u.SetNull(resellerdomain.FieldSiteName)
+	return u
+}
+
+// SetSiteLogo sets the "site_logo" field.
+func (u *ResellerDomainUpsert) SetSiteLogo(v string) *ResellerDomainUpsert {
+	u.Set(resellerdomain.FieldSiteLogo, v)
+	return u
+}
+
+// UpdateSiteLogo sets the "site_logo" field to the value that was provided on create.
+func (u *ResellerDomainUpsert) UpdateSiteLogo() *ResellerDomainUpsert {
+	u.SetExcluded(resellerdomain.FieldSiteLogo)
+	return u
+}
+
+// ClearSiteLogo clears the value of the "site_logo" field.
+func (u *ResellerDomainUpsert) ClearSiteLogo() *ResellerDomainUpsert {
+	u.SetNull(resellerdomain.FieldSiteLogo)
+	return u
+}
+
+// SetSiteSubtitle sets the "site_subtitle" field.
+func (u *ResellerDomainUpsert) SetSiteSubtitle(v string) *ResellerDomainUpsert {
+	u.Set(resellerdomain.FieldSiteSubtitle, v)
+	return u
+}
+
+// UpdateSiteSubtitle sets the "site_subtitle" field to the value that was provided on create.
+func (u *ResellerDomainUpsert) UpdateSiteSubtitle() *ResellerDomainUpsert {
+	u.SetExcluded(resellerdomain.FieldSiteSubtitle)
+	return u
+}
+
+// ClearSiteSubtitle clears the value of the "site_subtitle" field.
+func (u *ResellerDomainUpsert) ClearSiteSubtitle() *ResellerDomainUpsert {
+	u.SetNull(resellerdomain.FieldSiteSubtitle)
 	return u
 }
 
@@ -461,6 +591,69 @@ func (u *ResellerDomainUpsertOne) SetNotes(v string) *ResellerDomainUpsertOne {
 func (u *ResellerDomainUpsertOne) UpdateNotes() *ResellerDomainUpsertOne {
 	return u.Update(func(s *ResellerDomainUpsert) {
 		s.UpdateNotes()
+	})
+}
+
+// SetSiteName sets the "site_name" field.
+func (u *ResellerDomainUpsertOne) SetSiteName(v string) *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.SetSiteName(v)
+	})
+}
+
+// UpdateSiteName sets the "site_name" field to the value that was provided on create.
+func (u *ResellerDomainUpsertOne) UpdateSiteName() *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.UpdateSiteName()
+	})
+}
+
+// ClearSiteName clears the value of the "site_name" field.
+func (u *ResellerDomainUpsertOne) ClearSiteName() *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.ClearSiteName()
+	})
+}
+
+// SetSiteLogo sets the "site_logo" field.
+func (u *ResellerDomainUpsertOne) SetSiteLogo(v string) *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.SetSiteLogo(v)
+	})
+}
+
+// UpdateSiteLogo sets the "site_logo" field to the value that was provided on create.
+func (u *ResellerDomainUpsertOne) UpdateSiteLogo() *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.UpdateSiteLogo()
+	})
+}
+
+// ClearSiteLogo clears the value of the "site_logo" field.
+func (u *ResellerDomainUpsertOne) ClearSiteLogo() *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.ClearSiteLogo()
+	})
+}
+
+// SetSiteSubtitle sets the "site_subtitle" field.
+func (u *ResellerDomainUpsertOne) SetSiteSubtitle(v string) *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.SetSiteSubtitle(v)
+	})
+}
+
+// UpdateSiteSubtitle sets the "site_subtitle" field to the value that was provided on create.
+func (u *ResellerDomainUpsertOne) UpdateSiteSubtitle() *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.UpdateSiteSubtitle()
+	})
+}
+
+// ClearSiteSubtitle clears the value of the "site_subtitle" field.
+func (u *ResellerDomainUpsertOne) ClearSiteSubtitle() *ResellerDomainUpsertOne {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.ClearSiteSubtitle()
 	})
 }
 
@@ -749,6 +942,69 @@ func (u *ResellerDomainUpsertBulk) SetNotes(v string) *ResellerDomainUpsertBulk 
 func (u *ResellerDomainUpsertBulk) UpdateNotes() *ResellerDomainUpsertBulk {
 	return u.Update(func(s *ResellerDomainUpsert) {
 		s.UpdateNotes()
+	})
+}
+
+// SetSiteName sets the "site_name" field.
+func (u *ResellerDomainUpsertBulk) SetSiteName(v string) *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.SetSiteName(v)
+	})
+}
+
+// UpdateSiteName sets the "site_name" field to the value that was provided on create.
+func (u *ResellerDomainUpsertBulk) UpdateSiteName() *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.UpdateSiteName()
+	})
+}
+
+// ClearSiteName clears the value of the "site_name" field.
+func (u *ResellerDomainUpsertBulk) ClearSiteName() *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.ClearSiteName()
+	})
+}
+
+// SetSiteLogo sets the "site_logo" field.
+func (u *ResellerDomainUpsertBulk) SetSiteLogo(v string) *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.SetSiteLogo(v)
+	})
+}
+
+// UpdateSiteLogo sets the "site_logo" field to the value that was provided on create.
+func (u *ResellerDomainUpsertBulk) UpdateSiteLogo() *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.UpdateSiteLogo()
+	})
+}
+
+// ClearSiteLogo clears the value of the "site_logo" field.
+func (u *ResellerDomainUpsertBulk) ClearSiteLogo() *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.ClearSiteLogo()
+	})
+}
+
+// SetSiteSubtitle sets the "site_subtitle" field.
+func (u *ResellerDomainUpsertBulk) SetSiteSubtitle(v string) *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.SetSiteSubtitle(v)
+	})
+}
+
+// UpdateSiteSubtitle sets the "site_subtitle" field to the value that was provided on create.
+func (u *ResellerDomainUpsertBulk) UpdateSiteSubtitle() *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.UpdateSiteSubtitle()
+	})
+}
+
+// ClearSiteSubtitle clears the value of the "site_subtitle" field.
+func (u *ResellerDomainUpsertBulk) ClearSiteSubtitle() *ResellerDomainUpsertBulk {
+	return u.Update(func(s *ResellerDomainUpsert) {
+		s.ClearSiteSubtitle()
 	})
 }
 

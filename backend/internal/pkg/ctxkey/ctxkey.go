@@ -81,4 +81,9 @@ const (
 
 	// ClaudeCodeVersion stores the extracted Claude Code version from User-Agent (e.g. "2.1.22")
 	ClaudeCodeVersion Key = "ctx_claude_code_version"
+
+	// HostBranding 是按请求 Host 解析出的分销商品牌覆盖（branding.Host）。
+	// 由 middleware.HostBranding 在请求最开始写入，公开设置与首屏注入都从这里读，
+	// 从而只解析一次。缺省（未设置/未命中）即表示使用全站品牌。
+	HostBranding Key = "ctx_host_branding"
 )

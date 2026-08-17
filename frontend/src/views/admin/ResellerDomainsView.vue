@@ -44,11 +44,29 @@
             <span class="text-xs text-ink-secondary">{{ row.notes || '—' }}</span>
           </template>
 
+          <!--
+            Which resellers are white-labelled is the question an operator asks
+            first, so it is a column rather than something you learn by opening
+            each row's dialog in turn.
+          -->
+          <template #cell-branding="{ row }">
+            <span :class="['badge', hasBranding(row) ? 'badge-primary' : 'badge-gray']">
+              {{
+                hasBranding(row)
+                  ? t('admin.resellerDomains.branding.overrideBadge')
+                  : t('admin.resellerDomains.branding.inheritBadge')
+              }}
+            </span>
+          </template>
+
           <template #cell-created_at="{ row }">
             <span class="whitespace-nowrap text-xs text-ink-tertiary">{{ formatDateTime(row.created_at) }}</span>
           </template>
 
           <template #actions="{ row }">
+            <button type="button" class="btn btn-secondary btn-sm" @click="openBranding(row)">
+              {{ t('admin.resellerDomains.branding.editAction') }}
+            </button>
             <button
               type="button"
               class="btn btn-secondary btn-sm"
@@ -112,6 +130,121 @@
       </template>
     </BaseDialog>
 
+    <BaseDialog
+      :show="!!brandingDomain"
+      :title="t('admin.resellerDomains.branding.title', { domain: brandingDomain?.domain ?? '' })"
+      @close="brandingDomain = null"
+    >
+      <form id="reseller-domain-branding-form" class="space-y-4" @submit.prevent="saveBranding">
+        <p class="text-xs text-ink-secondary">
+          {{ t('admin.resellerDomains.branding.intro') }}
+        </p>
+
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <label class="input-label">{{ t('admin.resellerDomains.branding.siteName') }}</label>
+            <span v-if="!brandingForm.site_name.trim()" class="badge badge-gray">
+              {{ t('admin.resellerDomains.branding.inheritBadge') }}
+            </span>
+          </div>
+          <input
+            v-model="brandingForm.site_name"
+            type="text"
+            class="input"
+            :placeholder="t('admin.resellerDomains.branding.inheritPlaceholder')"
+          />
+          <p class="mt-1 text-xs text-ink-tertiary">
+            {{ t('admin.resellerDomains.branding.siteNameHint') }}
+          </p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <label class="input-label">{{ t('admin.resellerDomains.branding.siteSubtitle') }}</label>
+            <span v-if="!brandingForm.site_subtitle.trim()" class="badge badge-gray">
+              {{ t('admin.resellerDomains.branding.inheritBadge') }}
+            </span>
+          </div>
+          <input
+            v-model="brandingForm.site_subtitle"
+            type="text"
+            class="input"
+            :placeholder="t('admin.resellerDomains.branding.inheritPlaceholder')"
+          />
+          <p class="mt-1 text-xs text-ink-tertiary">
+            {{ t('admin.resellerDomains.branding.siteSubtitleHint') }}
+          </p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <label class="input-label">{{ t('admin.resellerDomains.branding.siteLogo') }}</label>
+            <span v-if="!brandingForm.site_logo.trim()" class="badge badge-gray">
+              {{ t('admin.resellerDomains.branding.inheritBadge') }}
+            </span>
+          </div>
+          <input
+            v-model="brandingForm.site_logo"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            class="input font-mono"
+            :placeholder="t('admin.resellerDomains.branding.siteLogoPlaceholder')"
+          />
+          <p class="mt-1 text-xs text-ink-tertiary">
+            {{ t('admin.resellerDomains.branding.siteLogoHint') }}
+          </p>
+
+          <!--
+            A logo that 404s is invisible to whoever typed it and obvious to the
+            reseller's customers, so the URL gets checked here: rejected outright
+            if it is not a usable image URL, and flagged if it fails to load.
+          -->
+          <div v-if="brandingForm.site_logo.trim()" class="mt-2">
+            <p v-if="!logoPreviewUrl" class="text-xs text-danger">
+              {{ t('admin.resellerDomains.branding.logoInvalid') }}
+            </p>
+            <div v-else class="flex items-center gap-3">
+              <div
+                class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface-sunken ring-1 ring-gray-900/5 dark:ring-dark-700"
+              >
+                <img
+                  :src="logoPreviewUrl"
+                  alt=""
+                  class="max-h-full max-w-full object-contain"
+                  @load="logoBroken = false"
+                  @error="logoBroken = true"
+                />
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs text-ink-tertiary">
+                  {{ t('admin.resellerDomains.branding.logoPreview') }}
+                </p>
+                <p v-if="logoBroken" class="mt-0.5 text-xs text-warn">
+                  {{ t('admin.resellerDomains.branding.logoBroken') }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p v-if="brandingError" class="text-sm text-danger">{{ brandingError }}</p>
+      </form>
+      <template #footer>
+        <button type="button" class="btn btn-secondary" @click="brandingDomain = null">
+          {{ t('common.cancel') }}
+        </button>
+        <button
+          type="submit"
+          form="reseller-domain-branding-form"
+          class="btn btn-primary"
+          :disabled="savingBranding"
+        >
+          {{ t('common.save') }}
+        </button>
+      </template>
+    </BaseDialog>
+
     <ConfirmDialog
       :show="!!deletingDomain"
       :title="t('admin.resellerDomains.deleteTitle')"
@@ -136,6 +269,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import { adminAPI } from '@/api/admin'
 import { useAppStore } from '@/stores/app'
 import { formatDateTime } from '@/utils/format'
+import { sanitizeUrl } from '@/utils/url'
 import type { Column } from '@/components/common/types'
 import type { CreateResellerDomainRequest, ResellerDomain } from '@/types'
 
@@ -156,13 +290,44 @@ const form = reactive<Required<CreateResellerDomainRequest>>({
   notes: ''
 })
 
+const brandingDomain = ref<ResellerDomain | null>(null)
+const brandingError = ref('')
+const savingBranding = ref(false)
+const logoBroken = ref(false)
+
+const brandingForm = reactive({
+  site_name: '',
+  site_logo: '',
+  site_subtitle: ''
+})
+
 const columns = computed<Column[]>(() => [
   { key: 'domain', label: t('admin.resellerDomains.fields.domain') },
   { key: 'user_id', label: t('admin.resellerDomains.fields.userId'), sortable: true },
   { key: 'status', label: t('admin.resellerDomains.fields.status') },
+  { key: 'branding', label: t('admin.resellerDomains.fields.branding') },
   { key: 'notes', label: t('admin.resellerDomains.fields.notes') },
   { key: 'created_at', label: t('admin.resellerDomains.fields.createdAt'), sortable: true }
 ])
+
+/**
+ * The API sends `null` and `''` interchangeably for "no override", so an
+ * override only counts once something non-blank is actually stored.
+ */
+function hasBranding(domain: ResellerDomain): boolean {
+  return [domain.site_name, domain.site_logo, domain.site_subtitle].some(
+    (value) => (value ?? '').trim() !== ''
+  )
+}
+
+/**
+ * Empty when the field is blank OR the URL is one no browser would render.
+ * Passing it through sanitizeUrl keeps a `javascript:` URL out of the preview's
+ * `src` — the operator pastes this, and it later ships to a reseller's visitors.
+ */
+const logoPreviewUrl = computed(() =>
+  sanitizeUrl(brandingForm.site_logo, { allowRelative: true, allowDataUrl: true })
+)
 
 async function load() {
   loading.value = true
@@ -211,6 +376,42 @@ async function save() {
     editorError.value = error?.response?.data?.message || t('admin.resellerDomains.saveFailed')
   } finally {
     saving.value = false
+  }
+}
+
+function openBranding(domain: ResellerDomain) {
+  brandingDomain.value = domain
+  brandingForm.site_name = domain.site_name ?? ''
+  brandingForm.site_logo = domain.site_logo ?? ''
+  brandingForm.site_subtitle = domain.site_subtitle ?? ''
+  brandingError.value = ''
+  logoBroken.value = false
+}
+
+/**
+ * Every field goes over the wire, blank ones included: a blank field is the
+ * operator clearing the override, and the API reads `''` as exactly that.
+ */
+async function saveBranding() {
+  const domain = brandingDomain.value
+  if (!domain) return
+
+  savingBranding.value = true
+  brandingError.value = ''
+  try {
+    await adminAPI.resellerDomains.update(domain.id, {
+      site_name: brandingForm.site_name.trim(),
+      site_logo: brandingForm.site_logo.trim(),
+      site_subtitle: brandingForm.site_subtitle.trim()
+    })
+    brandingDomain.value = null
+    appStore.showSuccess(t('admin.resellerDomains.branding.saved'))
+    await load()
+  } catch (error: any) {
+    brandingError.value =
+      error?.response?.data?.message || t('admin.resellerDomains.branding.saveFailed')
+  } finally {
+    savingBranding.value = false
   }
 }
 

@@ -10,6 +10,7 @@ import (
 	"golang.org/x/sync/singleflight"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/branding"
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
 )
@@ -26,9 +27,13 @@ const (
 )
 
 type resellerDomainSnapshot struct {
-	// domains is a set rather than a slice: lookup happens on every proxied
+	// domains is a map rather than a slice: lookup happens on every proxied
 	// request, so it must not be linear in the number of resellers.
-	domains   map[string]struct{}
+	//
+	// The value is the branding to render under, not an empty struct: the allow
+	// decision and the branding are read on the same request, from the same
+	// row, so one snapshot answers both without a second query.
+	domains   map[string]branding.Host
 	expiresAt time.Time
 }
 
@@ -50,8 +55,28 @@ type ResellerDomainService struct {
 
 	quotaResolver ResellerDomainQuotaResolver
 
+	// onInvalidate lets the rendered-HTML cache hear about a domain edit.
+	//
+	// Without it, changing a reseller's name would expire this snapshot and
+	// change nothing a visitor sees: the HTML for that domain is cached under
+	// its own key and, unlike the settings cache, has no TTL to fall back on —
+	// the old name would survive until the next global settings change or a
+	// restart, which is exactly when an operator concludes the feature is
+	// broken and edits it again.
+	onInvalidate atomic.Value // func()
+
 	cache atomic.Value // resellerDomainSnapshot
 	sf    singleflight.Group
+}
+
+// SetOnInvalidateCallback registers a listener for domain-set changes, mirroring
+// SettingService.SetOnUpdateCallback. Optional: unset, nothing downstream is
+// notified and behaviour is unchanged.
+func (s *ResellerDomainService) SetOnInvalidateCallback(callback func()) {
+	if s == nil || callback == nil {
+		return
+	}
+	s.onInvalidate.Store(callback)
 }
 
 // checkDomainQuota refuses a domain the user's plan does not cover.
@@ -138,6 +163,38 @@ func (s *ResellerDomainService) IsAllowedHost(ctx context.Context, host string) 
 	return ok
 }
 
+// ResolveHostBranding returns the branding this hostname renders under.
+//
+// Falling back is the default and the failure mode: the canonical host, an
+// unknown host, a domain with nothing configured, and a database that is down
+// all return the zero Host, which every consumer reads as "use the global
+// settings". Branding is cosmetic — unlike IsAllowedHost, which gates
+// certificate issuance and therefore fails closed, there is nothing here worth
+// serving an error page over.
+func (s *ResellerDomainService) ResolveHostBranding(ctx context.Context, host string) branding.Host {
+	if s == nil || s.repo == nil {
+		return branding.Host{}
+	}
+
+	domain := NormalizeDomain(host)
+	if domain == "" {
+		return branding.Host{}
+	}
+
+	// The deployment's own hostnames render the deployment's own branding, and
+	// answer without touching the database — same reasoning as IsAllowedHost.
+	if _, ok := s.canonical[domain]; ok {
+		return branding.Host{}
+	}
+
+	snapshot, err := s.activeSnapshot(ctx)
+	if err != nil {
+		return branding.Host{}
+	}
+
+	return snapshot.domains[domain]
+}
+
 // activeSnapshot returns the cached set, refreshing it at most once at a time.
 func (s *ResellerDomainService) activeSnapshot(ctx context.Context) (resellerDomainSnapshot, error) {
 	if cached, ok := s.cache.Load().(resellerDomainSnapshot); ok && time.Now().Before(cached.expiresAt) {
@@ -165,11 +222,25 @@ func (s *ResellerDomainService) activeSnapshot(ctx context.Context) (resellerDom
 			return resellerDomainSnapshot{}, err
 		}
 
-		set := make(map[string]struct{}, len(domains))
+		set := make(map[string]branding.Host, len(domains))
 		for _, d := range domains {
-			if normalized := NormalizeDomain(d); normalized != "" {
-				set[normalized] = struct{}{}
+			normalized := NormalizeDomain(d.Domain)
+			if normalized == "" {
+				continue
 			}
+			// Only rows that actually override something carry an identity of
+			// their own; the rest resolve to the zero Host and therefore share
+			// the default HTML cache entry with everyone else.
+			host := branding.Host{
+				DomainID:     d.ID,
+				SiteName:     strings.TrimSpace(d.SiteName),
+				SiteLogo:     strings.TrimSpace(d.SiteLogo),
+				SiteSubtitle: strings.TrimSpace(d.SiteSubtitle),
+			}
+			if !host.HasOverride() {
+				host = branding.Host{}
+			}
+			set[normalized] = host
 		}
 
 		snapshot := resellerDomainSnapshot{domains: set, expiresAt: time.Now().Add(resellerDomainCacheTTL)}
@@ -196,6 +267,10 @@ func (s *ResellerDomainService) activeSnapshot(ctx context.Context) (resellerDom
 func (s *ResellerDomainService) Invalidate() {
 	if s == nil {
 		return
+	}
+
+	if callback, ok := s.onInvalidate.Load().(func()); ok && callback != nil {
+		callback()
 	}
 
 	// Expire in place rather than discarding the set. Dropping it would throw
@@ -272,6 +347,82 @@ func (s *ResellerDomainService) SetStatus(ctx context.Context, id int64, status 
 		return err
 	}
 	s.Invalidate()
+	return nil
+}
+
+// Branding field caps. Names and subtitles are chrome, not content: the column
+// widths in migration 229 are the hard limit, and these keep a paste of an
+// entire document from reaching them. The logo allowance is wide because an
+// inline data: URI is a legitimate value — the same latitude the global
+// site_logo setting has.
+const (
+	maxResellerSiteNameLen     = 100
+	maxResellerSiteSubtitleLen = 200
+	maxResellerSiteLogoLen     = 8192
+)
+
+// UpdateBranding edits what a single hostname renders as.
+//
+// An empty string clears the override rather than blanking the panel: the
+// stored value and "unset" are the same state, so an operator undoing a
+// customisation puts the domain back on the deployment's own branding instead
+// of onto a nameless one.
+func (s *ResellerDomainService) UpdateBranding(ctx context.Context, id int64, update ResellerDomainBrandingUpdate) error {
+	if id <= 0 {
+		return infraerrors.BadRequest("INVALID_RESELLER_DOMAIN", "a reseller domain id is required")
+	}
+	if update.IsEmpty() {
+		return nil
+	}
+
+	normalized := ResellerDomainBrandingUpdate{}
+	for _, field := range []struct {
+		in     *string
+		out    **string
+		max    int
+		label  string
+		errKey string
+	}{
+		{in: update.SiteName, out: &normalized.SiteName, max: maxResellerSiteNameLen, label: "site_name", errKey: "INVALID_RESELLER_SITE_NAME"},
+		{in: update.SiteLogo, out: &normalized.SiteLogo, max: maxResellerSiteLogoLen, label: "site_logo", errKey: "INVALID_RESELLER_SITE_LOGO"},
+		{in: update.SiteSubtitle, out: &normalized.SiteSubtitle, max: maxResellerSiteSubtitleLen, label: "site_subtitle", errKey: "INVALID_RESELLER_SITE_SUBTITLE"},
+	} {
+		if field.in == nil {
+			continue
+		}
+		value := strings.TrimSpace(*field.in)
+		if err := validateResellerBrandingValue(value, field.max, field.label, field.errKey); err != nil {
+			return err
+		}
+		v := value
+		*field.out = &v
+	}
+
+	if err := s.repo.UpdateBranding(ctx, id, normalized); err != nil {
+		return err
+	}
+
+	// Same snapshot serves the allow decision and the branding, so a branding
+	// edit has to expire it too — otherwise the operator's change appears to
+	// have done nothing for up to a minute.
+	s.Invalidate()
+	return nil
+}
+
+// validateResellerBrandingValue rejects what would either overflow the column
+// or render as something other than the text the operator typed.
+func validateResellerBrandingValue(value string, max int, label, errKey string) error {
+	if len(value) > max {
+		return infraerrors.BadRequest(errKey, fmt.Sprintf("%s exceeds %d characters", label, max))
+	}
+	// Control characters never appear in a legitimate name, logo URL or
+	// subtitle, and they are the part of an injected string that survives HTML
+	// escaping intact. Refuse them at the door rather than at every render.
+	for _, r := range value {
+		if r < 0x20 || r == 0x7f {
+			return infraerrors.BadRequest(errKey, fmt.Sprintf("%s contains control characters", label))
+		}
+	}
 	return nil
 }
 
