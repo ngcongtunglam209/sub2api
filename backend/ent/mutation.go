@@ -41,6 +41,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/resellerdomain"
+	"github.com/Wei-Shaw/sub2api/ent/resellerplan"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
 	"github.com/Wei-Shaw/sub2api/ent/subscriptionplan"
@@ -94,6 +95,7 @@ const (
 	TypeProxy                         = "Proxy"
 	TypeRedeemCode                    = "RedeemCode"
 	TypeResellerDomain                = "ResellerDomain"
+	TypeResellerPlan                  = "ResellerPlan"
 	TypeSecuritySecret                = "SecuritySecret"
 	TypeSetting                       = "Setting"
 	TypeSubscriptionPlan              = "SubscriptionPlan"
@@ -37650,6 +37652,8 @@ type RedeemCodeMutation struct {
 	status           *string
 	used_at          *time.Time
 	notes            *string
+	created_by       *int64
+	addcreated_by    *int64
 	created_at       *time.Time
 	expires_at       *time.Time
 	validity_days    *int
@@ -38073,6 +38077,76 @@ func (m *RedeemCodeMutation) ResetNotes() {
 	delete(m.clearedFields, redeemcode.FieldNotes)
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (m *RedeemCodeMutation) SetCreatedBy(i int64) {
+	m.created_by = &i
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *RedeemCodeMutation) CreatedBy() (r int64, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the RedeemCode entity.
+// If the RedeemCode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RedeemCodeMutation) OldCreatedBy(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (m *RedeemCodeMutation) AddCreatedBy(i int64) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += i
+	} else {
+		m.addcreated_by = &i
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *RedeemCodeMutation) AddedCreatedBy() (r int64, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (m *RedeemCodeMutation) ClearCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	m.clearedFields[redeemcode.FieldCreatedBy] = struct{}{}
+}
+
+// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
+func (m *RedeemCodeMutation) CreatedByCleared() bool {
+	_, ok := m.clearedFields[redeemcode.FieldCreatedBy]
+	return ok
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *RedeemCodeMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	delete(m.clearedFields, redeemcode.FieldCreatedBy)
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *RedeemCodeMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -38364,7 +38438,7 @@ func (m *RedeemCodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RedeemCodeMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.code != nil {
 		fields = append(fields, redeemcode.FieldCode)
 	}
@@ -38385,6 +38459,9 @@ func (m *RedeemCodeMutation) Fields() []string {
 	}
 	if m.notes != nil {
 		fields = append(fields, redeemcode.FieldNotes)
+	}
+	if m.created_by != nil {
+		fields = append(fields, redeemcode.FieldCreatedBy)
 	}
 	if m.created_at != nil {
 		fields = append(fields, redeemcode.FieldCreatedAt)
@@ -38420,6 +38497,8 @@ func (m *RedeemCodeMutation) Field(name string) (ent.Value, bool) {
 		return m.UsedAt()
 	case redeemcode.FieldNotes:
 		return m.Notes()
+	case redeemcode.FieldCreatedBy:
+		return m.CreatedBy()
 	case redeemcode.FieldCreatedAt:
 		return m.CreatedAt()
 	case redeemcode.FieldExpiresAt:
@@ -38451,6 +38530,8 @@ func (m *RedeemCodeMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUsedAt(ctx)
 	case redeemcode.FieldNotes:
 		return m.OldNotes(ctx)
+	case redeemcode.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
 	case redeemcode.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case redeemcode.FieldExpiresAt:
@@ -38517,6 +38598,13 @@ func (m *RedeemCodeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetNotes(v)
 		return nil
+	case redeemcode.FieldCreatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
 	case redeemcode.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -38556,6 +38644,9 @@ func (m *RedeemCodeMutation) AddedFields() []string {
 	if m.addvalue != nil {
 		fields = append(fields, redeemcode.FieldValue)
 	}
+	if m.addcreated_by != nil {
+		fields = append(fields, redeemcode.FieldCreatedBy)
+	}
 	if m.addvalidity_days != nil {
 		fields = append(fields, redeemcode.FieldValidityDays)
 	}
@@ -38569,6 +38660,8 @@ func (m *RedeemCodeMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case redeemcode.FieldValue:
 		return m.AddedValue()
+	case redeemcode.FieldCreatedBy:
+		return m.AddedCreatedBy()
 	case redeemcode.FieldValidityDays:
 		return m.AddedValidityDays()
 	}
@@ -38586,6 +38679,13 @@ func (m *RedeemCodeMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddValue(v)
+		return nil
+	case redeemcode.FieldCreatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
 		return nil
 	case redeemcode.FieldValidityDays:
 		v, ok := value.(int)
@@ -38610,6 +38710,9 @@ func (m *RedeemCodeMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(redeemcode.FieldNotes) {
 		fields = append(fields, redeemcode.FieldNotes)
+	}
+	if m.FieldCleared(redeemcode.FieldCreatedBy) {
+		fields = append(fields, redeemcode.FieldCreatedBy)
 	}
 	if m.FieldCleared(redeemcode.FieldExpiresAt) {
 		fields = append(fields, redeemcode.FieldExpiresAt)
@@ -38639,6 +38742,9 @@ func (m *RedeemCodeMutation) ClearField(name string) error {
 		return nil
 	case redeemcode.FieldNotes:
 		m.ClearNotes()
+		return nil
+	case redeemcode.FieldCreatedBy:
+		m.ClearCreatedBy()
 		return nil
 	case redeemcode.FieldExpiresAt:
 		m.ClearExpiresAt()
@@ -38674,6 +38780,9 @@ func (m *RedeemCodeMutation) ResetField(name string) error {
 		return nil
 	case redeemcode.FieldNotes:
 		m.ResetNotes()
+		return nil
+	case redeemcode.FieldCreatedBy:
+		m.ResetCreatedBy()
 		return nil
 	case redeemcode.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -39413,6 +39522,1176 @@ func (m *ResellerDomainMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ResellerDomainMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown ResellerDomain edge %s", name)
+}
+
+// ResellerPlanMutation represents an operation that mutates the ResellerPlan nodes in the graph.
+type ResellerPlanMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *int64
+	created_at              *time.Time
+	updated_at              *time.Time
+	level                   *int
+	addlevel                *int
+	name                    *string
+	price                   *float64
+	addprice                *float64
+	credit_rate             *float64
+	addcredit_rate          *float64
+	concurrency_bonus       *int
+	addconcurrency_bonus    *int
+	rpm_limit               *int
+	addrpm_limit            *int
+	max_domains             *int
+	addmax_domains          *int
+	validity_days           *int
+	addvalidity_days        *int
+	allowed_group_ids       *[]int64
+	appendallowed_group_ids []int64
+	enabled                 *bool
+	clearedFields           map[string]struct{}
+	done                    bool
+	oldValue                func(context.Context) (*ResellerPlan, error)
+	predicates              []predicate.ResellerPlan
+}
+
+var _ ent.Mutation = (*ResellerPlanMutation)(nil)
+
+// resellerplanOption allows management of the mutation configuration using functional options.
+type resellerplanOption func(*ResellerPlanMutation)
+
+// newResellerPlanMutation creates new mutation for the ResellerPlan entity.
+func newResellerPlanMutation(c config, op Op, opts ...resellerplanOption) *ResellerPlanMutation {
+	m := &ResellerPlanMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeResellerPlan,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withResellerPlanID sets the ID field of the mutation.
+func withResellerPlanID(id int64) resellerplanOption {
+	return func(m *ResellerPlanMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ResellerPlan
+		)
+		m.oldValue = func(ctx context.Context) (*ResellerPlan, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ResellerPlan.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withResellerPlan sets the old ResellerPlan of the mutation.
+func withResellerPlan(node *ResellerPlan) resellerplanOption {
+	return func(m *ResellerPlanMutation) {
+		m.oldValue = func(context.Context) (*ResellerPlan, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ResellerPlanMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ResellerPlanMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ResellerPlanMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ResellerPlanMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ResellerPlan.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ResellerPlanMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ResellerPlanMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ResellerPlanMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ResellerPlanMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ResellerPlanMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ResellerPlanMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetLevel sets the "level" field.
+func (m *ResellerPlanMutation) SetLevel(i int) {
+	m.level = &i
+	m.addlevel = nil
+}
+
+// Level returns the value of the "level" field in the mutation.
+func (m *ResellerPlanMutation) Level() (r int, exists bool) {
+	v := m.level
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLevel returns the old "level" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldLevel(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLevel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLevel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLevel: %w", err)
+	}
+	return oldValue.Level, nil
+}
+
+// AddLevel adds i to the "level" field.
+func (m *ResellerPlanMutation) AddLevel(i int) {
+	if m.addlevel != nil {
+		*m.addlevel += i
+	} else {
+		m.addlevel = &i
+	}
+}
+
+// AddedLevel returns the value that was added to the "level" field in this mutation.
+func (m *ResellerPlanMutation) AddedLevel() (r int, exists bool) {
+	v := m.addlevel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLevel resets all changes to the "level" field.
+func (m *ResellerPlanMutation) ResetLevel() {
+	m.level = nil
+	m.addlevel = nil
+}
+
+// SetName sets the "name" field.
+func (m *ResellerPlanMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *ResellerPlanMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *ResellerPlanMutation) ResetName() {
+	m.name = nil
+}
+
+// SetPrice sets the "price" field.
+func (m *ResellerPlanMutation) SetPrice(f float64) {
+	m.price = &f
+	m.addprice = nil
+}
+
+// Price returns the value of the "price" field in the mutation.
+func (m *ResellerPlanMutation) Price() (r float64, exists bool) {
+	v := m.price
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrice returns the old "price" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldPrice(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrice is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrice requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrice: %w", err)
+	}
+	return oldValue.Price, nil
+}
+
+// AddPrice adds f to the "price" field.
+func (m *ResellerPlanMutation) AddPrice(f float64) {
+	if m.addprice != nil {
+		*m.addprice += f
+	} else {
+		m.addprice = &f
+	}
+}
+
+// AddedPrice returns the value that was added to the "price" field in this mutation.
+func (m *ResellerPlanMutation) AddedPrice() (r float64, exists bool) {
+	v := m.addprice
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPrice resets all changes to the "price" field.
+func (m *ResellerPlanMutation) ResetPrice() {
+	m.price = nil
+	m.addprice = nil
+}
+
+// SetCreditRate sets the "credit_rate" field.
+func (m *ResellerPlanMutation) SetCreditRate(f float64) {
+	m.credit_rate = &f
+	m.addcredit_rate = nil
+}
+
+// CreditRate returns the value of the "credit_rate" field in the mutation.
+func (m *ResellerPlanMutation) CreditRate() (r float64, exists bool) {
+	v := m.credit_rate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreditRate returns the old "credit_rate" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldCreditRate(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreditRate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreditRate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreditRate: %w", err)
+	}
+	return oldValue.CreditRate, nil
+}
+
+// AddCreditRate adds f to the "credit_rate" field.
+func (m *ResellerPlanMutation) AddCreditRate(f float64) {
+	if m.addcredit_rate != nil {
+		*m.addcredit_rate += f
+	} else {
+		m.addcredit_rate = &f
+	}
+}
+
+// AddedCreditRate returns the value that was added to the "credit_rate" field in this mutation.
+func (m *ResellerPlanMutation) AddedCreditRate() (r float64, exists bool) {
+	v := m.addcredit_rate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreditRate resets all changes to the "credit_rate" field.
+func (m *ResellerPlanMutation) ResetCreditRate() {
+	m.credit_rate = nil
+	m.addcredit_rate = nil
+}
+
+// SetConcurrencyBonus sets the "concurrency_bonus" field.
+func (m *ResellerPlanMutation) SetConcurrencyBonus(i int) {
+	m.concurrency_bonus = &i
+	m.addconcurrency_bonus = nil
+}
+
+// ConcurrencyBonus returns the value of the "concurrency_bonus" field in the mutation.
+func (m *ResellerPlanMutation) ConcurrencyBonus() (r int, exists bool) {
+	v := m.concurrency_bonus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConcurrencyBonus returns the old "concurrency_bonus" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldConcurrencyBonus(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConcurrencyBonus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConcurrencyBonus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConcurrencyBonus: %w", err)
+	}
+	return oldValue.ConcurrencyBonus, nil
+}
+
+// AddConcurrencyBonus adds i to the "concurrency_bonus" field.
+func (m *ResellerPlanMutation) AddConcurrencyBonus(i int) {
+	if m.addconcurrency_bonus != nil {
+		*m.addconcurrency_bonus += i
+	} else {
+		m.addconcurrency_bonus = &i
+	}
+}
+
+// AddedConcurrencyBonus returns the value that was added to the "concurrency_bonus" field in this mutation.
+func (m *ResellerPlanMutation) AddedConcurrencyBonus() (r int, exists bool) {
+	v := m.addconcurrency_bonus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetConcurrencyBonus resets all changes to the "concurrency_bonus" field.
+func (m *ResellerPlanMutation) ResetConcurrencyBonus() {
+	m.concurrency_bonus = nil
+	m.addconcurrency_bonus = nil
+}
+
+// SetRpmLimit sets the "rpm_limit" field.
+func (m *ResellerPlanMutation) SetRpmLimit(i int) {
+	m.rpm_limit = &i
+	m.addrpm_limit = nil
+}
+
+// RpmLimit returns the value of the "rpm_limit" field in the mutation.
+func (m *ResellerPlanMutation) RpmLimit() (r int, exists bool) {
+	v := m.rpm_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRpmLimit returns the old "rpm_limit" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldRpmLimit(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRpmLimit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRpmLimit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRpmLimit: %w", err)
+	}
+	return oldValue.RpmLimit, nil
+}
+
+// AddRpmLimit adds i to the "rpm_limit" field.
+func (m *ResellerPlanMutation) AddRpmLimit(i int) {
+	if m.addrpm_limit != nil {
+		*m.addrpm_limit += i
+	} else {
+		m.addrpm_limit = &i
+	}
+}
+
+// AddedRpmLimit returns the value that was added to the "rpm_limit" field in this mutation.
+func (m *ResellerPlanMutation) AddedRpmLimit() (r int, exists bool) {
+	v := m.addrpm_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRpmLimit resets all changes to the "rpm_limit" field.
+func (m *ResellerPlanMutation) ResetRpmLimit() {
+	m.rpm_limit = nil
+	m.addrpm_limit = nil
+}
+
+// SetMaxDomains sets the "max_domains" field.
+func (m *ResellerPlanMutation) SetMaxDomains(i int) {
+	m.max_domains = &i
+	m.addmax_domains = nil
+}
+
+// MaxDomains returns the value of the "max_domains" field in the mutation.
+func (m *ResellerPlanMutation) MaxDomains() (r int, exists bool) {
+	v := m.max_domains
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxDomains returns the old "max_domains" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldMaxDomains(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxDomains is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxDomains requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxDomains: %w", err)
+	}
+	return oldValue.MaxDomains, nil
+}
+
+// AddMaxDomains adds i to the "max_domains" field.
+func (m *ResellerPlanMutation) AddMaxDomains(i int) {
+	if m.addmax_domains != nil {
+		*m.addmax_domains += i
+	} else {
+		m.addmax_domains = &i
+	}
+}
+
+// AddedMaxDomains returns the value that was added to the "max_domains" field in this mutation.
+func (m *ResellerPlanMutation) AddedMaxDomains() (r int, exists bool) {
+	v := m.addmax_domains
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxDomains resets all changes to the "max_domains" field.
+func (m *ResellerPlanMutation) ResetMaxDomains() {
+	m.max_domains = nil
+	m.addmax_domains = nil
+}
+
+// SetValidityDays sets the "validity_days" field.
+func (m *ResellerPlanMutation) SetValidityDays(i int) {
+	m.validity_days = &i
+	m.addvalidity_days = nil
+}
+
+// ValidityDays returns the value of the "validity_days" field in the mutation.
+func (m *ResellerPlanMutation) ValidityDays() (r int, exists bool) {
+	v := m.validity_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValidityDays returns the old "validity_days" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldValidityDays(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValidityDays is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValidityDays requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValidityDays: %w", err)
+	}
+	return oldValue.ValidityDays, nil
+}
+
+// AddValidityDays adds i to the "validity_days" field.
+func (m *ResellerPlanMutation) AddValidityDays(i int) {
+	if m.addvalidity_days != nil {
+		*m.addvalidity_days += i
+	} else {
+		m.addvalidity_days = &i
+	}
+}
+
+// AddedValidityDays returns the value that was added to the "validity_days" field in this mutation.
+func (m *ResellerPlanMutation) AddedValidityDays() (r int, exists bool) {
+	v := m.addvalidity_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetValidityDays resets all changes to the "validity_days" field.
+func (m *ResellerPlanMutation) ResetValidityDays() {
+	m.validity_days = nil
+	m.addvalidity_days = nil
+}
+
+// SetAllowedGroupIds sets the "allowed_group_ids" field.
+func (m *ResellerPlanMutation) SetAllowedGroupIds(i []int64) {
+	m.allowed_group_ids = &i
+	m.appendallowed_group_ids = nil
+}
+
+// AllowedGroupIds returns the value of the "allowed_group_ids" field in the mutation.
+func (m *ResellerPlanMutation) AllowedGroupIds() (r []int64, exists bool) {
+	v := m.allowed_group_ids
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAllowedGroupIds returns the old "allowed_group_ids" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldAllowedGroupIds(ctx context.Context) (v []int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAllowedGroupIds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAllowedGroupIds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAllowedGroupIds: %w", err)
+	}
+	return oldValue.AllowedGroupIds, nil
+}
+
+// AppendAllowedGroupIds adds i to the "allowed_group_ids" field.
+func (m *ResellerPlanMutation) AppendAllowedGroupIds(i []int64) {
+	m.appendallowed_group_ids = append(m.appendallowed_group_ids, i...)
+}
+
+// AppendedAllowedGroupIds returns the list of values that were appended to the "allowed_group_ids" field in this mutation.
+func (m *ResellerPlanMutation) AppendedAllowedGroupIds() ([]int64, bool) {
+	if len(m.appendallowed_group_ids) == 0 {
+		return nil, false
+	}
+	return m.appendallowed_group_ids, true
+}
+
+// ResetAllowedGroupIds resets all changes to the "allowed_group_ids" field.
+func (m *ResellerPlanMutation) ResetAllowedGroupIds() {
+	m.allowed_group_ids = nil
+	m.appendallowed_group_ids = nil
+}
+
+// SetEnabled sets the "enabled" field.
+func (m *ResellerPlanMutation) SetEnabled(b bool) {
+	m.enabled = &b
+}
+
+// Enabled returns the value of the "enabled" field in the mutation.
+func (m *ResellerPlanMutation) Enabled() (r bool, exists bool) {
+	v := m.enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnabled returns the old "enabled" field's value of the ResellerPlan entity.
+// If the ResellerPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerPlanMutation) OldEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
+	}
+	return oldValue.Enabled, nil
+}
+
+// ResetEnabled resets all changes to the "enabled" field.
+func (m *ResellerPlanMutation) ResetEnabled() {
+	m.enabled = nil
+}
+
+// Where appends a list predicates to the ResellerPlanMutation builder.
+func (m *ResellerPlanMutation) Where(ps ...predicate.ResellerPlan) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ResellerPlanMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ResellerPlanMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ResellerPlan, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ResellerPlanMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ResellerPlanMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ResellerPlan).
+func (m *ResellerPlanMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ResellerPlanMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, resellerplan.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, resellerplan.FieldUpdatedAt)
+	}
+	if m.level != nil {
+		fields = append(fields, resellerplan.FieldLevel)
+	}
+	if m.name != nil {
+		fields = append(fields, resellerplan.FieldName)
+	}
+	if m.price != nil {
+		fields = append(fields, resellerplan.FieldPrice)
+	}
+	if m.credit_rate != nil {
+		fields = append(fields, resellerplan.FieldCreditRate)
+	}
+	if m.concurrency_bonus != nil {
+		fields = append(fields, resellerplan.FieldConcurrencyBonus)
+	}
+	if m.rpm_limit != nil {
+		fields = append(fields, resellerplan.FieldRpmLimit)
+	}
+	if m.max_domains != nil {
+		fields = append(fields, resellerplan.FieldMaxDomains)
+	}
+	if m.validity_days != nil {
+		fields = append(fields, resellerplan.FieldValidityDays)
+	}
+	if m.allowed_group_ids != nil {
+		fields = append(fields, resellerplan.FieldAllowedGroupIds)
+	}
+	if m.enabled != nil {
+		fields = append(fields, resellerplan.FieldEnabled)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ResellerPlanMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case resellerplan.FieldCreatedAt:
+		return m.CreatedAt()
+	case resellerplan.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case resellerplan.FieldLevel:
+		return m.Level()
+	case resellerplan.FieldName:
+		return m.Name()
+	case resellerplan.FieldPrice:
+		return m.Price()
+	case resellerplan.FieldCreditRate:
+		return m.CreditRate()
+	case resellerplan.FieldConcurrencyBonus:
+		return m.ConcurrencyBonus()
+	case resellerplan.FieldRpmLimit:
+		return m.RpmLimit()
+	case resellerplan.FieldMaxDomains:
+		return m.MaxDomains()
+	case resellerplan.FieldValidityDays:
+		return m.ValidityDays()
+	case resellerplan.FieldAllowedGroupIds:
+		return m.AllowedGroupIds()
+	case resellerplan.FieldEnabled:
+		return m.Enabled()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ResellerPlanMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case resellerplan.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case resellerplan.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case resellerplan.FieldLevel:
+		return m.OldLevel(ctx)
+	case resellerplan.FieldName:
+		return m.OldName(ctx)
+	case resellerplan.FieldPrice:
+		return m.OldPrice(ctx)
+	case resellerplan.FieldCreditRate:
+		return m.OldCreditRate(ctx)
+	case resellerplan.FieldConcurrencyBonus:
+		return m.OldConcurrencyBonus(ctx)
+	case resellerplan.FieldRpmLimit:
+		return m.OldRpmLimit(ctx)
+	case resellerplan.FieldMaxDomains:
+		return m.OldMaxDomains(ctx)
+	case resellerplan.FieldValidityDays:
+		return m.OldValidityDays(ctx)
+	case resellerplan.FieldAllowedGroupIds:
+		return m.OldAllowedGroupIds(ctx)
+	case resellerplan.FieldEnabled:
+		return m.OldEnabled(ctx)
+	}
+	return nil, fmt.Errorf("unknown ResellerPlan field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ResellerPlanMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case resellerplan.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case resellerplan.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case resellerplan.FieldLevel:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLevel(v)
+		return nil
+	case resellerplan.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case resellerplan.FieldPrice:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrice(v)
+		return nil
+	case resellerplan.FieldCreditRate:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreditRate(v)
+		return nil
+	case resellerplan.FieldConcurrencyBonus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConcurrencyBonus(v)
+		return nil
+	case resellerplan.FieldRpmLimit:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRpmLimit(v)
+		return nil
+	case resellerplan.FieldMaxDomains:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxDomains(v)
+		return nil
+	case resellerplan.FieldValidityDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValidityDays(v)
+		return nil
+	case resellerplan.FieldAllowedGroupIds:
+		v, ok := value.([]int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAllowedGroupIds(v)
+		return nil
+	case resellerplan.FieldEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnabled(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ResellerPlan field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ResellerPlanMutation) AddedFields() []string {
+	var fields []string
+	if m.addlevel != nil {
+		fields = append(fields, resellerplan.FieldLevel)
+	}
+	if m.addprice != nil {
+		fields = append(fields, resellerplan.FieldPrice)
+	}
+	if m.addcredit_rate != nil {
+		fields = append(fields, resellerplan.FieldCreditRate)
+	}
+	if m.addconcurrency_bonus != nil {
+		fields = append(fields, resellerplan.FieldConcurrencyBonus)
+	}
+	if m.addrpm_limit != nil {
+		fields = append(fields, resellerplan.FieldRpmLimit)
+	}
+	if m.addmax_domains != nil {
+		fields = append(fields, resellerplan.FieldMaxDomains)
+	}
+	if m.addvalidity_days != nil {
+		fields = append(fields, resellerplan.FieldValidityDays)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ResellerPlanMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case resellerplan.FieldLevel:
+		return m.AddedLevel()
+	case resellerplan.FieldPrice:
+		return m.AddedPrice()
+	case resellerplan.FieldCreditRate:
+		return m.AddedCreditRate()
+	case resellerplan.FieldConcurrencyBonus:
+		return m.AddedConcurrencyBonus()
+	case resellerplan.FieldRpmLimit:
+		return m.AddedRpmLimit()
+	case resellerplan.FieldMaxDomains:
+		return m.AddedMaxDomains()
+	case resellerplan.FieldValidityDays:
+		return m.AddedValidityDays()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ResellerPlanMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case resellerplan.FieldLevel:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLevel(v)
+		return nil
+	case resellerplan.FieldPrice:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPrice(v)
+		return nil
+	case resellerplan.FieldCreditRate:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreditRate(v)
+		return nil
+	case resellerplan.FieldConcurrencyBonus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddConcurrencyBonus(v)
+		return nil
+	case resellerplan.FieldRpmLimit:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRpmLimit(v)
+		return nil
+	case resellerplan.FieldMaxDomains:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxDomains(v)
+		return nil
+	case resellerplan.FieldValidityDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddValidityDays(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ResellerPlan numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ResellerPlanMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ResellerPlanMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ResellerPlanMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown ResellerPlan nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ResellerPlanMutation) ResetField(name string) error {
+	switch name {
+	case resellerplan.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case resellerplan.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case resellerplan.FieldLevel:
+		m.ResetLevel()
+		return nil
+	case resellerplan.FieldName:
+		m.ResetName()
+		return nil
+	case resellerplan.FieldPrice:
+		m.ResetPrice()
+		return nil
+	case resellerplan.FieldCreditRate:
+		m.ResetCreditRate()
+		return nil
+	case resellerplan.FieldConcurrencyBonus:
+		m.ResetConcurrencyBonus()
+		return nil
+	case resellerplan.FieldRpmLimit:
+		m.ResetRpmLimit()
+		return nil
+	case resellerplan.FieldMaxDomains:
+		m.ResetMaxDomains()
+		return nil
+	case resellerplan.FieldValidityDays:
+		m.ResetValidityDays()
+		return nil
+	case resellerplan.FieldAllowedGroupIds:
+		m.ResetAllowedGroupIds()
+		return nil
+	case resellerplan.FieldEnabled:
+		m.ResetEnabled()
+		return nil
+	}
+	return fmt.Errorf("unknown ResellerPlan field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ResellerPlanMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ResellerPlanMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ResellerPlanMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ResellerPlanMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ResellerPlanMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ResellerPlanMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ResellerPlanMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown ResellerPlan unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ResellerPlanMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown ResellerPlan edge %s", name)
 }
 
 // SecuritySecretMutation represents an operation that mutates the SecuritySecret nodes in the graph.
@@ -48227,6 +49506,9 @@ type UserMutation struct {
 	addvip_tier_id                *int64
 	vip_expires_at                *time.Time
 	vip_tier_locked               *bool
+	reseller_plan_id              *int64
+	addreseller_plan_id           *int64
+	reseller_plan_expires_at      *time.Time
 	clearedFields                 map[string]struct{}
 	api_keys                      map[int64]struct{}
 	removedapi_keys               map[int64]struct{}
@@ -49700,6 +50982,125 @@ func (m *UserMutation) ResetVipTierLocked() {
 	m.vip_tier_locked = nil
 }
 
+// SetResellerPlanID sets the "reseller_plan_id" field.
+func (m *UserMutation) SetResellerPlanID(i int64) {
+	m.reseller_plan_id = &i
+	m.addreseller_plan_id = nil
+}
+
+// ResellerPlanID returns the value of the "reseller_plan_id" field in the mutation.
+func (m *UserMutation) ResellerPlanID() (r int64, exists bool) {
+	v := m.reseller_plan_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResellerPlanID returns the old "reseller_plan_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldResellerPlanID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResellerPlanID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResellerPlanID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResellerPlanID: %w", err)
+	}
+	return oldValue.ResellerPlanID, nil
+}
+
+// AddResellerPlanID adds i to the "reseller_plan_id" field.
+func (m *UserMutation) AddResellerPlanID(i int64) {
+	if m.addreseller_plan_id != nil {
+		*m.addreseller_plan_id += i
+	} else {
+		m.addreseller_plan_id = &i
+	}
+}
+
+// AddedResellerPlanID returns the value that was added to the "reseller_plan_id" field in this mutation.
+func (m *UserMutation) AddedResellerPlanID() (r int64, exists bool) {
+	v := m.addreseller_plan_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearResellerPlanID clears the value of the "reseller_plan_id" field.
+func (m *UserMutation) ClearResellerPlanID() {
+	m.reseller_plan_id = nil
+	m.addreseller_plan_id = nil
+	m.clearedFields[user.FieldResellerPlanID] = struct{}{}
+}
+
+// ResellerPlanIDCleared returns if the "reseller_plan_id" field was cleared in this mutation.
+func (m *UserMutation) ResellerPlanIDCleared() bool {
+	_, ok := m.clearedFields[user.FieldResellerPlanID]
+	return ok
+}
+
+// ResetResellerPlanID resets all changes to the "reseller_plan_id" field.
+func (m *UserMutation) ResetResellerPlanID() {
+	m.reseller_plan_id = nil
+	m.addreseller_plan_id = nil
+	delete(m.clearedFields, user.FieldResellerPlanID)
+}
+
+// SetResellerPlanExpiresAt sets the "reseller_plan_expires_at" field.
+func (m *UserMutation) SetResellerPlanExpiresAt(t time.Time) {
+	m.reseller_plan_expires_at = &t
+}
+
+// ResellerPlanExpiresAt returns the value of the "reseller_plan_expires_at" field in the mutation.
+func (m *UserMutation) ResellerPlanExpiresAt() (r time.Time, exists bool) {
+	v := m.reseller_plan_expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResellerPlanExpiresAt returns the old "reseller_plan_expires_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldResellerPlanExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResellerPlanExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResellerPlanExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResellerPlanExpiresAt: %w", err)
+	}
+	return oldValue.ResellerPlanExpiresAt, nil
+}
+
+// ClearResellerPlanExpiresAt clears the value of the "reseller_plan_expires_at" field.
+func (m *UserMutation) ClearResellerPlanExpiresAt() {
+	m.reseller_plan_expires_at = nil
+	m.clearedFields[user.FieldResellerPlanExpiresAt] = struct{}{}
+}
+
+// ResellerPlanExpiresAtCleared returns if the "reseller_plan_expires_at" field was cleared in this mutation.
+func (m *UserMutation) ResellerPlanExpiresAtCleared() bool {
+	_, ok := m.clearedFields[user.FieldResellerPlanExpiresAt]
+	return ok
+}
+
+// ResetResellerPlanExpiresAt resets all changes to the "reseller_plan_expires_at" field.
+func (m *UserMutation) ResetResellerPlanExpiresAt() {
+	m.reseller_plan_expires_at = nil
+	delete(m.clearedFields, user.FieldResellerPlanExpiresAt)
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by ids.
 func (m *UserMutation) AddAPIKeyIDs(ids ...int64) {
 	if m.api_keys == nil {
@@ -50436,7 +51837,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 29)
+	fields := make([]string, 0, 31)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -50524,6 +51925,12 @@ func (m *UserMutation) Fields() []string {
 	if m.vip_tier_locked != nil {
 		fields = append(fields, user.FieldVipTierLocked)
 	}
+	if m.reseller_plan_id != nil {
+		fields = append(fields, user.FieldResellerPlanID)
+	}
+	if m.reseller_plan_expires_at != nil {
+		fields = append(fields, user.FieldResellerPlanExpiresAt)
+	}
 	return fields
 }
 
@@ -50590,6 +51997,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.VipExpiresAt()
 	case user.FieldVipTierLocked:
 		return m.VipTierLocked()
+	case user.FieldResellerPlanID:
+		return m.ResellerPlanID()
+	case user.FieldResellerPlanExpiresAt:
+		return m.ResellerPlanExpiresAt()
 	}
 	return nil, false
 }
@@ -50657,6 +52068,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldVipExpiresAt(ctx)
 	case user.FieldVipTierLocked:
 		return m.OldVipTierLocked(ctx)
+	case user.FieldResellerPlanID:
+		return m.OldResellerPlanID(ctx)
+	case user.FieldResellerPlanExpiresAt:
+		return m.OldResellerPlanExpiresAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -50869,6 +52284,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetVipTierLocked(v)
 		return nil
+	case user.FieldResellerPlanID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResellerPlanID(v)
+		return nil
+	case user.FieldResellerPlanExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResellerPlanExpiresAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -50904,6 +52333,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addvip_tier_id != nil {
 		fields = append(fields, user.FieldVipTierID)
 	}
+	if m.addreseller_plan_id != nil {
+		fields = append(fields, user.FieldResellerPlanID)
+	}
 	return fields
 }
 
@@ -50930,6 +52362,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedVipQualifyingSpend()
 	case user.FieldVipTierID:
 		return m.AddedVipTierID()
+	case user.FieldResellerPlanID:
+		return m.AddedResellerPlanID()
 	}
 	return nil, false
 }
@@ -51002,6 +52436,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddVipTierID(v)
 		return nil
+	case user.FieldResellerPlanID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddResellerPlanID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -51033,6 +52474,12 @@ func (m *UserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(user.FieldVipExpiresAt) {
 		fields = append(fields, user.FieldVipExpiresAt)
+	}
+	if m.FieldCleared(user.FieldResellerPlanID) {
+		fields = append(fields, user.FieldResellerPlanID)
+	}
+	if m.FieldCleared(user.FieldResellerPlanExpiresAt) {
+		fields = append(fields, user.FieldResellerPlanExpiresAt)
 	}
 	return fields
 }
@@ -51071,6 +52518,12 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldVipExpiresAt:
 		m.ClearVipExpiresAt()
+		return nil
+	case user.FieldResellerPlanID:
+		m.ClearResellerPlanID()
+		return nil
+	case user.FieldResellerPlanExpiresAt:
+		m.ClearResellerPlanExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -51166,6 +52619,12 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldVipTierLocked:
 		m.ResetVipTierLocked()
+		return nil
+	case user.FieldResellerPlanID:
+		m.ResetResellerPlanID()
+		return nil
+	case user.FieldResellerPlanExpiresAt:
+		m.ResetResellerPlanExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

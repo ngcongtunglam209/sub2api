@@ -21,6 +21,11 @@ type RedeemCode struct {
 	GroupID      *int64
 	ValidityDays int
 
+	// CreatedBy is the reseller who minted the code, nil for platform-issued
+	// ones. Reconciliation, tracing a suspended reseller's unsold codes, and
+	// the reseller's own listing all hang off it.
+	CreatedBy *int64
+
 	User  *User
 	Group *Group
 }

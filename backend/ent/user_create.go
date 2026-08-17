@@ -424,6 +424,34 @@ func (_c *UserCreate) SetNillableVipTierLocked(v *bool) *UserCreate {
 	return _c
 }
 
+// SetResellerPlanID sets the "reseller_plan_id" field.
+func (_c *UserCreate) SetResellerPlanID(v int64) *UserCreate {
+	_c.mutation.SetResellerPlanID(v)
+	return _c
+}
+
+// SetNillableResellerPlanID sets the "reseller_plan_id" field if the given value is not nil.
+func (_c *UserCreate) SetNillableResellerPlanID(v *int64) *UserCreate {
+	if v != nil {
+		_c.SetResellerPlanID(*v)
+	}
+	return _c
+}
+
+// SetResellerPlanExpiresAt sets the "reseller_plan_expires_at" field.
+func (_c *UserCreate) SetResellerPlanExpiresAt(v time.Time) *UserCreate {
+	_c.mutation.SetResellerPlanExpiresAt(v)
+	return _c
+}
+
+// SetNillableResellerPlanExpiresAt sets the "reseller_plan_expires_at" field if the given value is not nil.
+func (_c *UserCreate) SetNillableResellerPlanExpiresAt(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetResellerPlanExpiresAt(*v)
+	}
+	return _c
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_c *UserCreate) AddAPIKeyIDs(ids ...int64) *UserCreate {
 	_c.mutation.AddAPIKeyIDs(ids...)
@@ -978,6 +1006,14 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.VipTierLocked(); ok {
 		_spec.SetField(user.FieldVipTierLocked, field.TypeBool, value)
 		_node.VipTierLocked = value
+	}
+	if value, ok := _c.mutation.ResellerPlanID(); ok {
+		_spec.SetField(user.FieldResellerPlanID, field.TypeInt64, value)
+		_node.ResellerPlanID = &value
+	}
+	if value, ok := _c.mutation.ResellerPlanExpiresAt(); ok {
+		_spec.SetField(user.FieldResellerPlanExpiresAt, field.TypeTime, value)
+		_node.ResellerPlanExpiresAt = &value
 	}
 	if nodes := _c.mutation.APIKeysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -1681,6 +1717,48 @@ func (u *UserUpsert) UpdateVipTierLocked() *UserUpsert {
 	return u
 }
 
+// SetResellerPlanID sets the "reseller_plan_id" field.
+func (u *UserUpsert) SetResellerPlanID(v int64) *UserUpsert {
+	u.Set(user.FieldResellerPlanID, v)
+	return u
+}
+
+// UpdateResellerPlanID sets the "reseller_plan_id" field to the value that was provided on create.
+func (u *UserUpsert) UpdateResellerPlanID() *UserUpsert {
+	u.SetExcluded(user.FieldResellerPlanID)
+	return u
+}
+
+// AddResellerPlanID adds v to the "reseller_plan_id" field.
+func (u *UserUpsert) AddResellerPlanID(v int64) *UserUpsert {
+	u.Add(user.FieldResellerPlanID, v)
+	return u
+}
+
+// ClearResellerPlanID clears the value of the "reseller_plan_id" field.
+func (u *UserUpsert) ClearResellerPlanID() *UserUpsert {
+	u.SetNull(user.FieldResellerPlanID)
+	return u
+}
+
+// SetResellerPlanExpiresAt sets the "reseller_plan_expires_at" field.
+func (u *UserUpsert) SetResellerPlanExpiresAt(v time.Time) *UserUpsert {
+	u.Set(user.FieldResellerPlanExpiresAt, v)
+	return u
+}
+
+// UpdateResellerPlanExpiresAt sets the "reseller_plan_expires_at" field to the value that was provided on create.
+func (u *UserUpsert) UpdateResellerPlanExpiresAt() *UserUpsert {
+	u.SetExcluded(user.FieldResellerPlanExpiresAt)
+	return u
+}
+
+// ClearResellerPlanExpiresAt clears the value of the "reseller_plan_expires_at" field.
+func (u *UserUpsert) ClearResellerPlanExpiresAt() *UserUpsert {
+	u.SetNull(user.FieldResellerPlanExpiresAt)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -2234,6 +2312,55 @@ func (u *UserUpsertOne) SetVipTierLocked(v bool) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateVipTierLocked() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateVipTierLocked()
+	})
+}
+
+// SetResellerPlanID sets the "reseller_plan_id" field.
+func (u *UserUpsertOne) SetResellerPlanID(v int64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetResellerPlanID(v)
+	})
+}
+
+// AddResellerPlanID adds v to the "reseller_plan_id" field.
+func (u *UserUpsertOne) AddResellerPlanID(v int64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddResellerPlanID(v)
+	})
+}
+
+// UpdateResellerPlanID sets the "reseller_plan_id" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateResellerPlanID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateResellerPlanID()
+	})
+}
+
+// ClearResellerPlanID clears the value of the "reseller_plan_id" field.
+func (u *UserUpsertOne) ClearResellerPlanID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearResellerPlanID()
+	})
+}
+
+// SetResellerPlanExpiresAt sets the "reseller_plan_expires_at" field.
+func (u *UserUpsertOne) SetResellerPlanExpiresAt(v time.Time) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetResellerPlanExpiresAt(v)
+	})
+}
+
+// UpdateResellerPlanExpiresAt sets the "reseller_plan_expires_at" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateResellerPlanExpiresAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateResellerPlanExpiresAt()
+	})
+}
+
+// ClearResellerPlanExpiresAt clears the value of the "reseller_plan_expires_at" field.
+func (u *UserUpsertOne) ClearResellerPlanExpiresAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearResellerPlanExpiresAt()
 	})
 }
 
@@ -2956,6 +3083,55 @@ func (u *UserUpsertBulk) SetVipTierLocked(v bool) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateVipTierLocked() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateVipTierLocked()
+	})
+}
+
+// SetResellerPlanID sets the "reseller_plan_id" field.
+func (u *UserUpsertBulk) SetResellerPlanID(v int64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetResellerPlanID(v)
+	})
+}
+
+// AddResellerPlanID adds v to the "reseller_plan_id" field.
+func (u *UserUpsertBulk) AddResellerPlanID(v int64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddResellerPlanID(v)
+	})
+}
+
+// UpdateResellerPlanID sets the "reseller_plan_id" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateResellerPlanID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateResellerPlanID()
+	})
+}
+
+// ClearResellerPlanID clears the value of the "reseller_plan_id" field.
+func (u *UserUpsertBulk) ClearResellerPlanID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearResellerPlanID()
+	})
+}
+
+// SetResellerPlanExpiresAt sets the "reseller_plan_expires_at" field.
+func (u *UserUpsertBulk) SetResellerPlanExpiresAt(v time.Time) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetResellerPlanExpiresAt(v)
+	})
+}
+
+// UpdateResellerPlanExpiresAt sets the "reseller_plan_expires_at" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateResellerPlanExpiresAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateResellerPlanExpiresAt()
+	})
+}
+
+// ClearResellerPlanExpiresAt clears the value of the "reseller_plan_expires_at" field.
+func (u *UserUpsertBulk) ClearResellerPlanExpiresAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearResellerPlanExpiresAt()
 	})
 }
 

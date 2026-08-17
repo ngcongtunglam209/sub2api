@@ -414,6 +414,72 @@ export default {
       }
     },
 
+    // Reseller Plans
+    resellerPlans: {
+      title: 'Gói Đại Lý',
+      description: 'Các gói do quản trị viên chỉ định; mỗi gói cho phép người giữ tạo mã đổi thưởng bằng tín dụng của chính họ',
+      ladderHint: 'Gói cao hơn nên có giá cao hơn và đổi được nhiều mệnh giá hơn trên mỗi đô la tín dụng',
+      editTitle: 'Sửa Gói Đại Lý',
+      marginOf: 'Biên lợi nhuận {percent}%',
+      allGroups: 'Tất cả nhóm',
+      saved: 'Đã lưu gói đại lý',
+      saveFailed: 'Lưu gói đại lý thất bại',
+      loadFailed: 'Tải gói đại lý thất bại',
+      fields: {
+        level: 'Cấp Độ',
+        name: 'Tên',
+        price: 'Giá (USD)',
+        creditRate: 'Hệ Số Tín Dụng',
+        creditRateHint: '1.25 nghĩa là mỗi 1 USD tín dụng tạo ra mã có mệnh giá 1,25 USD',
+        concurrencyBonus: 'Số Luồng Cộng Thêm',
+        rpmLimit: 'Số yêu cầu mỗi phút',
+        rpmLimitHint: 'Giới hạn tốc độ yêu cầu của chính đại lý',
+        maxDomains: 'Số Tên Miền Tối Đa',
+        validityDays: 'Hiệu lực trong (ngày)',
+        validityDaysHint: 'Việc chỉ định kéo dài bao lâu trước khi hết hạn',
+        allowedGroups: 'Nhóm Được Phép',
+        allowedGroupsHint: 'Các nhóm mà gói này được tạo mã. Không chọn nhóm nào nghĩa là cho phép mọi nhóm.',
+        noGroups: 'Không có nhóm nào khả dụng',
+        enabled: 'Đã Bật',
+        enabledHint: 'Gói đã tắt vẫn giữ người dùng hiện tại nhưng không nhận thêm người mới'
+      }
+    },
+
+    // Reseller Domains
+    resellerDomains: {
+      title: 'Tên Miền Đại Lý',
+      description: 'Các tên miền bán hàng đã được duyệt cho đại lý',
+      hint: 'Đại lý chỉ được bán từ tên miền có trong danh sách này và đang bật',
+      create: 'Thêm Tên Miền',
+      createTitle: 'Thêm Tên Miền Đại Lý',
+      deleteTitle: 'Xóa Tên Miền Đại Lý',
+      deleteMessage: 'Xóa {domain}? Hãy tắt nó thay vì xóa nếu bạn có thể cần dùng lại.',
+      statusActive: 'Đang hoạt động',
+      statusDisabled: 'Đã tắt',
+      enableAction: 'Bật',
+      disableAction: 'Tắt',
+      saved: 'Đã thêm tên miền đại lý',
+      saveFailed: 'Thêm tên miền đại lý thất bại',
+      loadFailed: 'Tải tên miền đại lý thất bại',
+      deleted: 'Đã xóa tên miền đại lý',
+      deleteFailed: 'Xóa tên miền đại lý thất bại',
+      enabled: 'Đã bật tên miền đại lý',
+      disabled: 'Đã tắt tên miền đại lý',
+      statusFailed: 'Cập nhật trạng thái tên miền thất bại',
+      domainRequired: 'Hãy nhập tên miền',
+      userRequired: 'Hãy nhập ID người dùng của đại lý',
+      fields: {
+        domain: 'Tên Miền',
+        domainPlaceholder: 'shop.example.com',
+        domainHint: 'Chỉ nhập tên máy chủ — không có giao thức và đường dẫn',
+        userId: 'ID người dùng đại lý',
+        userIdHint: 'ID dạng số hiển thị trong trang Quản Lý Người Dùng',
+        notes: 'Ghi Chú',
+        status: 'Trạng Thái',
+        createdAt: 'Thời điểm thêm'
+      }
+    },
+
     // Promo Codes
     promo: {
       title: 'Quản Lý Mã Khuyến Mãi',

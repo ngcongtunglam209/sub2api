@@ -73,6 +73,10 @@ func (r *redeemRejectRepo) ListByUserPaginated(ctx context.Context, userID int64
 	panic("unexpected ListByUserPaginated call")
 }
 
+func (r *redeemRejectRepo) ListByCreator(ctx context.Context, userID int64, params pagination.PaginationParams) ([]RedeemCode, *pagination.PaginationResult, error) {
+	panic("unexpected ListByCreator call")
+}
+
 func (r *redeemRejectRepo) SumPositiveBalanceByUser(ctx context.Context, userID int64) (float64, error) {
 	panic("unexpected SumPositiveBalanceByUser call")
 }
