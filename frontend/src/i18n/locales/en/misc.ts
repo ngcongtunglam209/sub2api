@@ -81,7 +81,7 @@ export default {
     expiresOn: 'Valid until {date}',
     qualifyingSpend: 'Spend counted towards your tier',
     totalPaid: 'Total paid',
-    concurrency: 'Concurrency',
+    concurrency: 'Bonus concurrency',
     discountBadge: '{percent}% off usage',
     spendToNext: '{amount} more to reach {tier}',
     topTier: 'You are on the highest tier'

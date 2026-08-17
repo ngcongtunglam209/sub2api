@@ -377,14 +377,20 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 		// 查询失败或无 override 时留 nil，checkRPM 会回退到 DB 查询
 	}
 
-	// VIP tiers raise the concurrency ceiling. Resolved once per snapshot like
-	// the RPM override above, and applied as a floor rather than a replacement
-	// so an admin who hand-raised one user past their tier keeps that value.
+	// VIP tiers grant concurrency *on top of* whatever the user already holds.
+	// Resolved once per snapshot like the RPM override above.
+	//
+	// Additive rather than the max() this used to apply: `users.concurrency` is
+	// now sold as an add-on, and under max() a VIP whose tier granted more than
+	// they bought saw the purchase do nothing at all — they paid for a number
+	// that lost the comparison. Stacking keeps both levers meaningful, so the
+	// tier reads as a perk and the purchase as an increment.
+	//
 	// A lookup failure leaves the plain user limit — the tier perk goes
 	// missing, which is recoverable; denying the request would not be.
 	if s.vipBenefitRepo != nil && apiKey.UserID > 0 {
-		if tierConcurrency, err := s.vipBenefitRepo.GetVIPConcurrency(ctx, apiKey.UserID); err == nil && tierConcurrency > snapshot.User.Concurrency {
-			snapshot.User.Concurrency = tierConcurrency
+		if tierConcurrency, err := s.vipBenefitRepo.GetVIPConcurrency(ctx, apiKey.UserID); err == nil && tierConcurrency > 0 {
+			snapshot.User.Concurrency += tierConcurrency
 		}
 	}
 	if apiKey.Group != nil {

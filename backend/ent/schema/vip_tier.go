@@ -47,7 +47,10 @@ func (VIPTier) Fields() []ent.Field {
 		field.Float("rate_multiplier").
 			SchemaType(map[string]string{dialect.Postgres: "decimal(6,4)"}).
 			Default(1),
-		// 该等级的并发上限，覆盖 users.concurrency 默认值。
+		// 该等级额外赠送的并发数，累加到 users.concurrency 之上（而非覆盖）。
+		// users.concurrency 是可售卖的加购项，若此处取二者较大值，VIP 用户
+		// 买的并发会被等级数字吞掉、等于白付钱，因此改为相加。
+		// 注意：Positive() 意味着最小赠送为 1，没有“不送并发”的等级。
 		field.Int("concurrency").
 			Positive().
 			Default(5),

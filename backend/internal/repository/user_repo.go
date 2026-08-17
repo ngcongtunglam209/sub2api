@@ -878,8 +878,12 @@ func (r *userRepository) GetVIPRateMultiplier(ctx context.Context, userID int64)
 	return tier.RateMultiplier, nil
 }
 
-// GetVIPConcurrency returns the concurrency floor of the user's active tier,
+// GetVIPConcurrency returns the concurrency bonus of the user's active tier,
 // or 0 when they hold none.
+//
+// The caller adds this to `users.concurrency` rather than replacing it, so a
+// tier perk and a purchased add-on stack. 0 therefore means "no bonus", not
+// "no limit".
 func (r *userRepository) GetVIPConcurrency(ctx context.Context, userID int64) (int, error) {
 	tier, err := r.activeVIPTier(ctx, userID)
 	if err != nil || tier == nil || tier.Concurrency <= 0 {
