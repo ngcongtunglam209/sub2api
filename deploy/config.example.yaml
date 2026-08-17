@@ -789,6 +789,11 @@ token_refresh:
 # 仍有效近 90 天，不按 Host 拦截流量的话"停用"三个月内形同虚设。
 #
 # 漏填 canonical_hosts 会把自己关在门外，所以默认关闭。
+#
+# ⚠ 打开前先读 deploy/Caddyfile.reseller 顶部的前置条件，尤其是防火墙那一节：
+# 按需签发要求 80/443 对整个互联网开放，与「只放行 Cloudflare 网段」的加固
+# 不共存，且放行方式写错会静默切断容器出网、导致全部上游账号 502。
+# 那里也给了不需要碰防火墙的替代方案（分配本站子域名）。
 custom_domain:
   enabled: false
   # This deployment's own hostnames — panel and API domains alike.

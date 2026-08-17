@@ -21,6 +21,31 @@
 #   1. 后端 custom_domain.enabled = true，且 custom_domain.canonical_hosts
 #      列全本站自己的域名。漏一个，那个域名连自己都进不来。
 #   2. 分销商域名写入 reseller_domains 表且 status = 'active'。
+#   3. 分销商域名必须是 DNS-only（A 记录直指本机 IP），不能开 Cloudflare 代理。
+#      CNAME 到一个走代理的主机名拿不到证书，且失败信息只体现为 525。
+#   4. 80/443 必须对整个互联网开放。这条最容易被忽略，代价也最大——见下。
+#
+# ⚠ 防火墙：这套方案与「只放行 Cloudflare 网段」的加固不共存。ACME 的
+# tls-alpn-01 / http-01 都由 Let's Encrypt 从自己的机器直连 80/443 发起，被
+# 挡住的表现是签发反复超时（Timeout during connect），并自动降级到 staging CA。
+#
+# 放行时要按方向写，不要按端口写。DOCKER-USER 挂在 FORWARD 上，FORWARD 同时
+# 承载容器出网的流量，所以 `--dport 443 -j ACCEPT` 会连带放开入站；反过来，
+# 链尾若有针对 80/443 的 DROP，容器访问上游 API 的 SYN 也会被静默丢弃，
+# 全部账号一起 502（dial tcp ...:443: i/o timeout），排查时极易误判成上游故障。
+# 出网单独放行，入站才留给 Cloudflare 网段判断：
+#
+#     iptables -I DOCKER-USER 1 -o <WAN 网卡> -j ACCEPT
+#
+# 且必须做成开机自动执行的脚本。`-I` 不过重启，而 Docker 重建网络后
+# DOCKER-BRIDGE/DOCKER-CT/DOCKER-FORWARD 里的 per-bridge 规则若被外部
+# iptables-restore 冲掉，FORWARD 的 DROP 策略会让整站连接超时。
+#
+# 更省事的替代方案：不用分销商自己的域名，给他们本站的子域名
+# （reseller1.example.com）。已有的 *.example.com 通配证书直接覆盖，不需要
+# ACME、不需要 on_demand、不用碰防火墙，也保留 Cloudflare 代理与
+# Authenticated Origin Pulls。per-host 品牌化按 Host 头识别，子域名一样生效。
+# 代价仅是分销商用不了自己的域名。上线前先确认这个代价是否真的不可接受。
 #
 # 为什么主域名也走 on_demand：一个站点块只能有一份 encode 配置，拆成两块就会
 # 触发上面的策略检查。代价是主域名的证书签发/续期也要经过 ask 端点，因此
@@ -43,10 +68,11 @@
 	#
 	# 这里走 localhost 直连后端，不经过下面的站点块，因此块内对 /internal/*
 	# 的屏蔽不影响它。
+	# 只有 ask，没有 interval/burst：那两个选项已从 Caddy 移除，写上去 Caddy
+	# 直接拒绝启动（the on_demand_tls 'interval' option is no longer supported）。
+	# 签发频率的闸门因此完全落在 ask 端点上——白名单之外一律不签。
 	on_demand_tls {
 		ask http://localhost:8080/internal/tls-check
-		interval 2m
-		burst 5
 	}
 }
 
