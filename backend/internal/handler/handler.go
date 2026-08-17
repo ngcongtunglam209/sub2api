@@ -55,6 +55,7 @@ type Handlers struct {
 	Subscription   *SubscriptionHandler
 	Announcement   *AnnouncementHandler
 	ResellerDomain *ResellerDomainHandler
+	ResellerCode   *ResellerCodeHandler
 	// ResellerDomainService is carried alongside its handler because the host
 	// guard is middleware, not a route: it needs the same allowlist the ask
 	// endpoint consults, and reaching it through a handler would be worse.

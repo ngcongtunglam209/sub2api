@@ -37652,6 +37652,8 @@ type RedeemCodeMutation struct {
 	status           *string
 	used_at          *time.Time
 	notes            *string
+	created_by       *int64
+	addcreated_by    *int64
 	created_at       *time.Time
 	expires_at       *time.Time
 	validity_days    *int
@@ -38075,6 +38077,76 @@ func (m *RedeemCodeMutation) ResetNotes() {
 	delete(m.clearedFields, redeemcode.FieldNotes)
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (m *RedeemCodeMutation) SetCreatedBy(i int64) {
+	m.created_by = &i
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *RedeemCodeMutation) CreatedBy() (r int64, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the RedeemCode entity.
+// If the RedeemCode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RedeemCodeMutation) OldCreatedBy(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (m *RedeemCodeMutation) AddCreatedBy(i int64) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += i
+	} else {
+		m.addcreated_by = &i
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *RedeemCodeMutation) AddedCreatedBy() (r int64, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (m *RedeemCodeMutation) ClearCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	m.clearedFields[redeemcode.FieldCreatedBy] = struct{}{}
+}
+
+// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
+func (m *RedeemCodeMutation) CreatedByCleared() bool {
+	_, ok := m.clearedFields[redeemcode.FieldCreatedBy]
+	return ok
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *RedeemCodeMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	delete(m.clearedFields, redeemcode.FieldCreatedBy)
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *RedeemCodeMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -38366,7 +38438,7 @@ func (m *RedeemCodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RedeemCodeMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.code != nil {
 		fields = append(fields, redeemcode.FieldCode)
 	}
@@ -38387,6 +38459,9 @@ func (m *RedeemCodeMutation) Fields() []string {
 	}
 	if m.notes != nil {
 		fields = append(fields, redeemcode.FieldNotes)
+	}
+	if m.created_by != nil {
+		fields = append(fields, redeemcode.FieldCreatedBy)
 	}
 	if m.created_at != nil {
 		fields = append(fields, redeemcode.FieldCreatedAt)
@@ -38422,6 +38497,8 @@ func (m *RedeemCodeMutation) Field(name string) (ent.Value, bool) {
 		return m.UsedAt()
 	case redeemcode.FieldNotes:
 		return m.Notes()
+	case redeemcode.FieldCreatedBy:
+		return m.CreatedBy()
 	case redeemcode.FieldCreatedAt:
 		return m.CreatedAt()
 	case redeemcode.FieldExpiresAt:
@@ -38453,6 +38530,8 @@ func (m *RedeemCodeMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUsedAt(ctx)
 	case redeemcode.FieldNotes:
 		return m.OldNotes(ctx)
+	case redeemcode.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
 	case redeemcode.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case redeemcode.FieldExpiresAt:
@@ -38519,6 +38598,13 @@ func (m *RedeemCodeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetNotes(v)
 		return nil
+	case redeemcode.FieldCreatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
 	case redeemcode.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -38558,6 +38644,9 @@ func (m *RedeemCodeMutation) AddedFields() []string {
 	if m.addvalue != nil {
 		fields = append(fields, redeemcode.FieldValue)
 	}
+	if m.addcreated_by != nil {
+		fields = append(fields, redeemcode.FieldCreatedBy)
+	}
 	if m.addvalidity_days != nil {
 		fields = append(fields, redeemcode.FieldValidityDays)
 	}
@@ -38571,6 +38660,8 @@ func (m *RedeemCodeMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case redeemcode.FieldValue:
 		return m.AddedValue()
+	case redeemcode.FieldCreatedBy:
+		return m.AddedCreatedBy()
 	case redeemcode.FieldValidityDays:
 		return m.AddedValidityDays()
 	}
@@ -38588,6 +38679,13 @@ func (m *RedeemCodeMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddValue(v)
+		return nil
+	case redeemcode.FieldCreatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
 		return nil
 	case redeemcode.FieldValidityDays:
 		v, ok := value.(int)
@@ -38612,6 +38710,9 @@ func (m *RedeemCodeMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(redeemcode.FieldNotes) {
 		fields = append(fields, redeemcode.FieldNotes)
+	}
+	if m.FieldCleared(redeemcode.FieldCreatedBy) {
+		fields = append(fields, redeemcode.FieldCreatedBy)
 	}
 	if m.FieldCleared(redeemcode.FieldExpiresAt) {
 		fields = append(fields, redeemcode.FieldExpiresAt)
@@ -38641,6 +38742,9 @@ func (m *RedeemCodeMutation) ClearField(name string) error {
 		return nil
 	case redeemcode.FieldNotes:
 		m.ClearNotes()
+		return nil
+	case redeemcode.FieldCreatedBy:
+		m.ClearCreatedBy()
 		return nil
 	case redeemcode.FieldExpiresAt:
 		m.ClearExpiresAt()
@@ -38676,6 +38780,9 @@ func (m *RedeemCodeMutation) ResetField(name string) error {
 		return nil
 	case redeemcode.FieldNotes:
 		m.ResetNotes()
+		return nil
+	case redeemcode.FieldCreatedBy:
+		m.ResetCreatedBy()
 		return nil
 	case redeemcode.FieldCreatedAt:
 		m.ResetCreatedAt()

@@ -112,6 +112,15 @@ func RegisterUserRoutes(
 			usage.POST("/dashboard/api-keys-usage", h.Usage.DashboardAPIKeysUsage)
 		}
 
+		// 分销商：用自己的余额生成兑换码转售。
+		// 用户 id 取自会话而非请求体，否则可以让别人的余额买单。
+		if h.ResellerCode != nil {
+			reseller := authenticated.Group("/reseller")
+			{
+				reseller.POST("/codes", h.ResellerCode.GenerateCodes)
+			}
+		}
+
 		// 公告（用户可见）
 		announcements := authenticated.Group("/announcements")
 		{

@@ -59,6 +59,14 @@ func (RedeemCode) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			SchemaType(map[string]string{dialect.Postgres: "text"}),
+		// 生成该码的用户；NULL = 平台/管理员生成。
+		//
+		// 分销商用自己的余额生成码再转售，对账、停用后追查未售出的码、
+		// 分销商面板只列自己的码，都靠这一列。不设 edge：用户被删除后码
+		// 依然要能查到归属，级联清空反而毁掉审计线索。
+		field.Int64("created_by").
+			Optional().
+			Nillable(),
 		field.Time("created_at").
 			Immutable().
 			Default(time.Now).
