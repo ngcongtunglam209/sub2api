@@ -409,6 +409,72 @@ export default {
       }
     },
 
+    // 代理套餐
+    resellerPlans: {
+      title: '代理套餐',
+      description: '由管理员指派的套餐，持有者可用自己的额度生成兑换码',
+      ladderHint: '套餐等级越高，价格应越贵，每一美元额度能兑出的面值也应越多',
+      editTitle: '编辑代理套餐',
+      marginOf: '毛利 {percent}%',
+      allGroups: '全部分组',
+      saved: '代理套餐已保存',
+      saveFailed: '代理套餐保存失败',
+      loadFailed: '代理套餐加载失败',
+      fields: {
+        level: '等级序号',
+        name: '名称',
+        price: '价格（美元）',
+        creditRate: '额度倍率',
+        creditRateHint: '1.25 表示每 1 美元额度可生成 1.25 美元面值的兑换码',
+        concurrencyBonus: '并发加成',
+        rpmLimit: '每分钟请求数',
+        rpmLimitHint: '代理自身请求速率的上限',
+        maxDomains: '域名数量上限',
+        validityDays: '有效期（天）',
+        validityDaysHint: '该指派多少天后失效',
+        allowedGroups: '可用分组',
+        allowedGroupsHint: '该套餐可为哪些分组生成兑换码。一个都不选表示不限分组。',
+        noGroups: '暂无可用分组',
+        enabled: '启用',
+        enabledHint: '停用后已持有该套餐的用户保留到过期，新用户不再进入'
+      }
+    },
+
+    // 代理域名
+    resellerDomains: {
+      title: '代理域名',
+      description: '为代理开通的销售域名',
+      hint: '代理只能从这里列出且处于启用状态的域名销售',
+      create: '新增域名',
+      createTitle: '新增代理域名',
+      deleteTitle: '删除代理域名',
+      deleteMessage: '确定删除 {domain}？如果以后还可能用到，请改为停用。',
+      statusActive: '启用中',
+      statusDisabled: '已停用',
+      enableAction: '启用',
+      disableAction: '停用',
+      saved: '代理域名已添加',
+      saveFailed: '代理域名添加失败',
+      loadFailed: '代理域名加载失败',
+      deleted: '代理域名已删除',
+      deleteFailed: '代理域名删除失败',
+      enabled: '代理域名已启用',
+      disabled: '代理域名已停用',
+      statusFailed: '域名状态更新失败',
+      domainRequired: '请填写域名',
+      userRequired: '请填写代理的用户 ID',
+      fields: {
+        domain: '域名',
+        domainPlaceholder: 'shop.example.com',
+        domainHint: '只填主机名，不带协议和路径',
+        userId: '代理用户 ID',
+        userIdHint: '用户管理页中显示的数字 ID',
+        notes: '备注',
+        status: '状态',
+        createdAt: '添加时间'
+      }
+    },
+
     // Promo Codes
     promo: {
       title: '优惠码管理',

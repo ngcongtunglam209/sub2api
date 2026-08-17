@@ -14,6 +14,10 @@ type stubResellerDomainRepo struct {
 	domains []string
 	err     error
 	calls   int
+
+	statusCalls  int
+	lastStatusID int64
+	lastStatus   string
 }
 
 func (s *stubResellerDomainRepo) ListActiveDomains(context.Context) ([]string, error) {
@@ -45,8 +49,22 @@ func (s *stubResellerDomainRepo) ListByUser(context.Context, int64) ([]*Reseller
 	return nil, nil
 }
 func (s *stubResellerDomainRepo) List(context.Context) ([]*ResellerDomain, error) { return nil, nil }
-func (s *stubResellerDomainRepo) SetStatus(context.Context, int64, string) error  { return nil }
 func (s *stubResellerDomainRepo) Delete(context.Context, int64) error             { return nil }
+
+func (s *stubResellerDomainRepo) SetStatus(_ context.Context, id int64, status string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.statusCalls++
+	s.lastStatusID = id
+	s.lastStatus = status
+	return nil
+}
+
+func (s *stubResellerDomainRepo) statusState() (int, int64, string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.statusCalls, s.lastStatusID, s.lastStatus
+}
 
 // The Host header is client-controlled, so every spelling of the same name has
 // to collapse to one key — otherwise an attacker picks the one that misses the
@@ -150,6 +168,48 @@ func TestValidateResellerDomain(t *testing.T) {
 	} {
 		t.Run(bad, func(t *testing.T) {
 			require.Error(t, validateResellerDomain(bad))
+		})
+	}
+}
+
+// SetStatus is the only lever the admin API has over an existing domain, and
+// the status it writes decides whether the host is served at all. Anything
+// outside the two known values has to be refused before it reaches the column:
+// a typo like "disable" would store a status the allowlist query never matches,
+// leaving the domain silently dark with nothing to explain it.
+func TestSetStatusAcceptsOnlyKnownValues(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		in       string
+		wantOK   bool
+		wantSent string
+	}{
+		{name: "active", in: "active", wantOK: true, wantSent: "active"},
+		{name: "disabled", in: "disabled", wantOK: true, wantSent: "disabled"},
+		{name: "uppercase is normalized", in: "ACTIVE", wantOK: true, wantSent: "active"},
+		{name: "surrounding space is trimmed", in: "  disabled  ", wantOK: true, wantSent: "disabled"},
+		{name: "empty", in: ""},
+		{name: "near miss", in: "disable"},
+		{name: "unknown word", in: "paused"},
+		{name: "sql-ish", in: "active' OR '1'='1"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := &stubResellerDomainRepo{}
+			svc := NewResellerDomainService(repo, nil)
+
+			err := svc.SetStatus(context.Background(), 7, tc.in)
+			calls, id, sent := repo.statusState()
+
+			if !tc.wantOK {
+				require.Error(t, err)
+				require.Zero(t, calls, "a rejected status must never reach the database")
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, 1, calls)
+			require.Equal(t, int64(7), id)
+			require.Equal(t, tc.wantSent, sent)
 		})
 	}
 }

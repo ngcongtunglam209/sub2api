@@ -165,6 +165,37 @@ func (r *redeemCodeRepository) ListWithFilters(ctx context.Context, params pagin
 	return outCodes, paginationResultFromTotal(int64(total), params), nil
 }
 
+// ListByCreator returns the codes a reseller minted, and only those.
+//
+// The created_by filter is the first thing in the query and there is no way to
+// widen it from the outside: no filter argument, no "all" sentinel. A reseller
+// listing their own stock must never be one missing WHERE clause away from
+// reading every other reseller's unsold codes, which are bearer instruments —
+// so the scope is a property of this method, not of how a handler calls it.
+func (r *redeemCodeRepository) ListByCreator(ctx context.Context, userID int64, params pagination.PaginationParams) ([]service.RedeemCode, *pagination.PaginationResult, error) {
+	q := r.client.RedeemCode.Query().Where(redeemcode.CreatedByEQ(userID))
+
+	total, err := q.Count(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	codesQuery := q.
+		WithGroup().
+		Offset(params.Offset()).
+		Limit(params.Limit())
+	for _, order := range redeemCodeListOrder(params) {
+		codesQuery = codesQuery.Order(order)
+	}
+
+	codes, err := codesQuery.All(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return redeemCodeEntitiesToService(codes), paginationResultFromTotal(int64(total), params), nil
+}
+
 func redeemCodeListOrder(params pagination.PaginationParams) []func(*entsql.Selector) {
 	sortBy := strings.ToLower(strings.TrimSpace(params.SortBy))
 	sortOrder := params.NormalizedSortOrder(pagination.SortOrderDesc)
@@ -425,6 +456,7 @@ func redeemCodeEntityToService(m *dbent.RedeemCode) *service.RedeemCode {
 		ExpiresAt:    m.ExpiresAt,
 		GroupID:      m.GroupID,
 		ValidityDays: m.ValidityDays,
+		CreatedBy:    m.CreatedBy,
 	}
 	if m.Edges.User != nil {
 		out.User = userEntityToService(m.Edges.User)

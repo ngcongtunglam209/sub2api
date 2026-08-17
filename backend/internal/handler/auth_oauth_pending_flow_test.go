@@ -3014,6 +3014,10 @@ func (r *oauthPendingFlowRedeemCodeRepo) ListByUserPaginated(context.Context, in
 	panic("unexpected ListByUserPaginated call")
 }
 
+func (r *oauthPendingFlowRedeemCodeRepo) ListByCreator(context.Context, int64, pagination.PaginationParams) ([]service.RedeemCode, *pagination.PaginationResult, error) {
+	panic("unexpected ListByCreator call")
+}
+
 func (r *oauthPendingFlowRedeemCodeRepo) SumPositiveBalanceByUser(context.Context, int64) (float64, error) {
 	panic("unexpected SumPositiveBalanceByUser call")
 }

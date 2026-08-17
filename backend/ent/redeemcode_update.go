@@ -153,6 +153,33 @@ func (_u *RedeemCodeUpdate) ClearNotes() *RedeemCodeUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *RedeemCodeUpdate) SetCreatedBy(v int64) *RedeemCodeUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *RedeemCodeUpdate) SetNillableCreatedBy(v *int64) *RedeemCodeUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *RedeemCodeUpdate) AddCreatedBy(v int64) *RedeemCodeUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *RedeemCodeUpdate) ClearCreatedBy() *RedeemCodeUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetExpiresAt sets the "expires_at" field.
 func (_u *RedeemCodeUpdate) SetExpiresAt(v time.Time) *RedeemCodeUpdate {
 	_u.mutation.SetExpiresAt(v)
@@ -340,6 +367,15 @@ func (_u *RedeemCodeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _u.mutation.NotesCleared() {
 		_spec.ClearField(redeemcode.FieldNotes, field.TypeString)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(redeemcode.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(redeemcode.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(redeemcode.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(redeemcode.FieldExpiresAt, field.TypeTime, value)
@@ -551,6 +587,33 @@ func (_u *RedeemCodeUpdateOne) SetNillableNotes(v *string) *RedeemCodeUpdateOne 
 // ClearNotes clears the value of the "notes" field.
 func (_u *RedeemCodeUpdateOne) ClearNotes() *RedeemCodeUpdateOne {
 	_u.mutation.ClearNotes()
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *RedeemCodeUpdateOne) SetCreatedBy(v int64) *RedeemCodeUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *RedeemCodeUpdateOne) SetNillableCreatedBy(v *int64) *RedeemCodeUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *RedeemCodeUpdateOne) AddCreatedBy(v int64) *RedeemCodeUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *RedeemCodeUpdateOne) ClearCreatedBy() *RedeemCodeUpdateOne {
+	_u.mutation.ClearCreatedBy()
 	return _u
 }
 
@@ -771,6 +834,15 @@ func (_u *RedeemCodeUpdateOne) sqlSave(ctx context.Context) (_node *RedeemCode, 
 	}
 	if _u.mutation.NotesCleared() {
 		_spec.ClearField(redeemcode.FieldNotes, field.TypeString)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(redeemcode.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(redeemcode.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(redeemcode.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(redeemcode.FieldExpiresAt, field.TypeTime, value)

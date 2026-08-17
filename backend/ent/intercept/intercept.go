@@ -37,6 +37,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/resellerdomain"
+	"github.com/Wei-Shaw/sub2api/ent/resellerplan"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
 	"github.com/Wei-Shaw/sub2api/ent/subscriptionplan"
@@ -864,6 +865,33 @@ func (f TraverseResellerDomain) Traverse(ctx context.Context, q ent.Query) error
 	return fmt.Errorf("unexpected query type %T. expect *ent.ResellerDomainQuery", q)
 }
 
+// The ResellerPlanFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ResellerPlanFunc func(context.Context, *ent.ResellerPlanQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f ResellerPlanFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.ResellerPlanQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.ResellerPlanQuery", q)
+}
+
+// The TraverseResellerPlan type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseResellerPlan func(context.Context, *ent.ResellerPlanQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseResellerPlan) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseResellerPlan) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ResellerPlanQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.ResellerPlanQuery", q)
+}
+
 // The SecuritySecretFunc type is an adapter to allow the use of ordinary function as a Querier.
 type SecuritySecretFunc func(context.Context, *ent.SecuritySecretQuery) (ent.Value, error)
 
@@ -1274,6 +1302,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.RedeemCodeQuery, predicate.RedeemCode, redeemcode.OrderOption]{typ: ent.TypeRedeemCode, tq: q}, nil
 	case *ent.ResellerDomainQuery:
 		return &query[*ent.ResellerDomainQuery, predicate.ResellerDomain, resellerdomain.OrderOption]{typ: ent.TypeResellerDomain, tq: q}, nil
+	case *ent.ResellerPlanQuery:
+		return &query[*ent.ResellerPlanQuery, predicate.ResellerPlan, resellerplan.OrderOption]{typ: ent.TypeResellerPlan, tq: q}, nil
 	case *ent.SecuritySecretQuery:
 		return &query[*ent.SecuritySecretQuery, predicate.SecuritySecret, securitysecret.OrderOption]{typ: ent.TypeSecuritySecret, tq: q}, nil
 	case *ent.SettingQuery:

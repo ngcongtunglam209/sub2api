@@ -393,6 +393,23 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 			snapshot.User.Concurrency += tierConcurrency
 		}
 	}
+
+	// A reseller plan stacks on top of that again, for the same reason: it is a
+	// separate thing they bought, and swallowing one perk into another is how a
+	// customer ends up paying twice for one number.
+	//
+	// Expired or disabled plans grant nothing — `Active` decides, not the mere
+	// presence of a row — so a lapsed tier stops conferring the instant it
+	// lapses rather than at the next cache refresh of some other subsystem.
+	//
+	// Same failure posture as above: a lookup error leaves the plain limit.
+	if s.resellerPlanResolver != nil && apiKey.UserID > 0 {
+		if assignment, err := s.resellerPlanResolver.ResolveForUser(ctx, apiKey.UserID); err == nil && assignment.Active(time.Now()) {
+			if bonus := assignment.Plan.ConcurrencyBonus; bonus > 0 {
+				snapshot.User.Concurrency += bonus
+			}
+		}
+	}
 	if apiKey.Group != nil {
 		snapshot.Group = &APIKeyAuthGroupSnapshot{
 			ID:                              apiKey.Group.ID,
