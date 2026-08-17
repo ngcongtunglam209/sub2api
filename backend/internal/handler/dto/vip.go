@@ -8,12 +8,12 @@ import (
 
 // VIPTier is the wire shape of a configured tier.
 type VIPTier struct {
-	ID             int64     `json:"id"`
-	Level          int       `json:"level"`
-	Name           string    `json:"name"`
-	MinSpendUSD    float64   `json:"min_spend_usd"`
-	RateMultiplier float64   `json:"rate_multiplier"`
-	Concurrency    int       `json:"concurrency"`
+	ID             int64   `json:"id"`
+	Level          int     `json:"level"`
+	Name           string  `json:"name"`
+	MinSpendUSD    float64 `json:"min_spend_usd"`
+	RateMultiplier float64 `json:"rate_multiplier"`
+	Concurrency    int     `json:"concurrency"`
 	// RPMLimit is the extra requests per minute the tier grants, added to the
 	// user's own limit. 0 means the tier grants none.
 	RPMLimit int `json:"rpm_limit"`

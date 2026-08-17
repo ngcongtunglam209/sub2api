@@ -65,11 +65,6 @@ type VIPBenefits struct {
 	UnlimitedRPM         bool
 }
 
-// Empty reports whether the tier grants nothing, so callers can skip the work.
-func (b VIPBenefits) Empty() bool {
-	return b.Concurrency <= 0 && b.RPM <= 0 && !b.UnlimitedConcurrency && !b.UnlimitedRPM
-}
-
 // VIPStatus is what a user sees about their own standing.
 type VIPStatus struct {
 	Tier            *VIPTier
@@ -121,19 +116,6 @@ func vipTierFromEnt(t *dbent.VIPTier) *VIPTier {
 		Enabled:              t.Enabled,
 		CreatedAt:            t.CreatedAt,
 		UpdatedAt:            t.UpdatedAt,
-	}
-}
-
-// Benefits reduces a tier to what the auth snapshot needs from it.
-func (t *VIPTier) Benefits() VIPBenefits {
-	if t == nil {
-		return VIPBenefits{}
-	}
-	return VIPBenefits{
-		Concurrency:          t.Concurrency,
-		RPM:                  t.RPMLimit,
-		UnlimitedConcurrency: t.UnlimitedConcurrency,
-		UnlimitedRPM:         t.UnlimitedRPM,
 	}
 }
 
