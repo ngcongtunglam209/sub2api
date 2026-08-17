@@ -177,6 +177,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	resellerPlanRepository := repository.NewResellerPlanRepository(client)
 	resellerPlanService := service.NewResellerPlanService(resellerPlanRepository)
 	resellerDomainService := service.ProvideResellerDomainService(resellerDomainRepository, resellerPlanService, configConfig)
+	apiKeyService.SetResellerPlanResolver(resellerPlanService)
 	resellerDomainHandler := handler.NewResellerDomainHandler(resellerDomainService)
 	resellerCodeRepository := repository.NewResellerCodeRepository(client)
 	resellerCodeHandler := handler.NewResellerCodeHandler(redeemService, resellerPlanService, resellerCodeRepository)
