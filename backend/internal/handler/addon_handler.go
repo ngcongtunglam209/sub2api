@@ -93,6 +93,26 @@ func (h *AddonHandler) Purchase(c *gin.Context) {
 // holding an active tier already is refused — see
 // AddonService.PurchaseResellerPlan for why that one is a money bug rather
 // than an inconvenience.
+// ListResellerPlans returns the tiers on sale.
+// GET /api/v1/reseller-plans
+//
+// Separate from the admin listing on purpose: this one hides withdrawn tiers,
+// and it is reachable by any signed-in user because the store has to show what
+// is for sale before anyone holds a plan.
+func (h *AddonHandler) ListResellerPlans(c *gin.Context) {
+	plans, err := h.addonService.ListPurchasablePlans(c.Request.Context())
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	items := make([]*dto.ResellerPlan, 0, len(plans))
+	for _, plan := range plans {
+		items = append(items, dto.ResellerPlanFromService(plan))
+	}
+	response.Success(c, items)
+}
+
 func (h *AddonHandler) PurchaseResellerPlan(c *gin.Context) {
 	subject, ok := middleware2.GetAuthSubjectFromContext(c)
 	if !ok {

@@ -297,3 +297,27 @@ func addonCapExceeded(kind AddonKind, limit int) error {
 	return infraerrors.BadRequest("ADDON_CAP_EXCEEDED",
 		fmt.Sprintf("you may hold at most %d %s in total", limit, kind))
 }
+
+// ListPurchasablePlans returns the tiers a user may buy right now.
+//
+// Disabled tiers are filtered here rather than in the repository because the
+// admin screen still has to see them: a tier withdrawn from sale needs editing,
+// and its existing holders need it resolvable.
+func (s *AddonService) ListPurchasablePlans(ctx context.Context) ([]*ResellerPlan, error) {
+	if s == nil || s.planService == nil {
+		return []*ResellerPlan{}, nil
+	}
+
+	plans, err := s.planService.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	purchasable := make([]*ResellerPlan, 0, len(plans))
+	for _, plan := range plans {
+		if plan != nil && plan.Enabled {
+			purchasable = append(purchasable, plan)
+		}
+	}
+	return purchasable, nil
+}

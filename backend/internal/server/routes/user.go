@@ -137,6 +137,9 @@ func RegisterUserRoutes(
 			}
 			// 套餐购买挂在 /reseller-plans 下而不是 /addons 下：变的是套餐
 			// 归属，与并发额度不是一类东西，路径按被改的对象走。
+			// 商店要先列出在售套餐，用户此时还没有任何套餐，所以这条是只读的
+			// 公开列表（仍需登录），与管理端的列表分开：这里隐藏已下架的档位。
+			authenticated.GET("/reseller-plans", h.Addon.ListResellerPlans)
 			authenticated.POST("/reseller-plans/:id/purchase", h.Addon.PurchaseResellerPlan)
 		}
 

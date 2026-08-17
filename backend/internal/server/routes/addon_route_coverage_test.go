@@ -53,6 +53,10 @@ func TestAddonUserRoutesAreRegistered(t *testing.T) {
 	requireRoutes(t, registeredRoutes(router), []string{
 		"GET /api/v1/addons",
 		"POST /api/v1/addons/purchase",
+		// The store lists tiers before anyone holds one, so this read has to
+		// exist separately from the admin listing. Its absence is what shipped
+		// a store page whose first request 404'd.
+		"GET /api/v1/reseller-plans",
 		"POST /api/v1/reseller-plans/:id/purchase",
 	}, "add-on store routes must stay registered")
 }
