@@ -8,6 +8,15 @@
 # deploy/test-caddyfile-cache.sh 约束（只允许一个 encode 块、禁止 import），
 # 所以这里是整份拷贝而不是抽 snippet 复用。改动其中一份时请同步另一份。
 #
+# ⚠ 上游地址：本文件按「Caddy 与后端同机」写成 localhost:8080，与
+# deploy/Caddyfile 一致。用 docker-compose 部署时两处都要改成服务名
+# sub2api:8080——Caddy 在自己的容器里，localhost 是它自己，不是后端：
+#
+#     sed -i 's|localhost:8080|sub2api:8080|g' deploy/Caddyfile.reseller
+#
+# 共两处：全局 on_demand_tls 的 ask，以及站点块里的 reverse_proxy。
+# 漏改 ask 会让所有陌生域名拿不到证书，且失败得很安静。
+#
 # 前置条件：
 #   1. 后端 custom_domain.enabled = true，且 custom_domain.canonical_hosts
 #      列全本站自己的域名。漏一个，那个域名连自己都进不来。
