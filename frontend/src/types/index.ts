@@ -444,12 +444,30 @@ export interface ResellerDomain {
   status: ResellerDomainStatus
   notes: string
   created_at: string
+  /**
+   * Per-host branding. `null` and `''` mean the same thing here — no override,
+   * so the host serves the platform's own branding.
+   */
+  site_name?: string | null
+  site_logo?: string | null
+  site_subtitle?: string | null
 }
 
 export interface CreateResellerDomainRequest {
   domain: string
   user_id: number
   notes?: string
+}
+
+/**
+ * A partial update: an omitted field is left as it was, and an empty string
+ * clears that branding override rather than setting it to an empty name.
+ */
+export interface UpdateResellerDomainRequest {
+  status?: ResellerDomainStatus
+  site_name?: string
+  site_logo?: string
+  site_subtitle?: string
 }
 
 /** What `GET /reseller/plan` returns; null when the user holds no plan. */

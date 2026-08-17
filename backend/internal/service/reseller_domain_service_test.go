@@ -10,24 +10,50 @@ import (
 )
 
 type stubResellerDomainRepo struct {
-	mu      sync.Mutex
+	mu sync.Mutex
+	// domains seeds hostnames with no branding override; rows seeds whole
+	// snapshot rows when the test cares about the branding they carry.
 	domains []string
+	rows    []ActiveResellerDomain
 	err     error
 	calls   int
+
+	brandingCalls  int
+	lastBrandingID int64
+	lastBranding   ResellerDomainBrandingUpdate
 
 	statusCalls  int
 	lastStatusID int64
 	lastStatus   string
 }
 
-func (s *stubResellerDomainRepo) ListActiveDomains(context.Context) ([]string, error) {
+func (s *stubResellerDomainRepo) ListActiveDomains(context.Context) ([]ActiveResellerDomain, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.calls++
 	if s.err != nil {
 		return nil, s.err
 	}
-	return append([]string(nil), s.domains...), nil
+	out := append([]ActiveResellerDomain(nil), s.rows...)
+	for i, d := range s.domains {
+		out = append(out, ActiveResellerDomain{ID: int64(i + 1), Domain: d})
+	}
+	return out, nil
+}
+
+func (s *stubResellerDomainRepo) UpdateBranding(_ context.Context, id int64, update ResellerDomainBrandingUpdate) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.brandingCalls++
+	s.lastBrandingID = id
+	s.lastBranding = update
+	return nil
+}
+
+func (s *stubResellerDomainRepo) brandingState() (int, int64, ResellerDomainBrandingUpdate) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.brandingCalls, s.lastBrandingID, s.lastBranding
 }
 
 func (s *stubResellerDomainRepo) callCount() int {

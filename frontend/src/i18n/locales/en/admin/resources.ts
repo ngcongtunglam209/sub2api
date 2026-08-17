@@ -477,7 +477,29 @@ export default {
         userIdHint: 'The numeric ID shown in User Management',
         notes: 'Notes',
         status: 'Status',
+        branding: 'Branding',
         createdAt: 'Added at'
+      },
+      branding: {
+        editAction: 'Branding',
+        title: 'Branding for {domain}',
+        intro:
+          'What this hostname shows its visitors. Leave a field blank and it inherits the platform branding.',
+        overrideBadge: 'White-labelled',
+        inheritBadge: 'Inherits',
+        inheritPlaceholder: 'Inherits the platform branding',
+        siteName: 'Site name',
+        siteNameHint: 'Replaces the platform name in the header and the browser tab.',
+        siteSubtitle: 'Subtitle',
+        siteSubtitleHint: 'The line shown under the site name on the landing page.',
+        siteLogo: 'Logo URL',
+        siteLogoPlaceholder: 'https://cdn.example.com/logo.svg',
+        siteLogoHint: 'An absolute https:// URL, a site-relative /path, or a data:image URL.',
+        logoPreview: 'Preview',
+        logoInvalid: 'Not a usable image URL — use https://, a /path, or a data:image URL.',
+        logoBroken: 'This URL did not load an image. Check it before the reseller does.',
+        saved: 'Branding updated',
+        saveFailed: 'Failed to update branding'
       }
     },
 

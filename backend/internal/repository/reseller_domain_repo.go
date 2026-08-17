@@ -17,21 +17,82 @@ func NewResellerDomainRepository(client *dbent.Client) service.ResellerDomainRep
 	return &resellerDomainRepository{client: client}
 }
 
-// ListActiveDomains returns just the hostname column.
+// ListActiveDomains returns the hostname, its row id and its branding override.
 //
-// Only the strings are selected: the caller builds a set for membership tests
-// and never reads another field, so pulling whole rows on every cache refresh
-// would be waste on the one query that sits in front of the request path.
-func (r *resellerDomainRepository) ListActiveDomains(ctx context.Context) ([]string, error) {
+// Still an explicit column list rather than whole rows: notes and timestamps
+// are never read on the request path, and this is the one query that sits in
+// front of it. The branding columns are here because the caller renders them on
+// the same request it uses the hostname to admit — fetching them separately
+// would be a second round trip for a row already in memory.
+func (r *resellerDomainRepository) ListActiveDomains(ctx context.Context) ([]service.ActiveResellerDomain, error) {
 	client := clientFromContext(ctx, r.client)
-	domains, err := client.ResellerDomain.Query().
+	rows, err := client.ResellerDomain.Query().
 		Where(resellerdomain.StatusEQ(service.ResellerDomainStatusActive)).
-		Select(resellerdomain.FieldDomain).
-		Strings(ctx)
+		Select(
+			resellerdomain.FieldID,
+			resellerdomain.FieldDomain,
+			resellerdomain.FieldSiteName,
+			resellerdomain.FieldSiteLogo,
+			resellerdomain.FieldSiteSubtitle,
+		).
+		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list active reseller domains: %w", err)
 	}
-	return domains, nil
+
+	out := make([]service.ActiveResellerDomain, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, service.ActiveResellerDomain{
+			ID:           row.ID,
+			Domain:       row.Domain,
+			SiteName:     row.SiteName,
+			SiteLogo:     row.SiteLogo,
+			SiteSubtitle: row.SiteSubtitle,
+		})
+	}
+	return out, nil
+}
+
+// UpdateBranding writes only the fields the caller addressed.
+//
+// An empty value clears the column to NULL rather than storing "": NULL and ""
+// mean the same thing to every reader — "use the global setting" — and keeping
+// one spelling of "unset" in the table keeps that equivalence from having to be
+// rediscovered by every future query.
+func (r *resellerDomainRepository) UpdateBranding(ctx context.Context, id int64, update service.ResellerDomainBrandingUpdate) error {
+	if update.IsEmpty() {
+		return nil
+	}
+
+	client := clientFromContext(ctx, r.client)
+	builder := client.ResellerDomain.UpdateOneID(id)
+
+	if update.SiteName != nil {
+		if *update.SiteName == "" {
+			builder = builder.ClearSiteName()
+		} else {
+			builder = builder.SetSiteName(*update.SiteName)
+		}
+	}
+	if update.SiteLogo != nil {
+		if *update.SiteLogo == "" {
+			builder = builder.ClearSiteLogo()
+		} else {
+			builder = builder.SetSiteLogo(*update.SiteLogo)
+		}
+	}
+	if update.SiteSubtitle != nil {
+		if *update.SiteSubtitle == "" {
+			builder = builder.ClearSiteSubtitle()
+		} else {
+			builder = builder.SetSiteSubtitle(*update.SiteSubtitle)
+		}
+	}
+
+	if err := builder.Exec(ctx); err != nil {
+		return fmt.Errorf("update reseller domain %d branding: %w", id, err)
+	}
+	return nil
 }
 
 func (r *resellerDomainRepository) Create(ctx context.Context, domain *service.ResellerDomain) (*service.ResellerDomain, error) {
@@ -92,13 +153,16 @@ func resellerDomainEntityToService(row *dbent.ResellerDomain) *service.ResellerD
 		return nil
 	}
 	return &service.ResellerDomain{
-		ID:        row.ID,
-		Domain:    row.Domain,
-		UserID:    row.UserID,
-		Status:    row.Status,
-		Notes:     row.Notes,
-		CreatedAt: row.CreatedAt,
-		UpdatedAt: row.UpdatedAt,
+		ID:           row.ID,
+		Domain:       row.Domain,
+		UserID:       row.UserID,
+		Status:       row.Status,
+		Notes:        row.Notes,
+		SiteName:     row.SiteName,
+		SiteLogo:     row.SiteLogo,
+		SiteSubtitle: row.SiteSubtitle,
+		CreatedAt:    row.CreatedAt,
+		UpdatedAt:    row.UpdatedAt,
 	}
 }
 

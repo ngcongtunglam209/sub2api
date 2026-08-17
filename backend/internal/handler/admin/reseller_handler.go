@@ -68,11 +68,28 @@ type CreateResellerDomainRequest struct {
 	Notes  string `json:"notes"`
 }
 
-// SetResellerDomainStatusRequest switches a domain on or off. Disabled rather
-// than deleted is the normal lever: the row keeps its certificate and can be
-// switched back, and it still counts against the owner's quota.
-type SetResellerDomainStatusRequest struct {
-	Status string `json:"status" binding:"required,oneof=active disabled"`
+// UpdateResellerDomainRequest edits one domain: its status, its branding, or
+// both in one request.
+//
+// Every field is a pointer because every field is independently optional.
+// Status keeps its old meaning — omitted leaves the domain on or off as it was
+// — and the three branding fields distinguish "leave it alone" (absent) from
+// "clear the override" (present and empty), which is the only way an operator
+// can put a domain back on the deployment's own branding.
+type UpdateResellerDomainRequest struct {
+	Status *string `json:"status" binding:"omitempty,oneof=active disabled"`
+
+	SiteName     *string `json:"site_name"`
+	SiteLogo     *string `json:"site_logo"`
+	SiteSubtitle *string `json:"site_subtitle"`
+}
+
+func (r UpdateResellerDomainRequest) brandingUpdate() service.ResellerDomainBrandingUpdate {
+	return service.ResellerDomainBrandingUpdate{
+		SiteName:     r.SiteName,
+		SiteLogo:     r.SiteLogo,
+		SiteSubtitle: r.SiteSubtitle,
+	}
 }
 
 // ListPlans handles GET /api/v1/admin/reseller-plans
@@ -187,23 +204,43 @@ func (h *ResellerHandler) CreateDomain(c *gin.Context) {
 }
 
 // SetDomainStatus handles PATCH /api/v1/admin/reseller-domains/:id
+//
+// One endpoint for status and branding because they are one row and one
+// operator action: a domain is switched on and named in the same sitting.
 func (h *ResellerHandler) SetDomainStatus(c *gin.Context) {
 	domainID, ok := parseResellerID(c, "Invalid reseller domain ID")
 	if !ok {
 		return
 	}
 
-	var req SetResellerDomainStatusRequest
+	var req UpdateResellerDomainRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request: "+err.Error())
 		return
 	}
 
-	if err := h.domainService.SetStatus(c.Request.Context(), domainID, req.Status); err != nil {
+	update := req.brandingUpdate()
+	if req.Status == nil && update.IsEmpty() {
+		response.BadRequest(c, "Invalid request: nothing to update")
+		return
+	}
+
+	// Branding first, status second. If the branding is rejected the domain's
+	// on/off state has not moved, so the operator retries one request instead
+	// of discovering a half-applied edit.
+	if err := h.domainService.UpdateBranding(c.Request.Context(), domainID, update); err != nil {
 		response.ErrorFrom(c, err)
 		return
 	}
-	response.Success(c, gin.H{"message": "Reseller domain status updated successfully"})
+
+	if req.Status != nil {
+		if err := h.domainService.SetStatus(c.Request.Context(), domainID, *req.Status); err != nil {
+			response.ErrorFrom(c, err)
+			return
+		}
+	}
+
+	response.Success(c, gin.H{"message": "Reseller domain updated successfully"})
 }
 
 // DeleteDomain handles DELETE /api/v1/admin/reseller-domains/:id

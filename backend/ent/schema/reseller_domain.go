@@ -59,6 +59,27 @@ func (ResellerDomain) Fields() []ent.Field {
 		field.String("notes").
 			Default("").
 			SchemaType(map[string]string{dialect.Postgres: "text"}),
+
+		// site_name / site_logo / site_subtitle: 该域名下的品牌覆盖。
+		//
+		// 三个字段都可空，且**逐字段**回退到全站设置：分销商通常只想换个名字
+		// 和 logo，副标题照抄本站的即可。空字符串与 NULL 同义——都表示"用全站
+		// 的"，而不是"显示空白"。管理端把空串当作清除覆盖，正是靠这一点。
+		field.String("site_name").
+			MaxLen(100).
+			Optional().
+			Default(""),
+
+		// 长度按 data: URI 放宽：logo 允许内联小图，和全站设置的口径一致。
+		field.String("site_logo").
+			Optional().
+			Default("").
+			SchemaType(map[string]string{dialect.Postgres: "text"}),
+
+		field.String("site_subtitle").
+			MaxLen(200).
+			Optional().
+			Default(""),
 	}
 }
 

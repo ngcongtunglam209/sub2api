@@ -13,6 +13,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Wei-Shaw/sub2api/internal/pkg/branding"
 	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -226,7 +227,7 @@ func TestFrontendServer_InjectSettings(t *testing.T) {
 		require.NoError(t, err)
 
 		settingsJSON := []byte(`{"test":"data"}`)
-		result := server.injectSettings(settingsJSON)
+		result := renderIndexHTML(server.baseHTML, settingsJSON)
 
 		// Should contain the script with nonce placeholder
 		assert.Contains(t, string(result), `<script nonce="__CSP_NONCE_VALUE__">`)
@@ -243,7 +244,7 @@ func TestFrontendServer_InjectSettings(t *testing.T) {
 		require.NoError(t, err)
 
 		settingsJSON := []byte(`{}`)
-		result := server.injectSettings(settingsJSON)
+		result := renderIndexHTML(server.baseHTML, settingsJSON)
 
 		// Script should be injected before </head>
 		headCloseIndex := bytes.Index(result, []byte("</head>"))
@@ -265,7 +266,7 @@ func TestFrontendServer_InjectSettings(t *testing.T) {
 		require.NoError(t, err)
 
 		settingsJSON := []byte(`{"nested":{"array":[1,2,3]},"special":"<>&"}`)
-		result := server.injectSettings(settingsJSON)
+		result := renderIndexHTML(server.baseHTML, settingsJSON)
 
 		assert.Contains(t, string(result), `window.__APP_CONFIG__={"nested":{"array":[1,2,3]},"special":"<>&"};`)
 	})
@@ -818,7 +819,7 @@ func TestServeEmbeddedFrontend(t *testing.T) {
 func TestHTMLCache(t *testing.T) {
 	t.Run("new_cache_returns_nil", func(t *testing.T) {
 		cache := NewHTMLCache()
-		assert.Nil(t, cache.Get())
+		assert.Nil(t, cache.Get(branding.DefaultCacheKey))
 	})
 
 	t.Run("set_and_get", func(t *testing.T) {
@@ -827,9 +828,9 @@ func TestHTMLCache(t *testing.T) {
 
 		html := []byte("<html><body>test</body></html>")
 		settings := []byte(`{"key":"value"}`)
-		cache.Set(html, settings)
+		cache.Set(branding.DefaultCacheKey, html, settings)
 
-		result := cache.Get()
+		result := cache.Get(branding.DefaultCacheKey)
 		require.NotNil(t, result)
 		assert.Equal(t, html, result.Content)
 		assert.NotEmpty(t, result.ETag)
@@ -841,13 +842,13 @@ func TestHTMLCache(t *testing.T) {
 
 		html := []byte("<html><body>test</body></html>")
 		settings := []byte(`{"key":"value"}`)
-		cache.Set(html, settings)
+		cache.Set(branding.DefaultCacheKey, html, settings)
 
-		require.NotNil(t, cache.Get())
+		require.NotNil(t, cache.Get(branding.DefaultCacheKey))
 
 		cache.Invalidate()
 
-		assert.Nil(t, cache.Get())
+		assert.Nil(t, cache.Get(branding.DefaultCacheKey))
 	})
 
 	t.Run("etag_changes_with_settings", func(t *testing.T) {
@@ -856,12 +857,12 @@ func TestHTMLCache(t *testing.T) {
 
 		html := []byte("<html><body>test</body></html>")
 
-		cache.Set(html, []byte(`{"v":1}`))
-		etag1 := cache.Get().ETag
+		cache.Set(branding.DefaultCacheKey, html, []byte(`{"v":1}`))
+		etag1 := cache.Get(branding.DefaultCacheKey).ETag
 
 		cache.Invalidate()
-		cache.Set(html, []byte(`{"v":2}`))
-		etag2 := cache.Get().ETag
+		cache.Set(branding.DefaultCacheKey, html, []byte(`{"v":2}`))
+		etag2 := cache.Get(branding.DefaultCacheKey).ETag
 
 		assert.NotEqual(t, etag1, etag2)
 	})
@@ -870,8 +871,8 @@ func TestHTMLCache(t *testing.T) {
 		cache := NewHTMLCache()
 		cache.SetBaseHTML([]byte("<html></html>"))
 
-		cache.Set([]byte("<html></html>"), []byte(`{}`))
-		result := cache.Get()
+		cache.Set(branding.DefaultCacheKey, []byte("<html></html>"), []byte(`{}`))
+		result := cache.Get(branding.DefaultCacheKey)
 
 		// ETag should be quoted
 		assert.True(t, strings.HasPrefix(result.ETag, `"`))

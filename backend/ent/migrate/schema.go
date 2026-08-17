@@ -1497,6 +1497,9 @@ var (
 		{Name: "user_id", Type: field.TypeInt64},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
 		{Name: "notes", Type: field.TypeString, Default: "", SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "site_name", Type: field.TypeString, Nullable: true, Size: 100, Default: ""},
+		{Name: "site_logo", Type: field.TypeString, Nullable: true, Default: "", SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "site_subtitle", Type: field.TypeString, Nullable: true, Size: 200, Default: ""},
 	}
 	// ResellerDomainsTable holds the schema information for the "reseller_domains" table.
 	ResellerDomainsTable = &schema.Table{

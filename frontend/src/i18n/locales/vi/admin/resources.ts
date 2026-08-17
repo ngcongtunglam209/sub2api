@@ -477,7 +477,29 @@ export default {
         userIdHint: 'ID dạng số hiển thị trong trang Quản Lý Người Dùng',
         notes: 'Ghi Chú',
         status: 'Trạng Thái',
+        branding: 'Thương Hiệu',
         createdAt: 'Thời điểm thêm'
+      },
+      branding: {
+        editAction: 'Thương hiệu',
+        title: 'Thương hiệu cho {domain}',
+        intro:
+          'Nội dung mà tên miền này hiển thị cho khách truy cập. Để trống một mục thì mục đó dùng theo thương hiệu của nền tảng.',
+        overrideBadge: 'Đã gắn nhãn riêng',
+        inheritBadge: 'Theo nền tảng',
+        inheritPlaceholder: 'Để trống để dùng thương hiệu của nền tảng',
+        siteName: 'Tên trang',
+        siteNameHint: 'Thay thế tên nền tảng ở phần đầu trang và trên thẻ trình duyệt.',
+        siteSubtitle: 'Phụ đề',
+        siteSubtitleHint: 'Dòng chữ hiển thị dưới tên trang ở trang chủ.',
+        siteLogo: 'Đường dẫn logo',
+        siteLogoPlaceholder: 'https://cdn.example.com/logo.svg',
+        siteLogoHint: 'Một URL https:// tuyệt đối, một /đường-dẫn nội bộ, hoặc một URL data:image.',
+        logoPreview: 'Xem trước',
+        logoInvalid: 'Đây không phải đường dẫn ảnh dùng được — hãy dùng https://, một /đường-dẫn hoặc URL data:image.',
+        logoBroken: 'Đường dẫn này không tải được ảnh. Hãy kiểm tra trước khi khách của đại lý phát hiện.',
+        saved: 'Đã cập nhật thương hiệu',
+        saveFailed: 'Cập nhật thương hiệu thất bại'
       }
     },
 

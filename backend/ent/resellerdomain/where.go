@@ -84,6 +84,21 @@ func Notes(v string) predicate.ResellerDomain {
 	return predicate.ResellerDomain(sql.FieldEQ(FieldNotes, v))
 }
 
+// SiteName applies equality check predicate on the "site_name" field. It's identical to SiteNameEQ.
+func SiteName(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEQ(FieldSiteName, v))
+}
+
+// SiteLogo applies equality check predicate on the "site_logo" field. It's identical to SiteLogoEQ.
+func SiteLogo(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEQ(FieldSiteLogo, v))
+}
+
+// SiteSubtitle applies equality check predicate on the "site_subtitle" field. It's identical to SiteSubtitleEQ.
+func SiteSubtitle(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEQ(FieldSiteSubtitle, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.ResellerDomain {
 	return predicate.ResellerDomain(sql.FieldEQ(FieldCreatedAt, v))
@@ -397,6 +412,231 @@ func NotesEqualFold(v string) predicate.ResellerDomain {
 // NotesContainsFold applies the ContainsFold predicate on the "notes" field.
 func NotesContainsFold(v string) predicate.ResellerDomain {
 	return predicate.ResellerDomain(sql.FieldContainsFold(FieldNotes, v))
+}
+
+// SiteNameEQ applies the EQ predicate on the "site_name" field.
+func SiteNameEQ(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEQ(FieldSiteName, v))
+}
+
+// SiteNameNEQ applies the NEQ predicate on the "site_name" field.
+func SiteNameNEQ(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNEQ(FieldSiteName, v))
+}
+
+// SiteNameIn applies the In predicate on the "site_name" field.
+func SiteNameIn(vs ...string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldIn(FieldSiteName, vs...))
+}
+
+// SiteNameNotIn applies the NotIn predicate on the "site_name" field.
+func SiteNameNotIn(vs ...string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNotIn(FieldSiteName, vs...))
+}
+
+// SiteNameGT applies the GT predicate on the "site_name" field.
+func SiteNameGT(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldGT(FieldSiteName, v))
+}
+
+// SiteNameGTE applies the GTE predicate on the "site_name" field.
+func SiteNameGTE(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldGTE(FieldSiteName, v))
+}
+
+// SiteNameLT applies the LT predicate on the "site_name" field.
+func SiteNameLT(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldLT(FieldSiteName, v))
+}
+
+// SiteNameLTE applies the LTE predicate on the "site_name" field.
+func SiteNameLTE(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldLTE(FieldSiteName, v))
+}
+
+// SiteNameContains applies the Contains predicate on the "site_name" field.
+func SiteNameContains(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldContains(FieldSiteName, v))
+}
+
+// SiteNameHasPrefix applies the HasPrefix predicate on the "site_name" field.
+func SiteNameHasPrefix(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldHasPrefix(FieldSiteName, v))
+}
+
+// SiteNameHasSuffix applies the HasSuffix predicate on the "site_name" field.
+func SiteNameHasSuffix(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldHasSuffix(FieldSiteName, v))
+}
+
+// SiteNameIsNil applies the IsNil predicate on the "site_name" field.
+func SiteNameIsNil() predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldIsNull(FieldSiteName))
+}
+
+// SiteNameNotNil applies the NotNil predicate on the "site_name" field.
+func SiteNameNotNil() predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNotNull(FieldSiteName))
+}
+
+// SiteNameEqualFold applies the EqualFold predicate on the "site_name" field.
+func SiteNameEqualFold(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEqualFold(FieldSiteName, v))
+}
+
+// SiteNameContainsFold applies the ContainsFold predicate on the "site_name" field.
+func SiteNameContainsFold(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldContainsFold(FieldSiteName, v))
+}
+
+// SiteLogoEQ applies the EQ predicate on the "site_logo" field.
+func SiteLogoEQ(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEQ(FieldSiteLogo, v))
+}
+
+// SiteLogoNEQ applies the NEQ predicate on the "site_logo" field.
+func SiteLogoNEQ(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNEQ(FieldSiteLogo, v))
+}
+
+// SiteLogoIn applies the In predicate on the "site_logo" field.
+func SiteLogoIn(vs ...string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldIn(FieldSiteLogo, vs...))
+}
+
+// SiteLogoNotIn applies the NotIn predicate on the "site_logo" field.
+func SiteLogoNotIn(vs ...string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNotIn(FieldSiteLogo, vs...))
+}
+
+// SiteLogoGT applies the GT predicate on the "site_logo" field.
+func SiteLogoGT(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldGT(FieldSiteLogo, v))
+}
+
+// SiteLogoGTE applies the GTE predicate on the "site_logo" field.
+func SiteLogoGTE(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldGTE(FieldSiteLogo, v))
+}
+
+// SiteLogoLT applies the LT predicate on the "site_logo" field.
+func SiteLogoLT(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldLT(FieldSiteLogo, v))
+}
+
+// SiteLogoLTE applies the LTE predicate on the "site_logo" field.
+func SiteLogoLTE(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldLTE(FieldSiteLogo, v))
+}
+
+// SiteLogoContains applies the Contains predicate on the "site_logo" field.
+func SiteLogoContains(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldContains(FieldSiteLogo, v))
+}
+
+// SiteLogoHasPrefix applies the HasPrefix predicate on the "site_logo" field.
+func SiteLogoHasPrefix(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldHasPrefix(FieldSiteLogo, v))
+}
+
+// SiteLogoHasSuffix applies the HasSuffix predicate on the "site_logo" field.
+func SiteLogoHasSuffix(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldHasSuffix(FieldSiteLogo, v))
+}
+
+// SiteLogoIsNil applies the IsNil predicate on the "site_logo" field.
+func SiteLogoIsNil() predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldIsNull(FieldSiteLogo))
+}
+
+// SiteLogoNotNil applies the NotNil predicate on the "site_logo" field.
+func SiteLogoNotNil() predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNotNull(FieldSiteLogo))
+}
+
+// SiteLogoEqualFold applies the EqualFold predicate on the "site_logo" field.
+func SiteLogoEqualFold(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEqualFold(FieldSiteLogo, v))
+}
+
+// SiteLogoContainsFold applies the ContainsFold predicate on the "site_logo" field.
+func SiteLogoContainsFold(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldContainsFold(FieldSiteLogo, v))
+}
+
+// SiteSubtitleEQ applies the EQ predicate on the "site_subtitle" field.
+func SiteSubtitleEQ(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEQ(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleNEQ applies the NEQ predicate on the "site_subtitle" field.
+func SiteSubtitleNEQ(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNEQ(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleIn applies the In predicate on the "site_subtitle" field.
+func SiteSubtitleIn(vs ...string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldIn(FieldSiteSubtitle, vs...))
+}
+
+// SiteSubtitleNotIn applies the NotIn predicate on the "site_subtitle" field.
+func SiteSubtitleNotIn(vs ...string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNotIn(FieldSiteSubtitle, vs...))
+}
+
+// SiteSubtitleGT applies the GT predicate on the "site_subtitle" field.
+func SiteSubtitleGT(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldGT(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleGTE applies the GTE predicate on the "site_subtitle" field.
+func SiteSubtitleGTE(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldGTE(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleLT applies the LT predicate on the "site_subtitle" field.
+func SiteSubtitleLT(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldLT(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleLTE applies the LTE predicate on the "site_subtitle" field.
+func SiteSubtitleLTE(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldLTE(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleContains applies the Contains predicate on the "site_subtitle" field.
+func SiteSubtitleContains(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldContains(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleHasPrefix applies the HasPrefix predicate on the "site_subtitle" field.
+func SiteSubtitleHasPrefix(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldHasPrefix(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleHasSuffix applies the HasSuffix predicate on the "site_subtitle" field.
+func SiteSubtitleHasSuffix(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldHasSuffix(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleIsNil applies the IsNil predicate on the "site_subtitle" field.
+func SiteSubtitleIsNil() predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldIsNull(FieldSiteSubtitle))
+}
+
+// SiteSubtitleNotNil applies the NotNil predicate on the "site_subtitle" field.
+func SiteSubtitleNotNil() predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldNotNull(FieldSiteSubtitle))
+}
+
+// SiteSubtitleEqualFold applies the EqualFold predicate on the "site_subtitle" field.
+func SiteSubtitleEqualFold(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldEqualFold(FieldSiteSubtitle, v))
+}
+
+// SiteSubtitleContainsFold applies the ContainsFold predicate on the "site_subtitle" field.
+func SiteSubtitleContainsFold(v string) predicate.ResellerDomain {
+	return predicate.ResellerDomain(sql.FieldContainsFold(FieldSiteSubtitle, v))
 }
 
 // And groups predicates with the AND operator between them.

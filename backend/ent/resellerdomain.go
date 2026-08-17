@@ -28,7 +28,13 @@ type ResellerDomain struct {
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
 	// Notes holds the value of the "notes" field.
-	Notes        string `json:"notes,omitempty"`
+	Notes string `json:"notes,omitempty"`
+	// SiteName holds the value of the "site_name" field.
+	SiteName string `json:"site_name,omitempty"`
+	// SiteLogo holds the value of the "site_logo" field.
+	SiteLogo string `json:"site_logo,omitempty"`
+	// SiteSubtitle holds the value of the "site_subtitle" field.
+	SiteSubtitle string `json:"site_subtitle,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -39,7 +45,7 @@ func (*ResellerDomain) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case resellerdomain.FieldID, resellerdomain.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case resellerdomain.FieldDomain, resellerdomain.FieldStatus, resellerdomain.FieldNotes:
+		case resellerdomain.FieldDomain, resellerdomain.FieldStatus, resellerdomain.FieldNotes, resellerdomain.FieldSiteName, resellerdomain.FieldSiteLogo, resellerdomain.FieldSiteSubtitle:
 			values[i] = new(sql.NullString)
 		case resellerdomain.FieldCreatedAt, resellerdomain.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -100,6 +106,24 @@ func (_m *ResellerDomain) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Notes = value.String
 			}
+		case resellerdomain.FieldSiteName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field site_name", values[i])
+			} else if value.Valid {
+				_m.SiteName = value.String
+			}
+		case resellerdomain.FieldSiteLogo:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field site_logo", values[i])
+			} else if value.Valid {
+				_m.SiteLogo = value.String
+			}
+		case resellerdomain.FieldSiteSubtitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field site_subtitle", values[i])
+			} else if value.Valid {
+				_m.SiteSubtitle = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -153,6 +177,15 @@ func (_m *ResellerDomain) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("notes=")
 	builder.WriteString(_m.Notes)
+	builder.WriteString(", ")
+	builder.WriteString("site_name=")
+	builder.WriteString(_m.SiteName)
+	builder.WriteString(", ")
+	builder.WriteString("site_logo=")
+	builder.WriteString(_m.SiteLogo)
+	builder.WriteString(", ")
+	builder.WriteString("site_subtitle=")
+	builder.WriteString(_m.SiteSubtitle)
 	builder.WriteByte(')')
 	return builder.String()
 }

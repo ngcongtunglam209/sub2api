@@ -14,11 +14,22 @@ import (
 )
 
 type guardStubRepo struct {
+	// domains seeds hostnames with no branding override; rows seeds whole
+	// snapshot rows when the test cares about the branding they carry.
 	domains []string
+	rows    []service.ActiveResellerDomain
 }
 
-func (s *guardStubRepo) ListActiveDomains(context.Context) ([]string, error) {
-	return append([]string(nil), s.domains...), nil
+func (s *guardStubRepo) ListActiveDomains(context.Context) ([]service.ActiveResellerDomain, error) {
+	out := append([]service.ActiveResellerDomain(nil), s.rows...)
+	for i, d := range s.domains {
+		out = append(out, service.ActiveResellerDomain{ID: int64(i + 1), Domain: d})
+	}
+	return out, nil
+}
+
+func (s *guardStubRepo) UpdateBranding(context.Context, int64, service.ResellerDomainBrandingUpdate) error {
+	return nil
 }
 
 func (s *guardStubRepo) Create(context.Context, *service.ResellerDomain) (*service.ResellerDomain, error) {

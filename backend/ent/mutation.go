@@ -38907,6 +38907,9 @@ type ResellerDomainMutation struct {
 	adduser_id    *int64
 	status        *string
 	notes         *string
+	site_name     *string
+	site_logo     *string
+	site_subtitle *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*ResellerDomain, error)
@@ -39247,6 +39250,153 @@ func (m *ResellerDomainMutation) ResetNotes() {
 	m.notes = nil
 }
 
+// SetSiteName sets the "site_name" field.
+func (m *ResellerDomainMutation) SetSiteName(s string) {
+	m.site_name = &s
+}
+
+// SiteName returns the value of the "site_name" field in the mutation.
+func (m *ResellerDomainMutation) SiteName() (r string, exists bool) {
+	v := m.site_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSiteName returns the old "site_name" field's value of the ResellerDomain entity.
+// If the ResellerDomain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerDomainMutation) OldSiteName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSiteName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSiteName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSiteName: %w", err)
+	}
+	return oldValue.SiteName, nil
+}
+
+// ClearSiteName clears the value of the "site_name" field.
+func (m *ResellerDomainMutation) ClearSiteName() {
+	m.site_name = nil
+	m.clearedFields[resellerdomain.FieldSiteName] = struct{}{}
+}
+
+// SiteNameCleared returns if the "site_name" field was cleared in this mutation.
+func (m *ResellerDomainMutation) SiteNameCleared() bool {
+	_, ok := m.clearedFields[resellerdomain.FieldSiteName]
+	return ok
+}
+
+// ResetSiteName resets all changes to the "site_name" field.
+func (m *ResellerDomainMutation) ResetSiteName() {
+	m.site_name = nil
+	delete(m.clearedFields, resellerdomain.FieldSiteName)
+}
+
+// SetSiteLogo sets the "site_logo" field.
+func (m *ResellerDomainMutation) SetSiteLogo(s string) {
+	m.site_logo = &s
+}
+
+// SiteLogo returns the value of the "site_logo" field in the mutation.
+func (m *ResellerDomainMutation) SiteLogo() (r string, exists bool) {
+	v := m.site_logo
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSiteLogo returns the old "site_logo" field's value of the ResellerDomain entity.
+// If the ResellerDomain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerDomainMutation) OldSiteLogo(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSiteLogo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSiteLogo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSiteLogo: %w", err)
+	}
+	return oldValue.SiteLogo, nil
+}
+
+// ClearSiteLogo clears the value of the "site_logo" field.
+func (m *ResellerDomainMutation) ClearSiteLogo() {
+	m.site_logo = nil
+	m.clearedFields[resellerdomain.FieldSiteLogo] = struct{}{}
+}
+
+// SiteLogoCleared returns if the "site_logo" field was cleared in this mutation.
+func (m *ResellerDomainMutation) SiteLogoCleared() bool {
+	_, ok := m.clearedFields[resellerdomain.FieldSiteLogo]
+	return ok
+}
+
+// ResetSiteLogo resets all changes to the "site_logo" field.
+func (m *ResellerDomainMutation) ResetSiteLogo() {
+	m.site_logo = nil
+	delete(m.clearedFields, resellerdomain.FieldSiteLogo)
+}
+
+// SetSiteSubtitle sets the "site_subtitle" field.
+func (m *ResellerDomainMutation) SetSiteSubtitle(s string) {
+	m.site_subtitle = &s
+}
+
+// SiteSubtitle returns the value of the "site_subtitle" field in the mutation.
+func (m *ResellerDomainMutation) SiteSubtitle() (r string, exists bool) {
+	v := m.site_subtitle
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSiteSubtitle returns the old "site_subtitle" field's value of the ResellerDomain entity.
+// If the ResellerDomain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResellerDomainMutation) OldSiteSubtitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSiteSubtitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSiteSubtitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSiteSubtitle: %w", err)
+	}
+	return oldValue.SiteSubtitle, nil
+}
+
+// ClearSiteSubtitle clears the value of the "site_subtitle" field.
+func (m *ResellerDomainMutation) ClearSiteSubtitle() {
+	m.site_subtitle = nil
+	m.clearedFields[resellerdomain.FieldSiteSubtitle] = struct{}{}
+}
+
+// SiteSubtitleCleared returns if the "site_subtitle" field was cleared in this mutation.
+func (m *ResellerDomainMutation) SiteSubtitleCleared() bool {
+	_, ok := m.clearedFields[resellerdomain.FieldSiteSubtitle]
+	return ok
+}
+
+// ResetSiteSubtitle resets all changes to the "site_subtitle" field.
+func (m *ResellerDomainMutation) ResetSiteSubtitle() {
+	m.site_subtitle = nil
+	delete(m.clearedFields, resellerdomain.FieldSiteSubtitle)
+}
+
 // Where appends a list predicates to the ResellerDomainMutation builder.
 func (m *ResellerDomainMutation) Where(ps ...predicate.ResellerDomain) {
 	m.predicates = append(m.predicates, ps...)
@@ -39281,7 +39431,7 @@ func (m *ResellerDomainMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResellerDomainMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, resellerdomain.FieldCreatedAt)
 	}
@@ -39299,6 +39449,15 @@ func (m *ResellerDomainMutation) Fields() []string {
 	}
 	if m.notes != nil {
 		fields = append(fields, resellerdomain.FieldNotes)
+	}
+	if m.site_name != nil {
+		fields = append(fields, resellerdomain.FieldSiteName)
+	}
+	if m.site_logo != nil {
+		fields = append(fields, resellerdomain.FieldSiteLogo)
+	}
+	if m.site_subtitle != nil {
+		fields = append(fields, resellerdomain.FieldSiteSubtitle)
 	}
 	return fields
 }
@@ -39320,6 +39479,12 @@ func (m *ResellerDomainMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case resellerdomain.FieldNotes:
 		return m.Notes()
+	case resellerdomain.FieldSiteName:
+		return m.SiteName()
+	case resellerdomain.FieldSiteLogo:
+		return m.SiteLogo()
+	case resellerdomain.FieldSiteSubtitle:
+		return m.SiteSubtitle()
 	}
 	return nil, false
 }
@@ -39341,6 +39506,12 @@ func (m *ResellerDomainMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldStatus(ctx)
 	case resellerdomain.FieldNotes:
 		return m.OldNotes(ctx)
+	case resellerdomain.FieldSiteName:
+		return m.OldSiteName(ctx)
+	case resellerdomain.FieldSiteLogo:
+		return m.OldSiteLogo(ctx)
+	case resellerdomain.FieldSiteSubtitle:
+		return m.OldSiteSubtitle(ctx)
 	}
 	return nil, fmt.Errorf("unknown ResellerDomain field %s", name)
 }
@@ -39392,6 +39563,27 @@ func (m *ResellerDomainMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetNotes(v)
 		return nil
+	case resellerdomain.FieldSiteName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSiteName(v)
+		return nil
+	case resellerdomain.FieldSiteLogo:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSiteLogo(v)
+		return nil
+	case resellerdomain.FieldSiteSubtitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSiteSubtitle(v)
+		return nil
 	}
 	return fmt.Errorf("unknown ResellerDomain field %s", name)
 }
@@ -39436,7 +39628,17 @@ func (m *ResellerDomainMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ResellerDomainMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(resellerdomain.FieldSiteName) {
+		fields = append(fields, resellerdomain.FieldSiteName)
+	}
+	if m.FieldCleared(resellerdomain.FieldSiteLogo) {
+		fields = append(fields, resellerdomain.FieldSiteLogo)
+	}
+	if m.FieldCleared(resellerdomain.FieldSiteSubtitle) {
+		fields = append(fields, resellerdomain.FieldSiteSubtitle)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -39449,6 +39651,17 @@ func (m *ResellerDomainMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ResellerDomainMutation) ClearField(name string) error {
+	switch name {
+	case resellerdomain.FieldSiteName:
+		m.ClearSiteName()
+		return nil
+	case resellerdomain.FieldSiteLogo:
+		m.ClearSiteLogo()
+		return nil
+	case resellerdomain.FieldSiteSubtitle:
+		m.ClearSiteSubtitle()
+		return nil
+	}
 	return fmt.Errorf("unknown ResellerDomain nullable field %s", name)
 }
 
@@ -39473,6 +39686,15 @@ func (m *ResellerDomainMutation) ResetField(name string) error {
 		return nil
 	case resellerdomain.FieldNotes:
 		m.ResetNotes()
+		return nil
+	case resellerdomain.FieldSiteName:
+		m.ResetSiteName()
+		return nil
+	case resellerdomain.FieldSiteLogo:
+		m.ResetSiteLogo()
+		return nil
+	case resellerdomain.FieldSiteSubtitle:
+		m.ResetSiteSubtitle()
 		return nil
 	}
 	return fmt.Errorf("unknown ResellerDomain field %s", name)

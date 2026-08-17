@@ -1778,6 +1778,22 @@ func init() {
 	resellerdomainDescNotes := resellerdomainFields[3].Descriptor()
 	// resellerdomain.DefaultNotes holds the default value on creation for the notes field.
 	resellerdomain.DefaultNotes = resellerdomainDescNotes.Default.(string)
+	// resellerdomainDescSiteName is the schema descriptor for site_name field.
+	resellerdomainDescSiteName := resellerdomainFields[4].Descriptor()
+	// resellerdomain.DefaultSiteName holds the default value on creation for the site_name field.
+	resellerdomain.DefaultSiteName = resellerdomainDescSiteName.Default.(string)
+	// resellerdomain.SiteNameValidator is a validator for the "site_name" field. It is called by the builders before save.
+	resellerdomain.SiteNameValidator = resellerdomainDescSiteName.Validators[0].(func(string) error)
+	// resellerdomainDescSiteLogo is the schema descriptor for site_logo field.
+	resellerdomainDescSiteLogo := resellerdomainFields[5].Descriptor()
+	// resellerdomain.DefaultSiteLogo holds the default value on creation for the site_logo field.
+	resellerdomain.DefaultSiteLogo = resellerdomainDescSiteLogo.Default.(string)
+	// resellerdomainDescSiteSubtitle is the schema descriptor for site_subtitle field.
+	resellerdomainDescSiteSubtitle := resellerdomainFields[6].Descriptor()
+	// resellerdomain.DefaultSiteSubtitle holds the default value on creation for the site_subtitle field.
+	resellerdomain.DefaultSiteSubtitle = resellerdomainDescSiteSubtitle.Default.(string)
+	// resellerdomain.SiteSubtitleValidator is a validator for the "site_subtitle" field. It is called by the builders before save.
+	resellerdomain.SiteSubtitleValidator = resellerdomainDescSiteSubtitle.Validators[0].(func(string) error)
 	resellerplanMixin := schema.ResellerPlan{}.Mixin()
 	resellerplanMixinFields0 := resellerplanMixin[0].Fields()
 	_ = resellerplanMixinFields0
