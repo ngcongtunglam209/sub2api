@@ -86,6 +86,62 @@ export default {
     spendToNext: 'Cần thêm {amount} để đạt {tier}',
     topTier: 'Bạn đang ở hạng cao nhất'
   },
+
+  // Reseller Panel
+  reseller: {
+    title: 'Đại Lý',
+    description: 'Gói đại lý của bạn và các mã bạn đã tạo',
+    planTitle: 'Gói của bạn',
+    planName: 'Gói',
+    creditRate: 'Hệ số tín dụng',
+    creditRateCaption: 'Mệnh giá trên mỗi 1 USD tín dụng',
+    rpmLimit: 'Giới hạn tốc độ',
+    perMinute: 'yêu cầu/phút',
+    maxDomains: 'Tên miền',
+    expiresOn: 'Có hiệu lực đến {date}',
+    noExpiry: 'Gói này không hết hạn',
+    noPlanTitle: 'Bạn chưa có gói đại lý',
+    noPlanDescription: 'Hãy liên hệ quản trị viên để được chỉ định một gói trước khi tạo mã.',
+    planLoadFailed: 'Tải gói đại lý thất bại',
+    generateTitle: 'Tạo mã',
+    generateDescription: 'Mã được trừ vào tín dụng của bạn theo hệ số của gói',
+    generateButton: 'Tạo',
+    generateSuccess: 'Đã tạo {count} mã',
+    generateFailed: 'Tạo mã thất bại',
+    countRequired: 'Hãy nhập số lượng mã cần tạo',
+    valueRequired: 'Hãy nhập mệnh giá lớn hơn 0',
+    fields: {
+      count: 'Số lượng',
+      countHint: 'Số mã trong lô này',
+      value: 'Mệnh giá (USD)',
+      valueHint: 'Giá trị của mỗi mã khi được đổi',
+      group: 'Nhóm',
+      groupHint: 'Giới hạn mã cho một nhóm',
+      noGroup: 'Không giới hạn nhóm',
+      notes: 'Ghi chú',
+      notesHint: 'Chỉ bạn nhìn thấy'
+    },
+    mintedTitle: 'Mã mới của bạn',
+    mintedWarning: 'Các chuỗi này chỉ hiện một lần và không thể lấy lại. Hãy sao chép ngay.',
+    copyAll: 'Sao chép tất cả',
+    copiedAll: 'Đã sao chép {count} mã',
+    codesTitle: 'Mã của bạn',
+    noCodes: 'Bạn chưa tạo mã nào',
+    codesLoadFailed: 'Tải danh sách mã thất bại',
+    columns: {
+      code: 'Mã',
+      value: 'Mệnh giá',
+      status: 'Trạng thái',
+      createdAt: 'Đã tạo',
+      usedAt: 'Đã đổi'
+    },
+    status: {
+      unused: 'Chưa dùng',
+      used: 'Đã đổi',
+      expired: 'Hết hạn',
+      disabled: 'Đã tắt'
+    }
+  },
   announcements: {
     title: 'Thông báo',
     markRead: 'Đánh dấu đã đọc',

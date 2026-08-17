@@ -8,6 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 )
 
 // maxResellerCodesPerBatch bounds one generation call.
@@ -105,6 +106,26 @@ func (s *RedeemService) GenerateResellerCodes(
 		return nil, err
 	}
 	return codes, nil
+}
+
+// ListResellerCodes returns the codes this reseller minted, paginated.
+//
+// userID is passed through to a query that filters on created_by; it is never
+// combined with a caller-supplied filter, because the only safe answer to
+// "whose codes?" on this path is "the caller's".
+func (s *RedeemService) ListResellerCodes(
+	ctx context.Context,
+	userID int64,
+	params pagination.PaginationParams,
+) ([]RedeemCode, *pagination.PaginationResult, error) {
+	if userID <= 0 {
+		return nil, nil, infraerrors.BadRequest("INVALID_USER", "a reseller is required")
+	}
+	codes, result, err := s.redeemRepo.ListByCreator(ctx, userID, params)
+	if err != nil {
+		return nil, nil, fmt.Errorf("list reseller codes: %w", err)
+	}
+	return codes, result, nil
 }
 
 // ResellerPlanResolver is the slice of the plan service this path needs.

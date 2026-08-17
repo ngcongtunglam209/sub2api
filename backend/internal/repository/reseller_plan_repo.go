@@ -8,6 +8,7 @@ import (
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/resellerplan"
 	"github.com/Wei-Shaw/sub2api/ent/user"
+	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 )
 
@@ -42,6 +43,30 @@ func (r *resellerPlanRepository) GetByID(ctx context.Context, id int64) (*servic
 	}
 	if err != nil {
 		return nil, fmt.Errorf("get reseller plan %d: %w", id, err)
+	}
+	return resellerPlanEntityToService(row), nil
+}
+
+// Update writes the mutable columns of a plan the service has already merged
+// and validated. Level and name are not among them: level is the unique key
+// the ladder orders by, and a rename changes what resellers already bought.
+func (r *resellerPlanRepository) Update(ctx context.Context, plan *service.ResellerPlan) (*service.ResellerPlan, error) {
+	client := clientFromContext(ctx, r.client)
+	row, err := client.ResellerPlan.UpdateOneID(plan.ID).
+		SetPrice(plan.Price).
+		SetCreditRate(plan.CreditRate).
+		SetConcurrencyBonus(plan.ConcurrencyBonus).
+		SetRpmLimit(plan.RPMLimit).
+		SetMaxDomains(plan.MaxDomains).
+		SetValidityDays(plan.ValidityDays).
+		SetAllowedGroupIds(plan.AllowedGroupIDs).
+		SetEnabled(plan.Enabled).
+		Save(ctx)
+	if dbent.IsNotFound(err) {
+		return nil, infraerrors.NotFound("RESELLER_PLAN_NOT_FOUND", "reseller plan not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("update reseller plan %d: %w", plan.ID, err)
 	}
 	return resellerPlanEntityToService(row), nil
 }

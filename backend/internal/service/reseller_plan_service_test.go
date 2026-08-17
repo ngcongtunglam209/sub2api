@@ -12,6 +12,9 @@ type stubResellerPlanRepo struct {
 	plans      map[int64]*ResellerPlan
 	assignment *ResellerPlanAssignment
 
+	updated     *ResellerPlan
+	updateCalls int
+
 	assignedUser   int64
 	assignedPlan   *ResellerPlan
 	assignedExpiry time.Time
@@ -24,6 +27,14 @@ func (s *stubResellerPlanRepo) List(context.Context) ([]*ResellerPlan, error) { 
 
 func (s *stubResellerPlanRepo) GetByID(_ context.Context, id int64) (*ResellerPlan, error) {
 	return s.plans[id], nil
+}
+
+func (s *stubResellerPlanRepo) Update(_ context.Context, plan *ResellerPlan) (*ResellerPlan, error) {
+	s.updateCalls++
+	stored := *plan
+	s.updated = &stored
+	s.plans[plan.ID] = &stored
+	return &stored, nil
 }
 
 func (s *stubResellerPlanRepo) AssignToUser(_ context.Context, userID int64, plan *ResellerPlan, expiresAt time.Time, credit float64) error {
@@ -116,6 +127,119 @@ func TestAssignPlanRejectsUnknownAndDisabledPlans(t *testing.T) {
 	require.Error(t, err)
 
 	require.Equal(t, 0, repo.assignCalls, "nothing may be written for a rejected assignment")
+}
+
+// The bounds are not decoration. A credit rate above 1 hands a reseller more
+// balance than they paid, which mints money on every purchase; a validity of
+// zero produces a plan that is already expired the instant it is assigned, so
+// the buyer pays and gets nothing. Both have to be refused before the write.
+func TestUpdateRejectsOutOfBoundsFields(t *testing.T) {
+	stored := ResellerPlan{
+		ID: 2, Level: 2, Name: "Reseller 2",
+		Price: 150, CreditRate: 0.6, ConcurrencyBonus: 5,
+		RPMLimit: 120, MaxDomains: 3, ValidityDays: 365, Enabled: true,
+	}
+
+	for _, tc := range []struct {
+		name   string
+		in     ResellerPlanUpdate
+		wantOK bool
+	}{
+		{name: "no-op", in: ResellerPlanUpdate{}, wantOK: true},
+		{name: "zero price is free, not invalid", in: ResellerPlanUpdate{Price: float64Ptr(0)}, wantOK: true},
+		{name: "negative price", in: ResellerPlanUpdate{Price: float64Ptr(-0.01)}},
+		{name: "credit rate zero", in: ResellerPlanUpdate{CreditRate: float64Ptr(0)}, wantOK: true},
+		{name: "credit rate one", in: ResellerPlanUpdate{CreditRate: float64Ptr(1)}, wantOK: true},
+		{name: "credit rate above one mints money", in: ResellerPlanUpdate{CreditRate: float64Ptr(1.01)}},
+		{name: "negative credit rate", in: ResellerPlanUpdate{CreditRate: float64Ptr(-0.01)}},
+		{name: "validity one day", in: ResellerPlanUpdate{ValidityDays: intPtr(1)}, wantOK: true},
+		{name: "validity zero is born expired", in: ResellerPlanUpdate{ValidityDays: intPtr(0)}},
+		{name: "negative validity", in: ResellerPlanUpdate{ValidityDays: intPtr(-1)}},
+		{name: "zero concurrency bonus", in: ResellerPlanUpdate{ConcurrencyBonus: intPtr(0)}, wantOK: true},
+		{name: "negative concurrency bonus", in: ResellerPlanUpdate{ConcurrencyBonus: intPtr(-1)}},
+		{name: "zero rpm means no override", in: ResellerPlanUpdate{RPMLimit: intPtr(0)}, wantOK: true},
+		{name: "negative rpm", in: ResellerPlanUpdate{RPMLimit: intPtr(-1)}},
+		{name: "zero max domains", in: ResellerPlanUpdate{MaxDomains: intPtr(0)}, wantOK: true},
+		{name: "negative max domains", in: ResellerPlanUpdate{MaxDomains: intPtr(-1)}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			plan := stored
+			repo := &stubResellerPlanRepo{plans: map[int64]*ResellerPlan{2: &plan}}
+			svc := NewResellerPlanService(repo)
+
+			got, err := svc.Update(context.Background(), 2, tc.in)
+			if !tc.wantOK {
+				require.Error(t, err)
+				require.Nil(t, got)
+				require.Zero(t, repo.updateCalls, "a rejected edit must never reach the database")
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, 1, repo.updateCalls)
+			require.NotNil(t, got)
+		})
+	}
+}
+
+// Nil fields mean "leave alone": an operator toggling a tier off must not have
+// to resend the price, and resending nothing must not zero the row.
+func TestUpdateLeavesOmittedFieldsAlone(t *testing.T) {
+	plan := ResellerPlan{
+		ID: 2, Level: 2, Name: "Reseller 2",
+		Price: 150, CreditRate: 0.6, ConcurrencyBonus: 5,
+		RPMLimit: 120, MaxDomains: 3, ValidityDays: 365,
+		AllowedGroupIDs: []int64{7}, Enabled: true,
+	}
+	repo := &stubResellerPlanRepo{plans: map[int64]*ResellerPlan{2: &plan}}
+	svc := NewResellerPlanService(repo)
+
+	off := false
+	got, err := svc.Update(context.Background(), 2, ResellerPlanUpdate{Enabled: &off})
+	require.NoError(t, err)
+
+	require.False(t, got.Enabled)
+	require.InDelta(t, 150, got.Price, 1e-9)
+	require.InDelta(t, 0.6, got.CreditRate, 1e-9)
+	require.Equal(t, 5, got.ConcurrencyBonus)
+	require.Equal(t, 120, got.RPMLimit)
+	require.Equal(t, 3, got.MaxDomains)
+	require.Equal(t, 365, got.ValidityDays)
+	require.Equal(t, []int64{7}, got.AllowedGroupIDs)
+	// Level and name are not editable at all — the ladder orders by level, and a
+	// rename changes what resellers believe they bought.
+	require.Equal(t, 2, got.Level)
+	require.Equal(t, "Reseller 2", got.Name)
+}
+
+// The whitelist arrives as a slice off a decoded request body. Storing the
+// caller's backing array would let a later mutation of it change what we think
+// we wrote.
+func TestUpdateCopiesAllowedGroupIDs(t *testing.T) {
+	plan := ResellerPlan{ID: 2, Level: 2, Price: 150, CreditRate: 0.6, ValidityDays: 365, Enabled: true}
+	repo := &stubResellerPlanRepo{plans: map[int64]*ResellerPlan{2: &plan}}
+	svc := NewResellerPlanService(repo)
+
+	ids := []int64{1, 2}
+	got, err := svc.Update(context.Background(), 2, ResellerPlanUpdate{AllowedGroupIDs: &ids})
+	require.NoError(t, err)
+	require.Equal(t, []int64{1, 2}, got.AllowedGroupIDs)
+
+	ids[0] = 999
+	require.Equal(t, []int64{1, 2}, repo.updated.AllowedGroupIDs)
+}
+
+func TestUpdateRejectsUnknownPlan(t *testing.T) {
+	repo := &stubResellerPlanRepo{plans: map[int64]*ResellerPlan{}}
+	svc := NewResellerPlanService(repo)
+
+	_, err := svc.Update(context.Background(), 404, ResellerPlanUpdate{Price: float64Ptr(10)})
+	require.Error(t, err)
+
+	_, err = svc.Update(context.Background(), 0, ResellerPlanUpdate{Price: float64Ptr(10)})
+	require.Error(t, err)
+
+	require.Zero(t, repo.updateCalls)
 }
 
 func TestMaxDomainsForUser(t *testing.T) {

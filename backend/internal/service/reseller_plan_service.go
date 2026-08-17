@@ -26,6 +26,34 @@ func (s *ResellerPlanService) List(ctx context.Context) ([]*ResellerPlan, error)
 	return s.repo.List(ctx)
 }
 
+// Update edits a tier's terms.
+//
+// Holders are not re-stamped: their expiry and credited balance were settled
+// when they bought in, and repricing a tier must not retroactively shorten a
+// plan somebody already paid for. The new terms apply from the next assignment.
+func (s *ResellerPlanService) Update(ctx context.Context, id int64, in ResellerPlanUpdate) (*ResellerPlan, error) {
+	if id <= 0 {
+		return nil, infraerrors.BadRequest("INVALID_RESELLER_PLAN", "invalid reseller plan id")
+	}
+
+	current, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if current == nil {
+		return nil, infraerrors.NotFound("RESELLER_PLAN_NOT_FOUND", "reseller plan not found")
+	}
+
+	// Merge onto the stored row, then validate the result rather than the patch:
+	// a field left alone still has to be legal alongside the ones that changed.
+	candidate := applyResellerPlanUpdate(*current, in)
+	if err := validateResellerPlanFields(candidate); err != nil {
+		return nil, err
+	}
+
+	return s.repo.Update(ctx, &candidate)
+}
+
 // AssignPlan grants a purchased tier: stamps it on the user, sets its expiry,
 // and credits the agreed share of the price back as balance.
 func (s *ResellerPlanService) AssignPlan(ctx context.Context, userID, planID int64) (*ResellerPlanAssignment, error) {

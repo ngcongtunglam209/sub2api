@@ -118,6 +118,10 @@ func RegisterUserRoutes(
 			reseller := authenticated.Group("/reseller")
 			{
 				reseller.POST("/codes", h.ResellerCode.GenerateCodes)
+				// 只读自查：套餐与自己发出的卡密。两者的用户 id 都取自会话，
+				// 且卡密按 created_by 在查询层过滤，看不到别人的库存。
+				reseller.GET("/codes", h.ResellerCode.ListCodes)
+				reseller.GET("/plan", h.ResellerCode.GetPlan)
 			}
 		}
 

@@ -43,6 +43,7 @@ type AdminHandlers struct {
 	Compliance             *admin.ComplianceHandler
 	AuditLog               *admin.AuditLogHandler
 	VIPTier                *admin.VIPTierHandler
+	Reseller               *admin.ResellerHandler
 }
 
 // Handlers contains all HTTP handlers
