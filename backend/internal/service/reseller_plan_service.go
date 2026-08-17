@@ -22,6 +22,20 @@ func NewResellerPlanService(repo ResellerPlanRepository) *ResellerPlanService {
 	return &ResellerPlanService{repo: repo}
 }
 
+// SetResellerPlanResolver injects the plan lookup the auth snapshot uses for
+// the concurrency bonus.
+//
+// Set after construction because the plan service is built later in the
+// dependency graph than the API key service, and threading it through every
+// existing NewAPIKeyService caller to reach one optional perk is not worth the
+// churn. Left unset, the bonus is simply not applied — which is the behaviour
+// before reseller plans existed.
+func (s *APIKeyService) SetResellerPlanResolver(resolver ResellerPlanResolver) {
+	if s != nil {
+		s.resellerPlanResolver = resolver
+	}
+}
+
 func (s *ResellerPlanService) List(ctx context.Context) ([]*ResellerPlan, error) {
 	return s.repo.List(ctx)
 }

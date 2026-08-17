@@ -283,12 +283,17 @@ type RateLimitCacheInvalidator interface {
 }
 
 type APIKeyService struct {
-	apiKeyRepo                APIKeyRepository
-	userRepo                  UserRepository
-	groupRepo                 GroupRepository
-	userSubRepo               UserSubscriptionRepository
-	userGroupRateRepo         UserGroupRateRepository
-	vipBenefitRepo            VIPTierBenefitRepository
+	apiKeyRepo        APIKeyRepository
+	userRepo          UserRepository
+	groupRepo         GroupRepository
+	userSubRepo       UserSubscriptionRepository
+	userGroupRateRepo UserGroupRateRepository
+	vipBenefitRepo    VIPTierBenefitRepository
+	// resellerPlanResolver is injected after construction rather than taken as a
+	// constructor argument: the plan service is built later in the graph, and
+	// threading it through every existing NewAPIKeyService caller to reach one
+	// optional perk is not worth the churn.
+	resellerPlanResolver      ResellerPlanResolver
 	cache                     APIKeyCache
 	rateLimitCacheInvalid     RateLimitCacheInvalidator // optional: invalidate Redis rate limit cache
 	concurrencyService        *ConcurrencyService
