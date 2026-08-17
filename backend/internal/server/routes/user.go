@@ -112,6 +112,19 @@ func RegisterUserRoutes(
 			usage.POST("/dashboard/api-keys-usage", h.Usage.DashboardAPIKeysUsage)
 		}
 
+		// 分销商：用自己的余额生成兑换码转售。
+		// 用户 id 取自会话而非请求体，否则可以让别人的余额买单。
+		if h.ResellerCode != nil {
+			reseller := authenticated.Group("/reseller")
+			{
+				reseller.POST("/codes", h.ResellerCode.GenerateCodes)
+				// 只读自查：套餐与自己发出的卡密。两者的用户 id 都取自会话，
+				// 且卡密按 created_by 在查询层过滤，看不到别人的库存。
+				reseller.GET("/codes", h.ResellerCode.ListCodes)
+				reseller.GET("/plan", h.ResellerCode.GetPlan)
+			}
+		}
+
 		// 公告（用户可见）
 		announcements := authenticated.Group("/announcements")
 		{

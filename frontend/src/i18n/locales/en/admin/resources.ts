@@ -415,6 +415,72 @@ export default {
       }
     },
 
+    // Reseller Plans
+    resellerPlans: {
+      title: 'Reseller Plans',
+      description: 'Plans an admin assigns; each one lets its holder mint redeem codes against their own credit',
+      ladderHint: 'A higher plan should cost more and buy more face value per dollar of credit',
+      editTitle: 'Edit Reseller Plan',
+      marginOf: '{percent}% margin',
+      allGroups: 'All groups',
+      saved: 'Reseller plan saved',
+      saveFailed: 'Failed to save reseller plan',
+      loadFailed: 'Failed to load reseller plans',
+      fields: {
+        level: 'Level',
+        name: 'Name',
+        price: 'Price (USD)',
+        creditRate: 'Credit rate',
+        creditRateHint: '1.25 means every $1 of credit mints $1.25 of code face value',
+        concurrencyBonus: 'Concurrency bonus',
+        rpmLimit: 'Requests per minute',
+        rpmLimitHint: 'Ceiling on the reseller\'s own request rate',
+        maxDomains: 'Max domains',
+        validityDays: 'Valid for (days)',
+        validityDaysHint: 'How long the assignment lasts before it lapses',
+        allowedGroups: 'Allowed groups',
+        allowedGroupsHint: 'Groups this plan may mint codes for. Select none to allow every group.',
+        noGroups: 'No groups available',
+        enabled: 'Enabled',
+        enabledHint: 'Disabled plans keep their current holders but accept no new ones'
+      }
+    },
+
+    // Reseller Domains
+    resellerDomains: {
+      title: 'Reseller Domains',
+      description: 'Sales domains cleared for a reseller',
+      hint: 'A reseller may only sell from a domain listed and active here',
+      create: 'Add Domain',
+      createTitle: 'Add Reseller Domain',
+      deleteTitle: 'Delete Reseller Domain',
+      deleteMessage: 'Delete {domain}? Disable it instead if you may want it back.',
+      statusActive: 'Active',
+      statusDisabled: 'Disabled',
+      enableAction: 'Enable',
+      disableAction: 'Disable',
+      saved: 'Reseller domain added',
+      saveFailed: 'Failed to add reseller domain',
+      loadFailed: 'Failed to load reseller domains',
+      deleted: 'Reseller domain deleted',
+      deleteFailed: 'Failed to delete reseller domain',
+      enabled: 'Reseller domain enabled',
+      disabled: 'Reseller domain disabled',
+      statusFailed: 'Failed to update domain status',
+      domainRequired: 'Enter a domain',
+      userRequired: 'Enter the reseller\'s user ID',
+      fields: {
+        domain: 'Domain',
+        domainPlaceholder: 'shop.example.com',
+        domainHint: 'Host only — no scheme and no path',
+        userId: 'Reseller user ID',
+        userIdHint: 'The numeric ID shown in User Management',
+        notes: 'Notes',
+        status: 'Status',
+        createdAt: 'Added at'
+      }
+    },
+
     // Promo Codes
     promo: {
       title: 'Promo Code Management',

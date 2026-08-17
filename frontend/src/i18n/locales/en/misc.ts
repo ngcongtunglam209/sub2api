@@ -86,6 +86,62 @@ export default {
     spendToNext: '{amount} more to reach {tier}',
     topTier: 'You are on the highest tier'
   },
+
+  // Reseller Panel
+  reseller: {
+    title: 'Reseller',
+    description: 'Your reseller plan and the codes you have minted',
+    planTitle: 'Your plan',
+    planName: 'Plan',
+    creditRate: 'Credit rate',
+    creditRateCaption: 'Face value per $1 of credit',
+    rpmLimit: 'Rate limit',
+    perMinute: 'req/min',
+    maxDomains: 'Domains',
+    expiresOn: 'Valid until {date}',
+    noExpiry: 'This plan does not expire',
+    noPlanTitle: 'You have no reseller plan',
+    noPlanDescription: 'Contact an administrator to be assigned one before you can mint codes.',
+    planLoadFailed: 'Failed to load your reseller plan',
+    generateTitle: 'Generate codes',
+    generateDescription: 'Codes are billed against your credit at your plan rate',
+    generateButton: 'Generate',
+    generateSuccess: '{count} code(s) generated',
+    generateFailed: 'Failed to generate codes',
+    countRequired: 'Enter how many codes to generate',
+    valueRequired: 'Enter a face value greater than zero',
+    fields: {
+      count: 'How many',
+      countHint: 'Number of codes in this batch',
+      value: 'Face value (USD)',
+      valueHint: 'What each code is worth when redeemed',
+      group: 'Group',
+      groupHint: 'Restrict the codes to one group',
+      noGroup: 'No group',
+      notes: 'Notes',
+      notesHint: 'Only you see this'
+    },
+    mintedTitle: 'Your new codes',
+    mintedWarning: 'These strings are shown once and cannot be retrieved again. Copy them now.',
+    copyAll: 'Copy all',
+    copiedAll: '{count} code(s) copied',
+    codesTitle: 'Your codes',
+    noCodes: 'You have not generated any codes yet',
+    codesLoadFailed: 'Failed to load your codes',
+    columns: {
+      code: 'Code',
+      value: 'Value',
+      status: 'Status',
+      createdAt: 'Generated',
+      usedAt: 'Redeemed'
+    },
+    status: {
+      unused: 'Unused',
+      used: 'Redeemed',
+      expired: 'Expired',
+      disabled: 'Disabled'
+    }
+  },
   announcements: {
     title: 'Announcements',
     markRead: 'Mark as read',

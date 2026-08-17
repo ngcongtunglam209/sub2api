@@ -200,6 +200,16 @@ func VipTierLocked(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldVipTierLocked, v))
 }
 
+// ResellerPlanID applies equality check predicate on the "reseller_plan_id" field. It's identical to ResellerPlanIDEQ.
+func ResellerPlanID(v int64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldResellerPlanID, v))
+}
+
+// ResellerPlanExpiresAt applies equality check predicate on the "reseller_plan_expires_at" field. It's identical to ResellerPlanExpiresAtEQ.
+func ResellerPlanExpiresAt(v time.Time) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldResellerPlanExpiresAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))
@@ -1598,6 +1608,106 @@ func VipTierLockedEQ(v bool) predicate.User {
 // VipTierLockedNEQ applies the NEQ predicate on the "vip_tier_locked" field.
 func VipTierLockedNEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldVipTierLocked, v))
+}
+
+// ResellerPlanIDEQ applies the EQ predicate on the "reseller_plan_id" field.
+func ResellerPlanIDEQ(v int64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldResellerPlanID, v))
+}
+
+// ResellerPlanIDNEQ applies the NEQ predicate on the "reseller_plan_id" field.
+func ResellerPlanIDNEQ(v int64) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldResellerPlanID, v))
+}
+
+// ResellerPlanIDIn applies the In predicate on the "reseller_plan_id" field.
+func ResellerPlanIDIn(vs ...int64) predicate.User {
+	return predicate.User(sql.FieldIn(FieldResellerPlanID, vs...))
+}
+
+// ResellerPlanIDNotIn applies the NotIn predicate on the "reseller_plan_id" field.
+func ResellerPlanIDNotIn(vs ...int64) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldResellerPlanID, vs...))
+}
+
+// ResellerPlanIDGT applies the GT predicate on the "reseller_plan_id" field.
+func ResellerPlanIDGT(v int64) predicate.User {
+	return predicate.User(sql.FieldGT(FieldResellerPlanID, v))
+}
+
+// ResellerPlanIDGTE applies the GTE predicate on the "reseller_plan_id" field.
+func ResellerPlanIDGTE(v int64) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldResellerPlanID, v))
+}
+
+// ResellerPlanIDLT applies the LT predicate on the "reseller_plan_id" field.
+func ResellerPlanIDLT(v int64) predicate.User {
+	return predicate.User(sql.FieldLT(FieldResellerPlanID, v))
+}
+
+// ResellerPlanIDLTE applies the LTE predicate on the "reseller_plan_id" field.
+func ResellerPlanIDLTE(v int64) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldResellerPlanID, v))
+}
+
+// ResellerPlanIDIsNil applies the IsNil predicate on the "reseller_plan_id" field.
+func ResellerPlanIDIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldResellerPlanID))
+}
+
+// ResellerPlanIDNotNil applies the NotNil predicate on the "reseller_plan_id" field.
+func ResellerPlanIDNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldResellerPlanID))
+}
+
+// ResellerPlanExpiresAtEQ applies the EQ predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtEQ(v time.Time) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldResellerPlanExpiresAt, v))
+}
+
+// ResellerPlanExpiresAtNEQ applies the NEQ predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtNEQ(v time.Time) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldResellerPlanExpiresAt, v))
+}
+
+// ResellerPlanExpiresAtIn applies the In predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtIn(vs ...time.Time) predicate.User {
+	return predicate.User(sql.FieldIn(FieldResellerPlanExpiresAt, vs...))
+}
+
+// ResellerPlanExpiresAtNotIn applies the NotIn predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtNotIn(vs ...time.Time) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldResellerPlanExpiresAt, vs...))
+}
+
+// ResellerPlanExpiresAtGT applies the GT predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtGT(v time.Time) predicate.User {
+	return predicate.User(sql.FieldGT(FieldResellerPlanExpiresAt, v))
+}
+
+// ResellerPlanExpiresAtGTE applies the GTE predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtGTE(v time.Time) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldResellerPlanExpiresAt, v))
+}
+
+// ResellerPlanExpiresAtLT applies the LT predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtLT(v time.Time) predicate.User {
+	return predicate.User(sql.FieldLT(FieldResellerPlanExpiresAt, v))
+}
+
+// ResellerPlanExpiresAtLTE applies the LTE predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtLTE(v time.Time) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldResellerPlanExpiresAt, v))
+}
+
+// ResellerPlanExpiresAtIsNil applies the IsNil predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldResellerPlanExpiresAt))
+}
+
+// ResellerPlanExpiresAtNotNil applies the NotNil predicate on the "reseller_plan_expires_at" field.
+func ResellerPlanExpiresAtNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldResellerPlanExpiresAt))
 }
 
 // HasAPIKeys applies the HasEdge predicate on the "api_keys" edge.

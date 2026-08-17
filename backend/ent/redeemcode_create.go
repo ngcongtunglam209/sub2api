@@ -114,6 +114,20 @@ func (_c *RedeemCodeCreate) SetNillableNotes(v *string) *RedeemCodeCreate {
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *RedeemCodeCreate) SetCreatedBy(v int64) *RedeemCodeCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *RedeemCodeCreate) SetNillableCreatedBy(v *int64) *RedeemCodeCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *RedeemCodeCreate) SetCreatedAt(v time.Time) *RedeemCodeCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -337,6 +351,10 @@ func (_c *RedeemCodeCreate) createSpec() (*RedeemCode, *sqlgraph.CreateSpec) {
 		_spec.SetField(redeemcode.FieldNotes, field.TypeString, value)
 		_node.Notes = &value
 	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(redeemcode.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = &value
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(redeemcode.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -540,6 +558,30 @@ func (u *RedeemCodeUpsert) UpdateNotes() *RedeemCodeUpsert {
 // ClearNotes clears the value of the "notes" field.
 func (u *RedeemCodeUpsert) ClearNotes() *RedeemCodeUpsert {
 	u.SetNull(redeemcode.FieldNotes)
+	return u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (u *RedeemCodeUpsert) SetCreatedBy(v int64) *RedeemCodeUpsert {
+	u.Set(redeemcode.FieldCreatedBy, v)
+	return u
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *RedeemCodeUpsert) UpdateCreatedBy() *RedeemCodeUpsert {
+	u.SetExcluded(redeemcode.FieldCreatedBy)
+	return u
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *RedeemCodeUpsert) AddCreatedBy(v int64) *RedeemCodeUpsert {
+	u.Add(redeemcode.FieldCreatedBy, v)
+	return u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *RedeemCodeUpsert) ClearCreatedBy() *RedeemCodeUpsert {
+	u.SetNull(redeemcode.FieldCreatedBy)
 	return u
 }
 
@@ -765,6 +807,34 @@ func (u *RedeemCodeUpsertOne) UpdateNotes() *RedeemCodeUpsertOne {
 func (u *RedeemCodeUpsertOne) ClearNotes() *RedeemCodeUpsertOne {
 	return u.Update(func(s *RedeemCodeUpsert) {
 		s.ClearNotes()
+	})
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (u *RedeemCodeUpsertOne) SetCreatedBy(v int64) *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.SetCreatedBy(v)
+	})
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *RedeemCodeUpsertOne) AddCreatedBy(v int64) *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.AddCreatedBy(v)
+	})
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *RedeemCodeUpsertOne) UpdateCreatedBy() *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.UpdateCreatedBy()
+	})
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *RedeemCodeUpsertOne) ClearCreatedBy() *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.ClearCreatedBy()
 	})
 }
 
@@ -1165,6 +1235,34 @@ func (u *RedeemCodeUpsertBulk) UpdateNotes() *RedeemCodeUpsertBulk {
 func (u *RedeemCodeUpsertBulk) ClearNotes() *RedeemCodeUpsertBulk {
 	return u.Update(func(s *RedeemCodeUpsert) {
 		s.ClearNotes()
+	})
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (u *RedeemCodeUpsertBulk) SetCreatedBy(v int64) *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.SetCreatedBy(v)
+	})
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *RedeemCodeUpsertBulk) AddCreatedBy(v int64) *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.AddCreatedBy(v)
+	})
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *RedeemCodeUpsertBulk) UpdateCreatedBy() *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.UpdateCreatedBy()
+	})
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *RedeemCodeUpsertBulk) ClearCreatedBy() *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.ClearCreatedBy()
 	})
 }
 
