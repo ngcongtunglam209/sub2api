@@ -293,7 +293,12 @@ type APIKeyService struct {
 	// constructor argument: the plan service is built later in the graph, and
 	// threading it through every existing NewAPIKeyService caller to reach one
 	// optional perk is not worth the churn.
-	resellerPlanResolver      ResellerPlanResolver
+	resellerPlanResolver ResellerPlanResolver
+	// addonResolver is injected after construction for the same reason as
+	// resellerPlanResolver: the add-on service is built later in the graph.
+	// Left unset, purchased add-ons simply do not apply — the behaviour before
+	// the store existed.
+	addonResolver             AddonResolver
 	cache                     APIKeyCache
 	rateLimitCacheInvalid     RateLimitCacheInvalidator // optional: invalidate Redis rate limit cache
 	concurrencyService        *ConcurrencyService

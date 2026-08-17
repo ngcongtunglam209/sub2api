@@ -142,6 +142,65 @@ export default {
       disabled: 'Đã tắt'
     }
   },
+
+  // Add-on Store
+  store: {
+    title: 'Cửa Hàng Tiện Ích',
+    description: 'Dùng số dư để mua thêm hạn mức và gói đại lý',
+    balanceLabel: 'Số dư của bạn',
+    loadFailed: 'Không tải được cửa hàng',
+    unitPriceLabel: 'Đơn giá',
+    perUnitMonth: 'Mỗi đơn vị, mỗi tháng',
+    heldLabel: 'Đang thuê',
+    heldNone: 'Chưa thuê gì',
+    heldUntil: 'Hiệu lực đến {date}',
+    capLabel: 'Giới hạn sau khi mua',
+    monthsLabel: 'Số tháng',
+    monthsHint: 'Thời gian tiện ích còn hiệu lực',
+    totalLabel: 'Tổng cộng',
+    buy: 'Mua',
+    amountRequired: 'Nhập số lượng ít nhất là 1',
+    monthsRequired: 'Nhập ít nhất 1 tháng',
+    insufficientBalance: 'Số dư của bạn không đủ cho lần mua này',
+    capExceeded: 'Lần mua này sẽ vượt giới hạn {cap}',
+    purchaseSuccess: 'Mua thành công',
+    purchaseFailed: 'Mua không thành công',
+    concurrency: {
+      title: 'Đồng thời bổ sung',
+      description: 'Thêm số yêu cầu chạy song song, ngoài hạn mức tài khoản của bạn',
+      amountLabel: 'Số yêu cầu đồng thời thêm',
+      amountHint: 'Bán theo từng yêu cầu một',
+      unit: 'đồng thời'
+    },
+    rpm: {
+      title: 'Hạn mức tốc độ bổ sung',
+      description: 'Thêm số yêu cầu mỗi phút, ngoài hạn mức tài khoản của bạn',
+      amountLabel: 'Gói {step} yêu cầu/phút',
+      amountHint: 'Bán theo gói {step} yêu cầu mỗi phút',
+      unit: 'yêu cầu/phút'
+    },
+    plans: {
+      title: 'Gói đại lý',
+      description: 'Mua hạng đại lý bằng số dư của bạn',
+      loadFailed: 'Không tải được các gói đại lý',
+      empty: 'Hiện chưa có gói đại lý nào được bán',
+      price: 'Giá',
+      creditBack: 'Hoàn tín dụng',
+      creditBackCaption: 'Được hoàn lại vào số dư khi mua',
+      concurrencyBonus: 'Đồng thời thưởng thêm',
+      rpmLimit: 'Hạn mức tốc độ',
+      perMinute: 'yêu cầu/phút',
+      maxDomains: 'Tên miền',
+      validity: 'Hiệu lực {days} ngày',
+      buy: 'Mua gói',
+      purchaseSuccess: 'Gói đại lý đã được kích hoạt',
+      purchaseFailed: 'Không mua được gói đại lý',
+      heldTitle: 'Gói đại lý của bạn',
+      heldNotice: 'Bạn đã có một gói đại lý. Mua lần thứ hai sẽ trả tín dụng hai lần, nên máy chủ từ chối khi gói hiện tại còn hiệu lực.',
+      heldExpires: 'Hiệu lực đến {date}',
+      heldNoExpiry: 'Gói này không hết hạn'
+    }
+  },
   announcements: {
     title: 'Thông báo',
     markRead: 'Đánh dấu đã đọc',

@@ -23,6 +23,7 @@ export { passkeyAPI, type PasskeyCredentialSummary } from './passkey'
 export { default as announcementsAPI } from './announcements'
 export { channelMonitorUserAPI } from './channelMonitor'
 export { resellerAPI } from './reseller'
+export { addonsAPI } from './addons'
 
 // Admin APIs
 export { adminAPI } from './admin'

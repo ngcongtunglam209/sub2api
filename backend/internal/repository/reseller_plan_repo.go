@@ -76,6 +76,11 @@ func (r *resellerPlanRepository) Update(ctx context.Context, plan *service.Resel
 // The two writes cannot be split. A crash between them either leaves a
 // reseller holding a tier nobody paid for, or takes the payment and never
 // hands back the credit — both need a human to work out which.
+//
+// When the caller already has a transaction open on the context this joins it
+// rather than starting a second one, which is how the self-service store gets
+// to debit the price and stamp the tier atomically while still using this one
+// implementation of the expiry and the credit.
 func (r *resellerPlanRepository) AssignToUser(
 	ctx context.Context,
 	userID int64,
@@ -83,40 +88,27 @@ func (r *resellerPlanRepository) AssignToUser(
 	expiresAt time.Time,
 	creditAmount float64,
 ) error {
-	tx, err := r.client.Tx(ctx)
-	if err != nil {
-		return fmt.Errorf("begin reseller plan assignment: %w", err)
-	}
-	defer func() {
-		if tx != nil {
-			_ = tx.Rollback()
+	return runInTx(ctx, r.client, "reseller plan assignment", func(txCtx context.Context, client *dbent.Client) error {
+		update := client.User.UpdateOneID(userID).
+			SetResellerPlanID(plan.ID).
+			SetResellerPlanExpiresAt(expiresAt)
+
+		// RPM is an override, so it is safe to set outright. Concurrency is not
+		// touched here: it is additive and resolved on the auth snapshot, and
+		// writing a total into users.concurrency would lose the base value the
+		// bonus is supposed to sit on top of.
+		if plan.RPMLimit > 0 {
+			update = update.SetRpmLimit(plan.RPMLimit)
 		}
-	}()
+		if creditAmount > 0 {
+			update = update.AddBalance(creditAmount)
+		}
 
-	update := tx.User.UpdateOneID(userID).
-		SetResellerPlanID(plan.ID).
-		SetResellerPlanExpiresAt(expiresAt)
-
-	// RPM is an override, so it is safe to set outright. Concurrency is not
-	// touched here: it is additive and resolved on the auth snapshot, and
-	// writing a total into users.concurrency would lose the base value the
-	// bonus is supposed to sit on top of.
-	if plan.RPMLimit > 0 {
-		update = update.SetRpmLimit(plan.RPMLimit)
-	}
-	if creditAmount > 0 {
-		update = update.AddBalance(creditAmount)
-	}
-
-	if err := update.Exec(ctx); err != nil {
-		return fmt.Errorf("assign reseller plan %d to user %d: %w", plan.ID, userID, err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit reseller plan assignment: %w", err)
-	}
-	tx = nil
-	return nil
+		if err := update.Exec(txCtx); err != nil {
+			return fmt.Errorf("assign reseller plan %d to user %d: %w", plan.ID, userID, err)
+		}
+		return nil
+	})
 }
 
 func (r *resellerPlanRepository) GetUserAssignment(ctx context.Context, userID int64) (*service.ResellerPlanAssignment, error) {

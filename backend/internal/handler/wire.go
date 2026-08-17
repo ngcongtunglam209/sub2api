@@ -47,6 +47,7 @@ func ProvideAdminHandlers(
 	auditLogHandler *admin.AuditLogHandler,
 	vipTierHandler *admin.VIPTierHandler,
 	resellerHandler *admin.ResellerHandler,
+	addonPricingHandler *admin.AddonPricingHandler,
 	upstreamBillingProbe *service.UpstreamBillingProbeService,
 	ollamaCloudUsage *service.OllamaCloudUsageService,
 ) *AdminHandlers {
@@ -89,6 +90,7 @@ func ProvideAdminHandlers(
 		AuditLog:               auditLogHandler,
 		VIPTier:                vipTierHandler,
 		Reseller:               resellerHandler,
+		AddonPricing:           addonPricingHandler,
 	}
 }
 
@@ -195,6 +197,7 @@ func ProvideHandlers(
 	vipHandler *VIPHandler,
 	resellerDomainHandler *ResellerDomainHandler,
 	resellerCodeHandler *ResellerCodeHandler,
+	addonHandler *AddonHandler,
 	resellerDomainService *service.ResellerDomainService,
 	_ *service.IdempotencyCoordinator,
 	_ *service.IdempotencyCleanupService,
@@ -209,6 +212,7 @@ func ProvideHandlers(
 		Announcement:          announcementHandler,
 		ResellerDomain:        resellerDomainHandler,
 		ResellerCode:          resellerCodeHandler,
+		Addon:                 addonHandler,
 		ResellerDomainService: resellerDomainService,
 		ChannelMonitor:        channelMonitorUserHandler,
 		ChannelMonitorV2:      channelMonitorV2Handler,
@@ -240,6 +244,7 @@ var ProviderSet = wire.NewSet(
 	NewAnnouncementHandler,
 	NewResellerDomainHandler,
 	NewResellerCodeHandler,
+	NewAddonHandler,
 	NewChannelMonitorUserHandler,
 	NewChannelMonitorV2Handler,
 	ProvideGatewayHandler,
@@ -291,6 +296,7 @@ var ProviderSet = wire.NewSet(
 	admin.NewComplianceHandler,
 	admin.NewAuditLogHandler,
 	admin.NewResellerHandler,
+	admin.NewAddonPricingHandler,
 
 	// AdminHandlers and Handlers constructors
 	ProvideAdminHandlers,

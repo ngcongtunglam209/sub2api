@@ -49,6 +49,9 @@ func RegisterAdminRoutes(
 		// 分销商套餐与自定义域名
 		registerResellerRoutes(admin, h)
 
+		// 自助加购定价（并发 / RPM 的单价与上限）
+		registerAddonPricingRoutes(admin, h)
+
 		// OpenAI OAuth
 		registerOpenAIOAuthRoutes(admin, h)
 
@@ -463,6 +466,24 @@ func registerResellerRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		domains.POST("", h.Admin.Reseller.CreateDomain)
 		domains.PATCH("/:id", h.Admin.Reseller.SetDomainStatus)
 		domains.DELETE("/:id", h.Admin.Reseller.DeleteDomain)
+	}
+}
+
+// registerAddonPricingRoutes wires the operator side of the self-service store.
+//
+// Prices and caps only — there is no admin route that grants an add-on. The
+// store's whole premise is that the user pays for it out of a balance that is
+// already theirs, and a hand-granted add-on would be a second, unpriced way to
+// hand out the scarcest resource in the system.
+func registerAddonPricingRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	if h.Admin == nil || h.Admin.AddonPricing == nil {
+		return
+	}
+
+	pricing := admin.Group("/addon-pricing")
+	{
+		pricing.GET("", h.Admin.AddonPricing.Get)
+		pricing.PUT("", h.Admin.AddonPricing.Update)
 	}
 }
 

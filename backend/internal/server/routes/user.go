@@ -125,6 +125,21 @@ func RegisterUserRoutes(
 			}
 		}
 
+		// 自助加购：用自己的余额买并发 / RPM / 分销商套餐。
+		//
+		// 不走支付网关：钱早就通过充值进了余额，这里只是一次内部记账。
+		// 买家一律取自会话，请求体里没有、也不该有 user id。
+		if h.Addon != nil {
+			addons := authenticated.Group("/addons")
+			{
+				addons.GET("", h.Addon.Catalogue)
+				addons.POST("/purchase", h.Addon.Purchase)
+			}
+			// 套餐购买挂在 /reseller-plans 下而不是 /addons 下：变的是套餐
+			// 归属，与并发额度不是一类东西，路径按被改的对象走。
+			authenticated.POST("/reseller-plans/:id/purchase", h.Addon.PurchaseResellerPlan)
+		}
+
 		// 公告（用户可见）
 		announcements := authenticated.Group("/announcements")
 		{

@@ -142,6 +142,65 @@ export default {
       disabled: 'Disabled'
     }
   },
+
+  // Add-on Store
+  store: {
+    title: 'Add-on Store',
+    description: 'Spend your balance on extra capacity and reseller tiers',
+    balanceLabel: 'Your balance',
+    loadFailed: 'Failed to load the store',
+    unitPriceLabel: 'Unit price',
+    perUnitMonth: 'Per unit, per month',
+    heldLabel: 'Currently rented',
+    heldNone: 'Nothing rented yet',
+    heldUntil: 'Active until {date}',
+    capLabel: 'Cap after this purchase',
+    monthsLabel: 'Months',
+    monthsHint: 'How long the add-on stays active',
+    totalLabel: 'Total',
+    buy: 'Buy',
+    amountRequired: 'Enter a quantity of at least one',
+    monthsRequired: 'Enter at least one month',
+    insufficientBalance: 'Your balance does not cover this purchase',
+    capExceeded: 'This would take you past the cap of {cap}',
+    purchaseSuccess: 'Purchase complete',
+    purchaseFailed: 'Purchase failed',
+    concurrency: {
+      title: 'Extra concurrency',
+      description: 'More simultaneous requests, on top of your account limit',
+      amountLabel: 'Extra concurrent requests',
+      amountHint: 'Sold one request at a time',
+      unit: 'concurrent'
+    },
+    rpm: {
+      title: 'Extra rate limit',
+      description: 'More requests per minute, on top of your account limit',
+      amountLabel: 'Blocks of {step} req/min',
+      amountHint: 'Sold in blocks of {step} requests per minute',
+      unit: 'req/min'
+    },
+    plans: {
+      title: 'Reseller plans',
+      description: 'Buy a reseller tier with your balance',
+      loadFailed: 'Failed to load reseller plans',
+      empty: 'No reseller plans are on sale right now',
+      price: 'Price',
+      creditBack: 'Credit back',
+      creditBackCaption: 'Returned to your balance on purchase',
+      concurrencyBonus: 'Bonus concurrency',
+      rpmLimit: 'Rate limit',
+      perMinute: 'req/min',
+      maxDomains: 'Domains',
+      validity: 'Valid for {days} days',
+      buy: 'Buy plan',
+      purchaseSuccess: 'Reseller plan activated',
+      purchaseFailed: 'Failed to buy the reseller plan',
+      heldTitle: 'Your reseller plan',
+      heldNotice: 'You already hold a reseller plan. A second purchase would pay the credit twice, so the server refuses it while this one is active.',
+      heldExpires: 'Valid until {date}',
+      heldNoExpiry: 'This plan does not expire'
+    }
+  },
   announcements: {
     title: 'Announcements',
     markRead: 'Mark as read',

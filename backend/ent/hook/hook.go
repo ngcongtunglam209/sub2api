@@ -441,6 +441,18 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 }
 
+// The UserAddonFunc type is an adapter to allow the use of ordinary
+// function as UserAddon mutator.
+type UserAddonFunc func(context.Context, *ent.UserAddonMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserAddonFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.UserAddonMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserAddonMutation", m)
+}
+
 // The UserAllowedGroupFunc type is an adapter to allow the use of ordinary
 // function as UserAllowedGroup mutator.
 type UserAllowedGroupFunc func(context.Context, *ent.UserAllowedGroupMutation) (ent.Value, error)

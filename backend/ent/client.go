@@ -51,6 +51,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/usagecleanuptask"
 	"github.com/Wei-Shaw/sub2api/ent/usagelog"
 	"github.com/Wei-Shaw/sub2api/ent/user"
+	"github.com/Wei-Shaw/sub2api/ent/useraddon"
 	"github.com/Wei-Shaw/sub2api/ent/userallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/userattributedefinition"
 	"github.com/Wei-Shaw/sub2api/ent/userattributevalue"
@@ -138,6 +139,8 @@ type Client struct {
 	UsageLog *UsageLogClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserAddon is the client for interacting with the UserAddon builders.
+	UserAddon *UserAddonClient
 	// UserAllowedGroup is the client for interacting with the UserAllowedGroup builders.
 	UserAllowedGroup *UserAllowedGroupClient
 	// UserAttributeDefinition is the client for interacting with the UserAttributeDefinition builders.
@@ -197,6 +200,7 @@ func (c *Client) init() {
 	c.UsageCleanupTask = NewUsageCleanupTaskClient(c.config)
 	c.UsageLog = NewUsageLogClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UserAddon = NewUserAddonClient(c.config)
 	c.UserAllowedGroup = NewUserAllowedGroupClient(c.config)
 	c.UserAttributeDefinition = NewUserAttributeDefinitionClient(c.config)
 	c.UserAttributeValue = NewUserAttributeValueClient(c.config)
@@ -331,6 +335,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		UsageCleanupTask:              NewUsageCleanupTaskClient(cfg),
 		UsageLog:                      NewUsageLogClient(cfg),
 		User:                          NewUserClient(cfg),
+		UserAddon:                     NewUserAddonClient(cfg),
 		UserAllowedGroup:              NewUserAllowedGroupClient(cfg),
 		UserAttributeDefinition:       NewUserAttributeDefinitionClient(cfg),
 		UserAttributeValue:            NewUserAttributeValueClient(cfg),
@@ -392,6 +397,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		UsageCleanupTask:              NewUsageCleanupTaskClient(cfg),
 		UsageLog:                      NewUsageLogClient(cfg),
 		User:                          NewUserClient(cfg),
+		UserAddon:                     NewUserAddonClient(cfg),
 		UserAllowedGroup:              NewUserAllowedGroupClient(cfg),
 		UserAttributeDefinition:       NewUserAttributeDefinitionClient(cfg),
 		UserAttributeValue:            NewUserAttributeValueClient(cfg),
@@ -436,7 +442,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
 		c.Proxy, c.RedeemCode, c.ResellerDomain, c.ResellerPlan, c.SecuritySecret,
 		c.Setting, c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask,
-		c.UsageLog, c.User, c.UserAllowedGroup, c.UserAttributeDefinition,
+		c.UsageLog, c.User, c.UserAddon, c.UserAllowedGroup, c.UserAttributeDefinition,
 		c.UserAttributeValue, c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
 	} {
 		n.Use(hooks...)
@@ -456,7 +462,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
 		c.Proxy, c.RedeemCode, c.ResellerDomain, c.ResellerPlan, c.SecuritySecret,
 		c.Setting, c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask,
-		c.UsageLog, c.User, c.UserAllowedGroup, c.UserAttributeDefinition,
+		c.UsageLog, c.User, c.UserAddon, c.UserAllowedGroup, c.UserAttributeDefinition,
 		c.UserAttributeValue, c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
 	} {
 		n.Intercept(interceptors...)
@@ -538,6 +544,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UsageLog.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *UserAddonMutation:
+		return c.UserAddon.mutate(ctx, m)
 	case *UserAllowedGroupMutation:
 		return c.UserAllowedGroup.mutate(ctx, m)
 	case *UserAttributeDefinitionMutation:
@@ -6330,6 +6338,139 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
+// UserAddonClient is a client for the UserAddon schema.
+type UserAddonClient struct {
+	config
+}
+
+// NewUserAddonClient returns a client for the UserAddon from the given config.
+func NewUserAddonClient(c config) *UserAddonClient {
+	return &UserAddonClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `useraddon.Hooks(f(g(h())))`.
+func (c *UserAddonClient) Use(hooks ...Hook) {
+	c.hooks.UserAddon = append(c.hooks.UserAddon, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `useraddon.Intercept(f(g(h())))`.
+func (c *UserAddonClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserAddon = append(c.inters.UserAddon, interceptors...)
+}
+
+// Create returns a builder for creating a UserAddon entity.
+func (c *UserAddonClient) Create() *UserAddonCreate {
+	mutation := newUserAddonMutation(c.config, OpCreate)
+	return &UserAddonCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserAddon entities.
+func (c *UserAddonClient) CreateBulk(builders ...*UserAddonCreate) *UserAddonCreateBulk {
+	return &UserAddonCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserAddonClient) MapCreateBulk(slice any, setFunc func(*UserAddonCreate, int)) *UserAddonCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserAddonCreateBulk{err: fmt.Errorf("calling to UserAddonClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserAddonCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserAddonCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserAddon.
+func (c *UserAddonClient) Update() *UserAddonUpdate {
+	mutation := newUserAddonMutation(c.config, OpUpdate)
+	return &UserAddonUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserAddonClient) UpdateOne(_m *UserAddon) *UserAddonUpdateOne {
+	mutation := newUserAddonMutation(c.config, OpUpdateOne, withUserAddon(_m))
+	return &UserAddonUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserAddonClient) UpdateOneID(id int64) *UserAddonUpdateOne {
+	mutation := newUserAddonMutation(c.config, OpUpdateOne, withUserAddonID(id))
+	return &UserAddonUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserAddon.
+func (c *UserAddonClient) Delete() *UserAddonDelete {
+	mutation := newUserAddonMutation(c.config, OpDelete)
+	return &UserAddonDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserAddonClient) DeleteOne(_m *UserAddon) *UserAddonDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserAddonClient) DeleteOneID(id int64) *UserAddonDeleteOne {
+	builder := c.Delete().Where(useraddon.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserAddonDeleteOne{builder}
+}
+
+// Query returns a query builder for UserAddon.
+func (c *UserAddonClient) Query() *UserAddonQuery {
+	return &UserAddonQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserAddon},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserAddon entity by its id.
+func (c *UserAddonClient) Get(ctx context.Context, id int64) (*UserAddon, error) {
+	return c.Query().Where(useraddon.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserAddonClient) GetX(ctx context.Context, id int64) *UserAddon {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserAddonClient) Hooks() []Hook {
+	return c.hooks.UserAddon
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserAddonClient) Interceptors() []Interceptor {
+	return c.inters.UserAddon
+}
+
+func (c *UserAddonClient) mutate(ctx context.Context, m *UserAddonMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserAddonCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserAddonUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserAddonUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserAddonDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown UserAddon mutation op: %q", m.Op())
+	}
+}
+
 // UserAllowedGroupClient is a client for the UserAllowedGroup schema.
 type UserAllowedGroupClient struct {
 	config
@@ -7256,8 +7397,9 @@ type (
 		PaymentOrder, PaymentProviderInstance, PendingAuthSession, PromoCode,
 		PromoCodeUsage, Proxy, RedeemCode, ResellerDomain, ResellerPlan,
 		SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
-		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
-		UserAttributeValue, UserPlatformQuota, UserSubscription, VIPTier []ent.Hook
+		UsageCleanupTask, UsageLog, User, UserAddon, UserAllowedGroup,
+		UserAttributeDefinition, UserAttributeValue, UserPlatformQuota,
+		UserSubscription, VIPTier []ent.Hook
 	}
 	inters struct {
 		APIKey, Account, AccountGroup, Announcement, AnnouncementRead, AuthIdentity,
@@ -7268,9 +7410,9 @@ type (
 		PaymentOrder, PaymentProviderInstance, PendingAuthSession, PromoCode,
 		PromoCodeUsage, Proxy, RedeemCode, ResellerDomain, ResellerPlan,
 		SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
-		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
-		UserAttributeValue, UserPlatformQuota, UserSubscription,
-		VIPTier []ent.Interceptor
+		UsageCleanupTask, UsageLog, User, UserAddon, UserAllowedGroup,
+		UserAttributeDefinition, UserAttributeValue, UserPlatformQuota,
+		UserSubscription, VIPTier []ent.Interceptor
 	}
 )
 

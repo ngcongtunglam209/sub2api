@@ -131,6 +131,7 @@ export function buildSelfNavItems(ctx: NavContext, withDashboard: boolean): NavI
     { path: '/purchase', label: t('nav.buySubscription'), icon: 'recharge', hideInSimpleMode: true, featureFlag: flags.payment },
     { path: '/orders', label: t('nav.myOrders'), icon: 'orderList', hideInSimpleMode: true, featureFlag: flags.payment },
     { path: '/redeem', label: t('nav.redeem'), icon: 'gift', hideInSimpleMode: true },
+    { path: '/store', label: t('nav.store'), icon: 'priceTag', hideInSimpleMode: true },
     { path: '/reseller', label: t('nav.reseller'), icon: 'ticket', hideInSimpleMode: true },
     { path: '/affiliate', label: t('nav.affiliate'), icon: 'users', hideInSimpleMode: true, featureFlag: flags.affiliate },
     { path: '/profile', label: t('nav.profile'), icon: 'user' },
