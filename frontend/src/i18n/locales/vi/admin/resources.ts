@@ -386,7 +386,7 @@ export default {
     // VIP Tiers
     vipTiers: {
       title: 'Hạng VIP',
-      description: 'Các hạng đạt được nhờ chi tiêu; mỗi hạng mang lại một mức chiết khấu tính phí và giới hạn số luồng đồng thời cao hơn',
+      description: 'Các hạng đạt được nhờ chi tiêu; mỗi hạng mang lại một mức chiết khấu tính phí và số luồng đồng thời tặng thêm trên mức sẵn có của người dùng',
       ladderHint: 'Hạng cao hơn phải yêu cầu chi tiêu nhiều hơn và tính phí thấp hơn hạng bên dưới',
       create: 'Thêm Hạng',
       createTitle: 'Thêm Hạng VIP',
@@ -405,7 +405,8 @@ export default {
         minSpend: 'Chi tiêu yêu cầu (USD)',
         rateMultiplier: 'Hệ Số Tính Phí',
         rateMultiplierHint: '0.9 nghĩa là người dùng bị tính phí bằng 90% mức giá thông thường',
-        concurrency: 'Số Luồng Đồng Thời',
+        concurrency: 'Số Luồng Tặng Thêm',
+        concurrencyHint: 'Được cộng vào số luồng đồng thời sẵn có của người dùng, không phải thay thế. Người dùng có 2 mà đạt hạng tặng 5 thì thành 7',
         graceDays: 'Hiệu lực trong (ngày)',
         graceDaysHint: 'Được gia hạn thêm số ngày này sau mỗi đơn hàng hoàn tất',
         badgeColor: 'Màu Huy Hiệu',
