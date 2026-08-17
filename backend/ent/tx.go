@@ -70,6 +70,8 @@ type Tx struct {
 	RedeemCode *RedeemCodeClient
 	// ResellerDomain is the client for interacting with the ResellerDomain builders.
 	ResellerDomain *ResellerDomainClient
+	// ResellerPlan is the client for interacting with the ResellerPlan builders.
+	ResellerPlan *ResellerPlanClient
 	// SecuritySecret is the client for interacting with the SecuritySecret builders.
 	SecuritySecret *SecuritySecretClient
 	// Setting is the client for interacting with the Setting builders.
@@ -255,6 +257,7 @@ func (tx *Tx) init() {
 	tx.Proxy = NewProxyClient(tx.config)
 	tx.RedeemCode = NewRedeemCodeClient(tx.config)
 	tx.ResellerDomain = NewResellerDomainClient(tx.config)
+	tx.ResellerPlan = NewResellerPlanClient(tx.config)
 	tx.SecuritySecret = NewSecuritySecretClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.SubscriptionPlan = NewSubscriptionPlanClient(tx.config)

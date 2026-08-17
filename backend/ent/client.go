@@ -43,6 +43,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/resellerdomain"
+	"github.com/Wei-Shaw/sub2api/ent/resellerplan"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
 	"github.com/Wei-Shaw/sub2api/ent/subscriptionplan"
@@ -121,6 +122,8 @@ type Client struct {
 	RedeemCode *RedeemCodeClient
 	// ResellerDomain is the client for interacting with the ResellerDomain builders.
 	ResellerDomain *ResellerDomainClient
+	// ResellerPlan is the client for interacting with the ResellerPlan builders.
+	ResellerPlan *ResellerPlanClient
 	// SecuritySecret is the client for interacting with the SecuritySecret builders.
 	SecuritySecret *SecuritySecretClient
 	// Setting is the client for interacting with the Setting builders.
@@ -186,6 +189,7 @@ func (c *Client) init() {
 	c.Proxy = NewProxyClient(c.config)
 	c.RedeemCode = NewRedeemCodeClient(c.config)
 	c.ResellerDomain = NewResellerDomainClient(c.config)
+	c.ResellerPlan = NewResellerPlanClient(c.config)
 	c.SecuritySecret = NewSecuritySecretClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.SubscriptionPlan = NewSubscriptionPlanClient(c.config)
@@ -319,6 +323,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Proxy:                         NewProxyClient(cfg),
 		RedeemCode:                    NewRedeemCodeClient(cfg),
 		ResellerDomain:                NewResellerDomainClient(cfg),
+		ResellerPlan:                  NewResellerPlanClient(cfg),
 		SecuritySecret:                NewSecuritySecretClient(cfg),
 		Setting:                       NewSettingClient(cfg),
 		SubscriptionPlan:              NewSubscriptionPlanClient(cfg),
@@ -379,6 +384,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Proxy:                         NewProxyClient(cfg),
 		RedeemCode:                    NewRedeemCodeClient(cfg),
 		ResellerDomain:                NewResellerDomainClient(cfg),
+		ResellerPlan:                  NewResellerPlanClient(cfg),
 		SecuritySecret:                NewSecuritySecretClient(cfg),
 		Setting:                       NewSettingClient(cfg),
 		SubscriptionPlan:              NewSubscriptionPlanClient(cfg),
@@ -428,10 +434,10 @@ func (c *Client) Use(hooks ...Hook) {
 		c.CompositeModelRoute, c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord,
 		c.IdentityAdoptionDecision, c.PaymentAuditLog, c.PaymentOrder,
 		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
-		c.Proxy, c.RedeemCode, c.ResellerDomain, c.SecuritySecret, c.Setting,
-		c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog,
-		c.User, c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
-		c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
+		c.Proxy, c.RedeemCode, c.ResellerDomain, c.ResellerPlan, c.SecuritySecret,
+		c.Setting, c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask,
+		c.UsageLog, c.User, c.UserAllowedGroup, c.UserAttributeDefinition,
+		c.UserAttributeValue, c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
 	} {
 		n.Use(hooks...)
 	}
@@ -448,10 +454,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.CompositeModelRoute, c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord,
 		c.IdentityAdoptionDecision, c.PaymentAuditLog, c.PaymentOrder,
 		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
-		c.Proxy, c.RedeemCode, c.ResellerDomain, c.SecuritySecret, c.Setting,
-		c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog,
-		c.User, c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
-		c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
+		c.Proxy, c.RedeemCode, c.ResellerDomain, c.ResellerPlan, c.SecuritySecret,
+		c.Setting, c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask,
+		c.UsageLog, c.User, c.UserAllowedGroup, c.UserAttributeDefinition,
+		c.UserAttributeValue, c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -516,6 +522,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RedeemCode.mutate(ctx, m)
 	case *ResellerDomainMutation:
 		return c.ResellerDomain.mutate(ctx, m)
+	case *ResellerPlanMutation:
+		return c.ResellerPlan.mutate(ctx, m)
 	case *SecuritySecretMutation:
 		return c.SecuritySecret.mutate(ctx, m)
 	case *SettingMutation:
@@ -4952,6 +4960,139 @@ func (c *ResellerDomainClient) mutate(ctx context.Context, m *ResellerDomainMuta
 	}
 }
 
+// ResellerPlanClient is a client for the ResellerPlan schema.
+type ResellerPlanClient struct {
+	config
+}
+
+// NewResellerPlanClient returns a client for the ResellerPlan from the given config.
+func NewResellerPlanClient(c config) *ResellerPlanClient {
+	return &ResellerPlanClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `resellerplan.Hooks(f(g(h())))`.
+func (c *ResellerPlanClient) Use(hooks ...Hook) {
+	c.hooks.ResellerPlan = append(c.hooks.ResellerPlan, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `resellerplan.Intercept(f(g(h())))`.
+func (c *ResellerPlanClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ResellerPlan = append(c.inters.ResellerPlan, interceptors...)
+}
+
+// Create returns a builder for creating a ResellerPlan entity.
+func (c *ResellerPlanClient) Create() *ResellerPlanCreate {
+	mutation := newResellerPlanMutation(c.config, OpCreate)
+	return &ResellerPlanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ResellerPlan entities.
+func (c *ResellerPlanClient) CreateBulk(builders ...*ResellerPlanCreate) *ResellerPlanCreateBulk {
+	return &ResellerPlanCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ResellerPlanClient) MapCreateBulk(slice any, setFunc func(*ResellerPlanCreate, int)) *ResellerPlanCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ResellerPlanCreateBulk{err: fmt.Errorf("calling to ResellerPlanClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ResellerPlanCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ResellerPlanCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ResellerPlan.
+func (c *ResellerPlanClient) Update() *ResellerPlanUpdate {
+	mutation := newResellerPlanMutation(c.config, OpUpdate)
+	return &ResellerPlanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ResellerPlanClient) UpdateOne(_m *ResellerPlan) *ResellerPlanUpdateOne {
+	mutation := newResellerPlanMutation(c.config, OpUpdateOne, withResellerPlan(_m))
+	return &ResellerPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ResellerPlanClient) UpdateOneID(id int64) *ResellerPlanUpdateOne {
+	mutation := newResellerPlanMutation(c.config, OpUpdateOne, withResellerPlanID(id))
+	return &ResellerPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ResellerPlan.
+func (c *ResellerPlanClient) Delete() *ResellerPlanDelete {
+	mutation := newResellerPlanMutation(c.config, OpDelete)
+	return &ResellerPlanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ResellerPlanClient) DeleteOne(_m *ResellerPlan) *ResellerPlanDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ResellerPlanClient) DeleteOneID(id int64) *ResellerPlanDeleteOne {
+	builder := c.Delete().Where(resellerplan.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ResellerPlanDeleteOne{builder}
+}
+
+// Query returns a query builder for ResellerPlan.
+func (c *ResellerPlanClient) Query() *ResellerPlanQuery {
+	return &ResellerPlanQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeResellerPlan},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ResellerPlan entity by its id.
+func (c *ResellerPlanClient) Get(ctx context.Context, id int64) (*ResellerPlan, error) {
+	return c.Query().Where(resellerplan.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ResellerPlanClient) GetX(ctx context.Context, id int64) *ResellerPlan {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ResellerPlanClient) Hooks() []Hook {
+	return c.hooks.ResellerPlan
+}
+
+// Interceptors returns the client interceptors.
+func (c *ResellerPlanClient) Interceptors() []Interceptor {
+	return c.inters.ResellerPlan
+}
+
+func (c *ResellerPlanClient) mutate(ctx context.Context, m *ResellerPlanMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ResellerPlanCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ResellerPlanUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ResellerPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ResellerPlanDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ResellerPlan mutation op: %q", m.Op())
+	}
+}
+
 // SecuritySecretClient is a client for the SecuritySecret schema.
 type SecuritySecretClient struct {
 	config
@@ -7113,10 +7254,10 @@ type (
 		ChannelMonitorRequestTemplate, CompositeModelRoute, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, PaymentAuditLog,
 		PaymentOrder, PaymentProviderInstance, PendingAuthSession, PromoCode,
-		PromoCodeUsage, Proxy, RedeemCode, ResellerDomain, SecuritySecret, Setting,
-		SubscriptionPlan, TLSFingerprintProfile, UsageCleanupTask, UsageLog, User,
-		UserAllowedGroup, UserAttributeDefinition, UserAttributeValue,
-		UserPlatformQuota, UserSubscription, VIPTier []ent.Hook
+		PromoCodeUsage, Proxy, RedeemCode, ResellerDomain, ResellerPlan,
+		SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
+		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
+		UserAttributeValue, UserPlatformQuota, UserSubscription, VIPTier []ent.Hook
 	}
 	inters struct {
 		APIKey, Account, AccountGroup, Announcement, AnnouncementRead, AuthIdentity,
@@ -7125,10 +7266,11 @@ type (
 		ChannelMonitorRequestTemplate, CompositeModelRoute, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, PaymentAuditLog,
 		PaymentOrder, PaymentProviderInstance, PendingAuthSession, PromoCode,
-		PromoCodeUsage, Proxy, RedeemCode, ResellerDomain, SecuritySecret, Setting,
-		SubscriptionPlan, TLSFingerprintProfile, UsageCleanupTask, UsageLog, User,
-		UserAllowedGroup, UserAttributeDefinition, UserAttributeValue,
-		UserPlatformQuota, UserSubscription, VIPTier []ent.Interceptor
+		PromoCodeUsage, Proxy, RedeemCode, ResellerDomain, ResellerPlan,
+		SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
+		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
+		UserAttributeValue, UserPlatformQuota, UserSubscription,
+		VIPTier []ent.Interceptor
 	}
 )
 

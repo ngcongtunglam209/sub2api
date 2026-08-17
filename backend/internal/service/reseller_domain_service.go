@@ -48,14 +48,47 @@ type ResellerDomainService struct {
 	// the primary domain must not depend on the database being reachable.
 	canonical map[string]struct{}
 
+	quotaResolver ResellerDomainQuotaResolver
+
 	cache atomic.Value // resellerDomainSnapshot
 	sf    singleflight.Group
 }
 
+// checkDomainQuota refuses a domain the user's plan does not cover.
+//
+// Counts every row the user owns, disabled ones included: a disabled domain
+// still holds its certificate and can be switched back on, so letting it fall
+// out of the count would make the quota trivial to walk around.
+func (s *ResellerDomainService) checkDomainQuota(ctx context.Context, userID int64) error {
+	if s.quotaResolver == nil {
+		return nil
+	}
+
+	maxDomains, err := s.quotaResolver.MaxDomainsForUser(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if maxDomains <= 0 {
+		return infraerrors.Forbidden("RESELLER_PLAN_REQUIRED", "an active reseller plan is required to register a custom domain")
+	}
+
+	existing, err := s.repo.ListByUser(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if len(existing) >= maxDomains {
+		return infraerrors.Forbidden("RESELLER_DOMAIN_QUOTA_EXCEEDED",
+			fmt.Sprintf("this reseller plan allows %d custom domain(s)", maxDomains))
+	}
+	return nil
+}
+
 // ProvideResellerDomainService adapts the constructor for wire, which cannot
-// inject a bare []string.
-func ProvideResellerDomainService(repo ResellerDomainRepository, cfg *config.Config) *ResellerDomainService {
-	return NewResellerDomainService(repo, cfg.CustomDomain.CanonicalHosts)
+// inject a bare []string, and attaches the per-plan domain quota.
+func ProvideResellerDomainService(repo ResellerDomainRepository, planService *ResellerPlanService, cfg *config.Config) *ResellerDomainService {
+	svc := NewResellerDomainService(repo, cfg.CustomDomain.CanonicalHosts)
+	svc.SetQuotaResolver(planService)
+	return svc
 }
 
 func NewResellerDomainService(repo ResellerDomainRepository, canonicalHosts []string) *ResellerDomainService {
@@ -177,6 +210,24 @@ func (s *ResellerDomainService) Invalidate() {
 	s.cache.Store(resellerDomainSnapshot{})
 }
 
+// ResellerDomainQuotaResolver reports how many domains a user may hold.
+//
+// A narrow interface rather than the plan service itself: this package only
+// needs the number, and depending on the whole service would tie the domain
+// allowlist to the plan lifecycle for no gain.
+type ResellerDomainQuotaResolver interface {
+	MaxDomainsForUser(ctx context.Context, userID int64) (int, error)
+}
+
+// SetQuotaResolver wires the per-plan domain quota. Left unset, domain count
+// is unlimited — which is the behaviour before reseller plans existed, and the
+// right default for a deployment that never adopts them.
+func (s *ResellerDomainService) SetQuotaResolver(resolver ResellerDomainQuotaResolver) {
+	if s != nil {
+		s.quotaResolver = resolver
+	}
+}
+
 func (s *ResellerDomainService) Create(ctx context.Context, domain string, userID int64, notes string) (*ResellerDomain, error) {
 	normalized := NormalizeDomain(domain)
 	if err := validateResellerDomain(normalized); err != nil {
@@ -184,6 +235,10 @@ func (s *ResellerDomainService) Create(ctx context.Context, domain string, userI
 	}
 	if userID <= 0 {
 		return nil, infraerrors.BadRequest("INVALID_RESELLER_DOMAIN_USER", "a reseller domain must belong to a user")
+	}
+
+	if err := s.checkDomainQuota(ctx, userID); err != nil {
+		return nil, err
 	}
 
 	created, err := s.repo.Create(ctx, &ResellerDomain{

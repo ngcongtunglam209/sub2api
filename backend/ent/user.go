@@ -75,6 +75,10 @@ type User struct {
 	VipExpiresAt *time.Time `json:"vip_expires_at,omitempty"`
 	// VipTierLocked holds the value of the "vip_tier_locked" field.
 	VipTierLocked bool `json:"vip_tier_locked,omitempty"`
+	// ResellerPlanID holds the value of the "reseller_plan_id" field.
+	ResellerPlanID *int64 `json:"reseller_plan_id,omitempty"`
+	// ResellerPlanExpiresAt holds the value of the "reseller_plan_expires_at" field.
+	ResellerPlanExpiresAt *time.Time `json:"reseller_plan_expires_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -251,11 +255,11 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldBalance, user.FieldFrozenBalance, user.FieldBalanceNotifyThreshold, user.FieldTotalRecharged, user.FieldTotalPaidUsd, user.FieldVipQualifyingSpend:
 			values[i] = new(sql.NullFloat64)
-		case user.FieldID, user.FieldConcurrency, user.FieldRpmLimit, user.FieldVipTierID:
+		case user.FieldID, user.FieldConcurrency, user.FieldRpmLimit, user.FieldVipTierID, user.FieldResellerPlanID:
 			values[i] = new(sql.NullInt64)
 		case user.FieldEmail, user.FieldPasswordHash, user.FieldRole, user.FieldStatus, user.FieldUsername, user.FieldNotes, user.FieldTotpSecretEncrypted, user.FieldSignupSource, user.FieldBalanceNotifyThresholdType, user.FieldBalanceNotifyExtraEmails:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldTotpEnabledAt, user.FieldLastLoginAt, user.FieldLastActiveAt, user.FieldVipExpiresAt:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldTotpEnabledAt, user.FieldLastLoginAt, user.FieldLastActiveAt, user.FieldVipExpiresAt, user.FieldResellerPlanExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -459,6 +463,20 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field vip_tier_locked", values[i])
 			} else if value.Valid {
 				_m.VipTierLocked = value.Bool
+			}
+		case user.FieldResellerPlanID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field reseller_plan_id", values[i])
+			} else if value.Valid {
+				_m.ResellerPlanID = new(int64)
+				*_m.ResellerPlanID = value.Int64
+			}
+		case user.FieldResellerPlanExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field reseller_plan_expires_at", values[i])
+			} else if value.Valid {
+				_m.ResellerPlanExpiresAt = new(time.Time)
+				*_m.ResellerPlanExpiresAt = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -668,6 +686,16 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("vip_tier_locked=")
 	builder.WriteString(fmt.Sprintf("%v", _m.VipTierLocked))
+	builder.WriteString(", ")
+	if v := _m.ResellerPlanID; v != nil {
+		builder.WriteString("reseller_plan_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.ResellerPlanExpiresAt; v != nil {
+		builder.WriteString("reseller_plan_expires_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }
