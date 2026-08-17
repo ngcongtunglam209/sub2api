@@ -1487,6 +1487,29 @@ var (
 			},
 		},
 	}
+	// ResellerDomainsColumns holds the columns for the "reseller_domains" table.
+	ResellerDomainsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "domain", Type: field.TypeString, Unique: true, Size: 253},
+		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
+		{Name: "notes", Type: field.TypeString, Default: "", SchemaType: map[string]string{"postgres": "text"}},
+	}
+	// ResellerDomainsTable holds the schema information for the "reseller_domains" table.
+	ResellerDomainsTable = &schema.Table{
+		Name:       "reseller_domains",
+		Columns:    ResellerDomainsColumns,
+		PrimaryKey: []*schema.Column{ResellerDomainsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "resellerdomain_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{ResellerDomainsColumns[4]},
+			},
+		},
+	}
 	// SecuritySecretsColumns holds the columns for the "security_secrets" table.
 	SecuritySecretsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -2125,6 +2148,7 @@ var (
 		PromoCodeUsagesTable,
 		ProxiesTable,
 		RedeemCodesTable,
+		ResellerDomainsTable,
 		SecuritySecretsTable,
 		SettingsTable,
 		SubscriptionPlansTable,
@@ -2245,6 +2269,9 @@ func init() {
 	RedeemCodesTable.ForeignKeys[1].RefTable = UsersTable
 	RedeemCodesTable.Annotation = &entsql.Annotation{
 		Table: "redeem_codes",
+	}
+	ResellerDomainsTable.Annotation = &entsql.Annotation{
+		Table: "reseller_domains",
 	}
 	SecuritySecretsTable.Annotation = &entsql.Annotation{
 		Table: "security_secrets",

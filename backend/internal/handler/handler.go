@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/Wei-Shaw/sub2api/internal/handler/admin"
 	"github.com/Wei-Shaw/sub2api/internal/securityaudit"
+	"github.com/Wei-Shaw/sub2api/internal/service"
 )
 
 // AdminHandlers contains all admin-related HTTP handlers
@@ -46,28 +47,33 @@ type AdminHandlers struct {
 
 // Handlers contains all HTTP handlers
 type Handlers struct {
-	Auth             *AuthHandler
-	User             *UserHandler
-	APIKey           *APIKeyHandler
-	Usage            *UsageHandler
-	Redeem           *RedeemHandler
-	Subscription     *SubscriptionHandler
-	Announcement     *AnnouncementHandler
-	ChannelMonitor   *ChannelMonitorUserHandler
-	ChannelMonitorV2 *ChannelMonitorV2Handler
-	Admin            *AdminHandlers
-	Gateway          *GatewayHandler
-	OpenAIGateway    *OpenAIGatewayHandler
-	Setting          *SettingHandler
-	Totp             *TotpHandler
-	Passkey          *PasskeyHandler
-	Payment          *PaymentHandler
-	PaymentWebhook   *PaymentWebhookHandler
-	AvailableChannel *AvailableChannelHandler
-	ModelPlaza       *ModelPlazaHandler
-	AsyncImage       *AsyncImageHandler
-	BatchImage       *BatchImageHandler
-	VIP              *VIPHandler
+	Auth           *AuthHandler
+	User           *UserHandler
+	APIKey         *APIKeyHandler
+	Usage          *UsageHandler
+	Redeem         *RedeemHandler
+	Subscription   *SubscriptionHandler
+	Announcement   *AnnouncementHandler
+	ResellerDomain *ResellerDomainHandler
+	// ResellerDomainService is carried alongside its handler because the host
+	// guard is middleware, not a route: it needs the same allowlist the ask
+	// endpoint consults, and reaching it through a handler would be worse.
+	ResellerDomainService *service.ResellerDomainService
+	ChannelMonitor        *ChannelMonitorUserHandler
+	ChannelMonitorV2      *ChannelMonitorV2Handler
+	Admin                 *AdminHandlers
+	Gateway               *GatewayHandler
+	OpenAIGateway         *OpenAIGatewayHandler
+	Setting               *SettingHandler
+	Totp                  *TotpHandler
+	Passkey               *PasskeyHandler
+	Payment               *PaymentHandler
+	PaymentWebhook        *PaymentWebhookHandler
+	AvailableChannel      *AvailableChannelHandler
+	ModelPlaza            *ModelPlazaHandler
+	AsyncImage            *AsyncImageHandler
+	BatchImage            *BatchImageHandler
+	VIP                   *VIPHandler
 }
 
 // BuildInfo contains build-time information

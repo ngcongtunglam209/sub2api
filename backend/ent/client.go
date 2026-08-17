@@ -42,6 +42,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
+	"github.com/Wei-Shaw/sub2api/ent/resellerdomain"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
 	"github.com/Wei-Shaw/sub2api/ent/subscriptionplan"
@@ -118,6 +119,8 @@ type Client struct {
 	Proxy *ProxyClient
 	// RedeemCode is the client for interacting with the RedeemCode builders.
 	RedeemCode *RedeemCodeClient
+	// ResellerDomain is the client for interacting with the ResellerDomain builders.
+	ResellerDomain *ResellerDomainClient
 	// SecuritySecret is the client for interacting with the SecuritySecret builders.
 	SecuritySecret *SecuritySecretClient
 	// Setting is the client for interacting with the Setting builders.
@@ -182,6 +185,7 @@ func (c *Client) init() {
 	c.PromoCodeUsage = NewPromoCodeUsageClient(c.config)
 	c.Proxy = NewProxyClient(c.config)
 	c.RedeemCode = NewRedeemCodeClient(c.config)
+	c.ResellerDomain = NewResellerDomainClient(c.config)
 	c.SecuritySecret = NewSecuritySecretClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.SubscriptionPlan = NewSubscriptionPlanClient(c.config)
@@ -314,6 +318,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PromoCodeUsage:                NewPromoCodeUsageClient(cfg),
 		Proxy:                         NewProxyClient(cfg),
 		RedeemCode:                    NewRedeemCodeClient(cfg),
+		ResellerDomain:                NewResellerDomainClient(cfg),
 		SecuritySecret:                NewSecuritySecretClient(cfg),
 		Setting:                       NewSettingClient(cfg),
 		SubscriptionPlan:              NewSubscriptionPlanClient(cfg),
@@ -373,6 +378,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PromoCodeUsage:                NewPromoCodeUsageClient(cfg),
 		Proxy:                         NewProxyClient(cfg),
 		RedeemCode:                    NewRedeemCodeClient(cfg),
+		ResellerDomain:                NewResellerDomainClient(cfg),
 		SecuritySecret:                NewSecuritySecretClient(cfg),
 		Setting:                       NewSettingClient(cfg),
 		SubscriptionPlan:              NewSubscriptionPlanClient(cfg),
@@ -422,9 +428,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.CompositeModelRoute, c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord,
 		c.IdentityAdoptionDecision, c.PaymentAuditLog, c.PaymentOrder,
 		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
-		c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting, c.SubscriptionPlan,
-		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
-		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
+		c.Proxy, c.RedeemCode, c.ResellerDomain, c.SecuritySecret, c.Setting,
+		c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog,
+		c.User, c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
 		c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
 	} {
 		n.Use(hooks...)
@@ -442,9 +448,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.CompositeModelRoute, c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord,
 		c.IdentityAdoptionDecision, c.PaymentAuditLog, c.PaymentOrder,
 		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
-		c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting, c.SubscriptionPlan,
-		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
-		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
+		c.Proxy, c.RedeemCode, c.ResellerDomain, c.SecuritySecret, c.Setting,
+		c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog,
+		c.User, c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
 		c.UserPlatformQuota, c.UserSubscription, c.VIPTier,
 	} {
 		n.Intercept(interceptors...)
@@ -508,6 +514,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Proxy.mutate(ctx, m)
 	case *RedeemCodeMutation:
 		return c.RedeemCode.mutate(ctx, m)
+	case *ResellerDomainMutation:
+		return c.ResellerDomain.mutate(ctx, m)
 	case *SecuritySecretMutation:
 		return c.SecuritySecret.mutate(ctx, m)
 	case *SettingMutation:
@@ -4811,6 +4819,139 @@ func (c *RedeemCodeClient) mutate(ctx context.Context, m *RedeemCodeMutation) (V
 	}
 }
 
+// ResellerDomainClient is a client for the ResellerDomain schema.
+type ResellerDomainClient struct {
+	config
+}
+
+// NewResellerDomainClient returns a client for the ResellerDomain from the given config.
+func NewResellerDomainClient(c config) *ResellerDomainClient {
+	return &ResellerDomainClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `resellerdomain.Hooks(f(g(h())))`.
+func (c *ResellerDomainClient) Use(hooks ...Hook) {
+	c.hooks.ResellerDomain = append(c.hooks.ResellerDomain, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `resellerdomain.Intercept(f(g(h())))`.
+func (c *ResellerDomainClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ResellerDomain = append(c.inters.ResellerDomain, interceptors...)
+}
+
+// Create returns a builder for creating a ResellerDomain entity.
+func (c *ResellerDomainClient) Create() *ResellerDomainCreate {
+	mutation := newResellerDomainMutation(c.config, OpCreate)
+	return &ResellerDomainCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ResellerDomain entities.
+func (c *ResellerDomainClient) CreateBulk(builders ...*ResellerDomainCreate) *ResellerDomainCreateBulk {
+	return &ResellerDomainCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ResellerDomainClient) MapCreateBulk(slice any, setFunc func(*ResellerDomainCreate, int)) *ResellerDomainCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ResellerDomainCreateBulk{err: fmt.Errorf("calling to ResellerDomainClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ResellerDomainCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ResellerDomainCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ResellerDomain.
+func (c *ResellerDomainClient) Update() *ResellerDomainUpdate {
+	mutation := newResellerDomainMutation(c.config, OpUpdate)
+	return &ResellerDomainUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ResellerDomainClient) UpdateOne(_m *ResellerDomain) *ResellerDomainUpdateOne {
+	mutation := newResellerDomainMutation(c.config, OpUpdateOne, withResellerDomain(_m))
+	return &ResellerDomainUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ResellerDomainClient) UpdateOneID(id int64) *ResellerDomainUpdateOne {
+	mutation := newResellerDomainMutation(c.config, OpUpdateOne, withResellerDomainID(id))
+	return &ResellerDomainUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ResellerDomain.
+func (c *ResellerDomainClient) Delete() *ResellerDomainDelete {
+	mutation := newResellerDomainMutation(c.config, OpDelete)
+	return &ResellerDomainDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ResellerDomainClient) DeleteOne(_m *ResellerDomain) *ResellerDomainDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ResellerDomainClient) DeleteOneID(id int64) *ResellerDomainDeleteOne {
+	builder := c.Delete().Where(resellerdomain.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ResellerDomainDeleteOne{builder}
+}
+
+// Query returns a query builder for ResellerDomain.
+func (c *ResellerDomainClient) Query() *ResellerDomainQuery {
+	return &ResellerDomainQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeResellerDomain},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ResellerDomain entity by its id.
+func (c *ResellerDomainClient) Get(ctx context.Context, id int64) (*ResellerDomain, error) {
+	return c.Query().Where(resellerdomain.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ResellerDomainClient) GetX(ctx context.Context, id int64) *ResellerDomain {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ResellerDomainClient) Hooks() []Hook {
+	return c.hooks.ResellerDomain
+}
+
+// Interceptors returns the client interceptors.
+func (c *ResellerDomainClient) Interceptors() []Interceptor {
+	return c.inters.ResellerDomain
+}
+
+func (c *ResellerDomainClient) mutate(ctx context.Context, m *ResellerDomainMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ResellerDomainCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ResellerDomainUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ResellerDomainUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ResellerDomainDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ResellerDomain mutation op: %q", m.Op())
+	}
+}
+
 // SecuritySecretClient is a client for the SecuritySecret schema.
 type SecuritySecretClient struct {
 	config
@@ -6972,10 +7113,10 @@ type (
 		ChannelMonitorRequestTemplate, CompositeModelRoute, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, PaymentAuditLog,
 		PaymentOrder, PaymentProviderInstance, PendingAuthSession, PromoCode,
-		PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting, SubscriptionPlan,
-		TLSFingerprintProfile, UsageCleanupTask, UsageLog, User, UserAllowedGroup,
-		UserAttributeDefinition, UserAttributeValue, UserPlatformQuota,
-		UserSubscription, VIPTier []ent.Hook
+		PromoCodeUsage, Proxy, RedeemCode, ResellerDomain, SecuritySecret, Setting,
+		SubscriptionPlan, TLSFingerprintProfile, UsageCleanupTask, UsageLog, User,
+		UserAllowedGroup, UserAttributeDefinition, UserAttributeValue,
+		UserPlatformQuota, UserSubscription, VIPTier []ent.Hook
 	}
 	inters struct {
 		APIKey, Account, AccountGroup, Announcement, AnnouncementRead, AuthIdentity,
@@ -6984,10 +7125,10 @@ type (
 		ChannelMonitorRequestTemplate, CompositeModelRoute, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, PaymentAuditLog,
 		PaymentOrder, PaymentProviderInstance, PendingAuthSession, PromoCode,
-		PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting, SubscriptionPlan,
-		TLSFingerprintProfile, UsageCleanupTask, UsageLog, User, UserAllowedGroup,
-		UserAttributeDefinition, UserAttributeValue, UserPlatformQuota,
-		UserSubscription, VIPTier []ent.Interceptor
+		PromoCodeUsage, Proxy, RedeemCode, ResellerDomain, SecuritySecret, Setting,
+		SubscriptionPlan, TLSFingerprintProfile, UsageCleanupTask, UsageLog, User,
+		UserAllowedGroup, UserAttributeDefinition, UserAttributeValue,
+		UserPlatformQuota, UserSubscription, VIPTier []ent.Interceptor
 	}
 )
 
