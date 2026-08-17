@@ -81,6 +81,14 @@ describe('api/client locale coupling', () => {
     expect(await acceptLanguageOf(apiClient)).toBe('zh')
   })
 
+  it('sends the stored vi locale after a reload', async () => {
+    localStorage.setItem('sub2api_locale', 'vi')
+
+    const { apiClient } = await import('@/api/client')
+
+    expect(await acceptLanguageOf(apiClient)).toBe('vi')
+  })
+
   it('follows a language switch', async () => {
     const { apiClient } = await import('@/api/client')
     const { setCurrentLocale } = await import('@/i18n/locale')
@@ -88,6 +96,15 @@ describe('api/client locale coupling', () => {
     setCurrentLocale('zh')
 
     expect(await acceptLanguageOf(apiClient)).toBe('zh')
+  })
+
+  it('follows a language switch to vi', async () => {
+    const { apiClient } = await import('@/api/client')
+    const { setCurrentLocale } = await import('@/i18n/locale')
+
+    setCurrentLocale('vi')
+
+    expect(await acceptLanguageOf(apiClient)).toBe('vi')
   })
 
   it('falls back to the default locale when the active locale is unsupported', async () => {

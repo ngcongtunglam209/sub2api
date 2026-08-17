@@ -47,7 +47,14 @@
       user was reaching for the button. `FormField` reserves the message row, so
       the error appears in place.
     -->
-    <FormField :label="t('payment.customAmount')" :error="error">
+    <!--
+      The display-currency equivalent rides in `FormField`'s hint, not in a new
+      element: that row is already reserved and already muted at `2xs`, so the
+      hint costs no layout and cannot push the submit button down. An `error`
+      outranks it, which is the correct precedence — a rejected amount has no
+      meaningful equivalent to show.
+    -->
+    <FormField :label="t('payment.customAmount')" :error="error" :hint="displayEquivalentHint">
       <template #default="{ id, describedBy, invalid }">
         <div class="relative">
           <span
@@ -80,6 +87,7 @@ import { useI18n } from 'vue-i18n'
 
 import FormField from '@/components/common/FormField.vue'
 import { currencySymbol } from '@/components/payment/currency'
+import { useDisplayCurrency } from '@/composables/useDisplayCurrency'
 
 const props = withDefaults(defineProps<{
   amounts?: number[]
@@ -114,6 +122,22 @@ const quickAmountsLabelId = `quick-amounts-${useId()}`
  * topping up 100 CNY.
  */
 const creditedCurrencySymbol = currencySymbol('USD')
+
+/**
+ * A *reading aid*, never an input: the field keeps taking USD because the
+ * backend, the per-method limits and the credited balance are all USD. Showing
+ * the equivalent is what lets a reader priced in dong sanity-check the figure
+ * without leaving the form, and it stays hidden when nothing is being converted
+ * so an English reader never sees "$50 ≈ $50".
+ */
+const displayCurrency = useDisplayCurrency()
+
+const displayEquivalentHint = computed(() => {
+  if (!displayCurrency.converted.value) return ''
+  const amount = props.modelValue
+  if (amount == null || !(amount > 0)) return ''
+  return t('payment.approxDisplayAmount', { amount: displayCurrency.format(amount) })
+})
 
 const customText = ref('')
 

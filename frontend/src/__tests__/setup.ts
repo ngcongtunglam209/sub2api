@@ -135,6 +135,7 @@ config.global.stubs = {
 const { default: i18n, loadLocaleMessages } = await import('@/i18n')
 await loadLocaleMessages('en')
 await loadLocaleMessages('zh')
+await loadLocaleMessages('vi')
 config.global.plugins = [i18n]
 
 // 设置全局测试超时

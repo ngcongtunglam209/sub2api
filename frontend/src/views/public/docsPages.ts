@@ -1,7 +1,7 @@
 /**
  * The public documentation table of contents.
  *
- * Content lives in `docs/public/*.{en,zh}.md` — markdown in the repository,
+ * Content lives in `docs/public/*.{en,zh,vi}.md` — markdown in the repository,
  * reviewed and versioned with the code it describes, rather than rows in a
  * table an operator edits. The loaders are dynamic so a reader of one page
  * never downloads the other five, and so nothing here lands in the main
@@ -31,6 +31,7 @@ export const DOCS_PAGES: readonly DocsPage[] = [
     load: {
       en: () => import('../../../../docs/public/overview.en.md?raw'),
       zh: () => import('../../../../docs/public/overview.zh.md?raw'),
+      vi: () => import('../../../../docs/public/overview.vi.md?raw'),
     },
   },
   {
@@ -40,6 +41,7 @@ export const DOCS_PAGES: readonly DocsPage[] = [
     load: {
       en: () => import('../../../../docs/public/quickstart.en.md?raw'),
       zh: () => import('../../../../docs/public/quickstart.zh.md?raw'),
+      vi: () => import('../../../../docs/public/quickstart.vi.md?raw'),
     },
   },
   {
@@ -49,6 +51,7 @@ export const DOCS_PAGES: readonly DocsPage[] = [
     load: {
       en: () => import('../../../../docs/public/authentication.en.md?raw'),
       zh: () => import('../../../../docs/public/authentication.zh.md?raw'),
+      vi: () => import('../../../../docs/public/authentication.vi.md?raw'),
     },
   },
   {
@@ -58,6 +61,7 @@ export const DOCS_PAGES: readonly DocsPage[] = [
     load: {
       en: () => import('../../../../docs/public/api-reference.en.md?raw'),
       zh: () => import('../../../../docs/public/api-reference.zh.md?raw'),
+      vi: () => import('../../../../docs/public/api-reference.vi.md?raw'),
     },
   },
   {
@@ -67,6 +71,7 @@ export const DOCS_PAGES: readonly DocsPage[] = [
     load: {
       en: () => import('../../../../docs/public/billing-and-usage.en.md?raw'),
       zh: () => import('../../../../docs/public/billing-and-usage.zh.md?raw'),
+      vi: () => import('../../../../docs/public/billing-and-usage.vi.md?raw'),
     },
   },
   {
@@ -76,6 +81,7 @@ export const DOCS_PAGES: readonly DocsPage[] = [
     load: {
       en: () => import('../../../../docs/public/errors.en.md?raw'),
       zh: () => import('../../../../docs/public/errors.zh.md?raw'),
+      vi: () => import('../../../../docs/public/errors.vi.md?raw'),
     },
   },
 ]

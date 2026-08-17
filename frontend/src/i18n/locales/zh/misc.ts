@@ -82,7 +82,7 @@ export default {
     totalPaid: '累计付费',
     concurrency: '赠送并发数',
     discountBadge: '用量省 {percent}%',
-    spendToNext: '再消费 ${amount} 可达 {tier}',
+    spendToNext: '再消费 {amount} 可达 {tier}',
     topTier: '已是最高等级'
   },
   announcements: {
@@ -288,6 +288,7 @@ export default {
     quickAmounts: '快捷金额',
     customAmount: '自定义金额',
     enterAmount: '输入金额',
+    approxDisplayAmount: '≈ {amount}（按当前汇率）',
     paymentMethod: '支付方式',
     fee: '手续费',
     actualPay: '实付金额',

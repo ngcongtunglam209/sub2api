@@ -212,6 +212,30 @@
             </div>
             <div>
               <label class="input-label">{{
+                t("admin.settings.payment.displayUsdToCnyRate")
+              }}</label>
+              <input
+                :value="form.payment_display_usd_to_cny_rate || ''"
+                @input="
+                  form.payment_display_usd_to_cny_rate =
+                    parseFloat(
+                      ($event.target as HTMLInputElement).value,
+                    ) || 0
+                "
+                type="number"
+                step="0.0001"
+                min="0"
+                class="input"
+                :placeholder="
+                  t('admin.settings.payment.displayUsdToCnyRateDisabled')
+                "
+              />
+              <p class="mt-0.5 text-xs text-ink-tertiary">
+                {{ t("admin.settings.payment.displayUsdToCnyRateHint") }}
+              </p>
+            </div>
+            <div>
+              <label class="input-label">{{
                 t("admin.settings.payment.rechargeFeeRate")
               }}</label>
               <div class="relative">

@@ -659,6 +659,10 @@ export default {
         subscriptionUsdToVndRateHint:
           'VND charged per 1 USD on VND channels (e.g. 26000), for plan prices and balance recharges alike. 0 or empty = disabled, the USD figure is charged as-is. When enabled, all plan prices must be set in USD',
         subscriptionUsdToVndRateDisabled: 'Disabled (amount charged as-is)',
+        displayUsdToCnyRate: 'USD to CNY Display Rate',
+        displayUsdToCnyRateHint:
+          'CNY shown per 1 USD to readers using the Chinese panel (e.g. 7.1). Display only — nothing settles in CNY, so this never changes what a gateway charges. 0 or empty = show USD instead. The bank rate sync overwrites this field while it is enabled',
+        displayUsdToCnyRateDisabled: 'Disabled (prices shown in USD)',
         rechargeFeeRate: 'Recharge Fee Rate',
         rechargeFeeRateHint: 'Percentage of service fee charged on top of recharge amount, 0 means no fee',
         rechargeFeePreview: 'Preview: Recharge 100, fee {fee}',

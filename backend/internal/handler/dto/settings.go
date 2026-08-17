@@ -269,6 +269,7 @@ type SystemSettings struct {
 	PaymentBalanceDisabled           bool     `json:"payment_balance_disabled"`
 	PaymentBalanceRechargeMultiplier float64  `json:"payment_balance_recharge_multiplier"`
 	PaymentSubscriptionUSDToVNDRate  float64  `json:"payment_subscription_usd_to_vnd_rate"`
+	PaymentDisplayUSDToCNYRate       float64  `json:"payment_display_usd_to_cny_rate"`
 	PaymentRechargeFeeRate           float64  `json:"payment_recharge_fee_rate"`
 	PaymentLoadBalanceStrat          string   `json:"payment_load_balance_strategy"`
 	PaymentProductNamePrefix         string   `json:"payment_product_name_prefix"`
@@ -419,6 +420,12 @@ type PublicSettings struct {
 	RiskControlEnabled bool `json:"risk_control_enabled"`
 
 	AllowUserViewErrorRequests bool `json:"allow_user_view_error_requests"`
+
+	// Units of each display currency per 1 USD, keyed by ISO code (USD is always
+	// present at 1). The panel picks its display currency from the UI locale and
+	// converts stored USD amounts with this table; a currency missing here means
+	// "no usable rate", and the panel renders USD instead of guessing.
+	DisplayFXRates service.DisplayFXRates `json:"display_fx_rates"`
 }
 
 type LoginAgreementDocument struct {

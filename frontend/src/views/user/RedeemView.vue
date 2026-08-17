@@ -159,6 +159,7 @@ import Metric from '@/components/common/Metric.vue'
 import NumCell from '@/components/common/NumCell.vue'
 import Surface from '@/components/common/Surface.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import { useDisplayCurrency } from '@/composables/useDisplayCurrency'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { useSubscriptionStore } from '@/stores/subscriptions'
@@ -168,6 +169,7 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const subscriptionStore = useSubscriptionStore()
+const { format: formatDisplay } = useDisplayCurrency()
 
 const user = computed(() => authStore.user)
 
@@ -255,7 +257,14 @@ const successMessage = computed(() => {
   if (!result) return ''
 
   if (result.type === 'balance') {
-    return `${t('redeem.redeemSuccess')} ${t('redeem.added')}: $${result.value.toFixed(2)}`
+    /*
+     * A redeemed balance credit is a stored USD amount — no gateway is involved
+     * in a code redemption, so nothing here has been converted once already and
+     * the display conversion is safe to apply. `formatDisplayAmount` also owns
+     * the symbol, which the hardcoded `$` here got wrong for every non-English
+     * reader.
+     */
+    return `${t('redeem.redeemSuccess')} ${t('redeem.added')}: ${formatDisplay(result.value)}`
   }
   if (result.type === 'concurrency') {
     return `${t('redeem.redeemSuccess')} ${t('redeem.added')}: ${result.value} ${t('redeem.concurrentRequests')}`
