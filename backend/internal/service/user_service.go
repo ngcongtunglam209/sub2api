@@ -197,12 +197,13 @@ type RedeemUserAdjustmentRepository interface {
 }
 
 // VIPTierBenefitRepository reads the perks a user's active tier grants. Split
-// from VIPRateRepository because the auth snapshot needs the concurrency floor
+// from VIPRateRepository because the auth snapshot needs the concurrency bonus
 // while the billing hot path needs the multiplier, and neither should pull the
 // other's query along.
 type VIPTierBenefitRepository interface {
-	// GetVIPConcurrency returns the concurrency floor of the user's active
-	// tier, or 0 when they have none.
+	// GetVIPConcurrency returns the concurrency bonus of the user's active
+	// tier, or 0 when they have none. It is added to `users.concurrency`,
+	// not substituted for it.
 	GetVIPConcurrency(ctx context.Context, userID int64) (int, error)
 }
 

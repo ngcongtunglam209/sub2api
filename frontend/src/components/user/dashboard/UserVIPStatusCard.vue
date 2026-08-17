@@ -40,7 +40,12 @@
       </div>
       <div v-if="status.tier">
         <div class="text-ink-tertiary">{{ t('vip.concurrency') }}</div>
-        <div class="font-mono tabular-nums text-ink">{{ status.tier.concurrency }}</div>
+        <!--
+          The tier figure is a bonus added to the user's own concurrency, not
+          their total, so it is signed. Printing it bare read as "your limit is
+          5" to someone whose actual limit was 7.
+        -->
+        <div class="font-mono tabular-nums text-ink">+{{ status.tier.concurrency }}</div>
       </div>
       <div>
         <div class="text-ink-tertiary">{{ t('vip.totalPaid') }}</div>

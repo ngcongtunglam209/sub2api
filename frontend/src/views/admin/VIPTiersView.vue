@@ -112,6 +112,9 @@
           <div>
             <label class="input-label">{{ t('admin.vipTiers.fields.concurrency') }}</label>
             <input v-model.number="form.concurrency" type="number" min="1" class="input" />
+            <p class="mt-1 text-xs text-ink-tertiary">
+              {{ t('admin.vipTiers.fields.concurrencyHint') }}
+            </p>
           </div>
           <div>
             <label class="input-label">{{ t('admin.vipTiers.fields.graceDays') }}</label>

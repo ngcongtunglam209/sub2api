@@ -380,7 +380,7 @@ export default {
     // VIP 等级
     vipTiers: {
       title: 'VIP 等级',
-      description: '按真实付费金额定级，每级给出计费折扣与更高并发上限',
+      description: '按真实付费金额定级，每级给出计费折扣，并在用户自身并发之上额外赠送并发',
       ladderHint: '等级越高，所需消费必须更多、计费必须更低',
       create: '新增等级',
       createTitle: '新增 VIP 等级',
@@ -399,7 +399,8 @@ export default {
         minSpend: '所需消费（美元）',
         rateMultiplier: '计费倍率',
         rateMultiplierHint: '0.9 表示只按正常费用的 90% 计费',
-        concurrency: '并发数',
+        concurrency: '赠送并发数',
+        concurrencyHint: '累加到用户自身并发之上，不是替换。用户本身 2、等级赠送 5，最终为 7',
         graceDays: '有效期（天）',
         graceDaysHint: '每完成一笔订单顺延这么多天',
         badgeColor: '徽章颜色',

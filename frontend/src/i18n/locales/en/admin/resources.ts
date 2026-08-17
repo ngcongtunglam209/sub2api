@@ -386,7 +386,7 @@ export default {
     // VIP Tiers
     vipTiers: {
       title: 'VIP Tiers',
-      description: 'Tiers earned by paid spend; each grants a billing discount and a higher concurrency ceiling',
+      description: 'Tiers earned by paid spend; each grants a billing discount and extra concurrency on top of the user\'s own',
       ladderHint: 'A higher tier must require more spend and bill less than the one below it',
       create: 'Add Tier',
       createTitle: 'Add VIP Tier',
@@ -405,7 +405,8 @@ export default {
         minSpend: 'Spend required (USD)',
         rateMultiplier: 'Billing multiplier',
         rateMultiplierHint: '0.9 means the user is billed 90% of the normal rate',
-        concurrency: 'Concurrency',
+        concurrency: 'Bonus concurrency',
+        concurrencyHint: 'Added on top of the user\'s own concurrency, not a replacement for it. A user with 2 who reaches a tier granting 5 ends up with 7',
         graceDays: 'Valid for (days)',
         graceDaysHint: 'Extended by this many days on every completed order',
         badgeColor: 'Badge color',
