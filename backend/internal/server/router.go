@@ -113,6 +113,17 @@ func registerRoutes(
 	cfg *config.Config,
 	redisClient *redis.Client,
 ) {
+	// 分销商自定义域名：Host 准入必须排在所有业务路由之前，否则被停用的
+	// 分销商仍能打到后面的接口——签发证书的白名单管不到已签发的证书。
+	// custom_domain.enabled 为 false 时它是空操作。
+	r.Use(middleware2.ResellerHostGuard(cfg.CustomDomain, h.ResellerDomainService))
+
+	// Caddy 的 on_demand_tls ask 端点。放在 /internal/ 而不是 /api/v1/：
+	// 前者便于在边缘直接屏蔽外部访问，且不必为每个请求生成 CSP nonce。
+	if h.ResellerDomain != nil {
+		r.GET("/internal/tls-check", h.ResellerDomain.TLSCheck)
+	}
+
 	// 通用路由（健康检查、状态等）
 	routes.RegisterCommonRoutes(r)
 

@@ -360,6 +360,9 @@ func shouldBypassEmbeddedFrontend(path string) bool {
 		strings.HasPrefix(trimmed, "/backend-api/") ||
 		strings.HasPrefix(trimmed, "/antigravity/") ||
 		strings.HasPrefix(trimmed, "/setup/") ||
+		// Caddy's TLS ask endpoint — must not be swallowed by the SPA, which
+		// would answer 200 with index.html and thereby authorise every host.
+		strings.HasPrefix(trimmed, "/internal/") ||
 		trimmed == "/health" ||
 		trimmed == "/models" ||
 		trimmed == "/responses" ||

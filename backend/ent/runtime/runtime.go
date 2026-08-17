@@ -32,6 +32,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
+	"github.com/Wei-Shaw/sub2api/ent/resellerdomain"
 	"github.com/Wei-Shaw/sub2api/ent/schema"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
@@ -1732,6 +1733,49 @@ func init() {
 	redeemcodeDescValidityDays := redeemcodeFields[10].Descriptor()
 	// redeemcode.DefaultValidityDays holds the default value on creation for the validity_days field.
 	redeemcode.DefaultValidityDays = redeemcodeDescValidityDays.Default.(int)
+	resellerdomainMixin := schema.ResellerDomain{}.Mixin()
+	resellerdomainMixinFields0 := resellerdomainMixin[0].Fields()
+	_ = resellerdomainMixinFields0
+	resellerdomainFields := schema.ResellerDomain{}.Fields()
+	_ = resellerdomainFields
+	// resellerdomainDescCreatedAt is the schema descriptor for created_at field.
+	resellerdomainDescCreatedAt := resellerdomainMixinFields0[0].Descriptor()
+	// resellerdomain.DefaultCreatedAt holds the default value on creation for the created_at field.
+	resellerdomain.DefaultCreatedAt = resellerdomainDescCreatedAt.Default.(func() time.Time)
+	// resellerdomainDescUpdatedAt is the schema descriptor for updated_at field.
+	resellerdomainDescUpdatedAt := resellerdomainMixinFields0[1].Descriptor()
+	// resellerdomain.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	resellerdomain.DefaultUpdatedAt = resellerdomainDescUpdatedAt.Default.(func() time.Time)
+	// resellerdomain.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	resellerdomain.UpdateDefaultUpdatedAt = resellerdomainDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// resellerdomainDescDomain is the schema descriptor for domain field.
+	resellerdomainDescDomain := resellerdomainFields[0].Descriptor()
+	// resellerdomain.DomainValidator is a validator for the "domain" field. It is called by the builders before save.
+	resellerdomain.DomainValidator = func() func(string) error {
+		validators := resellerdomainDescDomain.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(domain string) error {
+			for _, fn := range fns {
+				if err := fn(domain); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// resellerdomainDescStatus is the schema descriptor for status field.
+	resellerdomainDescStatus := resellerdomainFields[2].Descriptor()
+	// resellerdomain.DefaultStatus holds the default value on creation for the status field.
+	resellerdomain.DefaultStatus = resellerdomainDescStatus.Default.(string)
+	// resellerdomain.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	resellerdomain.StatusValidator = resellerdomainDescStatus.Validators[0].(func(string) error)
+	// resellerdomainDescNotes is the schema descriptor for notes field.
+	resellerdomainDescNotes := resellerdomainFields[3].Descriptor()
+	// resellerdomain.DefaultNotes holds the default value on creation for the notes field.
+	resellerdomain.DefaultNotes = resellerdomainDescNotes.Default.(string)
 	securitysecretMixin := schema.SecuritySecret{}.Mixin()
 	securitysecretMixinFields0 := securitysecretMixin[0].Fields()
 	_ = securitysecretMixinFields0
