@@ -80,7 +80,7 @@ export default {
     expiresOn: '有效期至 {date}',
     qualifyingSpend: '计入等级的消费',
     totalPaid: '累计付费',
-    concurrency: '并发数',
+    concurrency: '赠送并发数',
     discountBadge: '用量省 {percent}%',
     spendToNext: '再消费 {amount} 可达 {tier}',
     topTier: '已是最高等级'

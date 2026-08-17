@@ -81,7 +81,7 @@ export default {
     expiresOn: 'Có hiệu lực đến {date}',
     qualifyingSpend: 'Chi tiêu được tính vào hạng của bạn',
     totalPaid: 'Tổng đã thanh toán',
-    concurrency: 'Số luồng đồng thời',
+    concurrency: 'Số luồng tặng thêm',
     discountBadge: 'Giảm {percent}% phí sử dụng',
     spendToNext: 'Cần thêm {amount} để đạt {tier}',
     topTier: 'Bạn đang ở hạng cao nhất'
