@@ -363,6 +363,16 @@ export interface VIPTier {
   /** Billing multiplier applied on top of the group rate, e.g. 0.9 = 10% off. */
   rate_multiplier: number
   concurrency: number
+  /** Extra requests per minute the tier grants; 0 means it grants none. */
+  rpm_limit: number
+  /**
+   * Exemptions, not amounts. `concurrency` and `rpm_limit` are added to what the
+   * user already holds, so 0 there means "adds nothing" — it cannot also mean
+   * "no ceiling". Read these before rendering either number, or an unlimited
+   * tier displays as its unused addend.
+   */
+  unlimited_concurrency: boolean
+  unlimited_rpm: boolean
   /** Days the tier is extended by on every completed order. */
   grace_days: number
   badge_color: string
@@ -377,6 +387,9 @@ export interface VIPTierRequest {
   min_spend_usd?: number
   rate_multiplier?: number
   concurrency?: number
+  rpm_limit?: number
+  unlimited_concurrency?: boolean
+  unlimited_rpm?: boolean
   grace_days?: number
   badge_color?: string
   enabled?: boolean

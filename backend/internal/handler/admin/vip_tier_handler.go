@@ -22,27 +22,36 @@ func NewVIPTierHandler(vipTierService *service.VIPTierService) *VIPTierHandler {
 // VIPTierRequest is shared by create and update. Every field is a pointer so an
 // update can leave the rest of a tier alone; create fills the gaps with the
 // service's defaults.
+// No `binding` tags on the numbers: `required` treats 0 as absent, and 0 is a
+// meaningful value for rpm_limit ("grants no extra RPM"). The service owns the
+// bounds and phrases them properly.
 type VIPTierRequest struct {
-	Level          *int     `json:"level"`
-	Name           *string  `json:"name"`
-	MinSpendUSD    *float64 `json:"min_spend_usd"`
-	RateMultiplier *float64 `json:"rate_multiplier"`
-	Concurrency    *int     `json:"concurrency"`
-	GraceDays      *int     `json:"grace_days"`
-	BadgeColor     *string  `json:"badge_color"`
-	Enabled        *bool    `json:"enabled"`
+	Level                *int     `json:"level"`
+	Name                 *string  `json:"name"`
+	MinSpendUSD          *float64 `json:"min_spend_usd"`
+	RateMultiplier       *float64 `json:"rate_multiplier"`
+	Concurrency          *int     `json:"concurrency"`
+	RPMLimit             *int     `json:"rpm_limit"`
+	UnlimitedConcurrency *bool    `json:"unlimited_concurrency"`
+	UnlimitedRPM         *bool    `json:"unlimited_rpm"`
+	GraceDays            *int     `json:"grace_days"`
+	BadgeColor           *string  `json:"badge_color"`
+	Enabled              *bool    `json:"enabled"`
 }
 
 func (r VIPTierRequest) toInput() service.VIPTierInput {
 	return service.VIPTierInput{
-		Level:          r.Level,
-		Name:           r.Name,
-		MinSpendUSD:    r.MinSpendUSD,
-		RateMultiplier: r.RateMultiplier,
-		Concurrency:    r.Concurrency,
-		GraceDays:      r.GraceDays,
-		BadgeColor:     r.BadgeColor,
-		Enabled:        r.Enabled,
+		Level:                r.Level,
+		Name:                 r.Name,
+		MinSpendUSD:          r.MinSpendUSD,
+		RateMultiplier:       r.RateMultiplier,
+		Concurrency:          r.Concurrency,
+		RPMLimit:             r.RPMLimit,
+		UnlimitedConcurrency: r.UnlimitedConcurrency,
+		UnlimitedRPM:         r.UnlimitedRPM,
+		GraceDays:            r.GraceDays,
+		BadgeColor:           r.BadgeColor,
+		Enabled:              r.Enabled,
 	}
 }
 

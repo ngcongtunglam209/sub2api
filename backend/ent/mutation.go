@@ -59209,28 +59209,32 @@ func (m *UserSubscriptionMutation) ResetEdge(name string) error {
 // VIPTierMutation represents an operation that mutates the VIPTier nodes in the graph.
 type VIPTierMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int64
-	level              *int
-	addlevel           *int
-	name               *string
-	min_spend_usd      *float64
-	addmin_spend_usd   *float64
-	rate_multiplier    *float64
-	addrate_multiplier *float64
-	concurrency        *int
-	addconcurrency     *int
-	grace_days         *int
-	addgrace_days      *int
-	badge_color        *string
-	enabled            *bool
-	created_at         *time.Time
-	updated_at         *time.Time
-	clearedFields      map[string]struct{}
-	done               bool
-	oldValue           func(context.Context) (*VIPTier, error)
-	predicates         []predicate.VIPTier
+	op                    Op
+	typ                   string
+	id                    *int64
+	level                 *int
+	addlevel              *int
+	name                  *string
+	min_spend_usd         *float64
+	addmin_spend_usd      *float64
+	rate_multiplier       *float64
+	addrate_multiplier    *float64
+	concurrency           *int
+	addconcurrency        *int
+	rpm_limit             *int
+	addrpm_limit          *int
+	unlimited_rpm         *bool
+	unlimited_concurrency *bool
+	grace_days            *int
+	addgrace_days         *int
+	badge_color           *string
+	enabled               *bool
+	created_at            *time.Time
+	updated_at            *time.Time
+	clearedFields         map[string]struct{}
+	done                  bool
+	oldValue              func(context.Context) (*VIPTier, error)
+	predicates            []predicate.VIPTier
 }
 
 var _ ent.Mutation = (*VIPTierMutation)(nil)
@@ -59591,6 +59595,134 @@ func (m *VIPTierMutation) ResetConcurrency() {
 	m.addconcurrency = nil
 }
 
+// SetRpmLimit sets the "rpm_limit" field.
+func (m *VIPTierMutation) SetRpmLimit(i int) {
+	m.rpm_limit = &i
+	m.addrpm_limit = nil
+}
+
+// RpmLimit returns the value of the "rpm_limit" field in the mutation.
+func (m *VIPTierMutation) RpmLimit() (r int, exists bool) {
+	v := m.rpm_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRpmLimit returns the old "rpm_limit" field's value of the VIPTier entity.
+// If the VIPTier object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VIPTierMutation) OldRpmLimit(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRpmLimit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRpmLimit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRpmLimit: %w", err)
+	}
+	return oldValue.RpmLimit, nil
+}
+
+// AddRpmLimit adds i to the "rpm_limit" field.
+func (m *VIPTierMutation) AddRpmLimit(i int) {
+	if m.addrpm_limit != nil {
+		*m.addrpm_limit += i
+	} else {
+		m.addrpm_limit = &i
+	}
+}
+
+// AddedRpmLimit returns the value that was added to the "rpm_limit" field in this mutation.
+func (m *VIPTierMutation) AddedRpmLimit() (r int, exists bool) {
+	v := m.addrpm_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRpmLimit resets all changes to the "rpm_limit" field.
+func (m *VIPTierMutation) ResetRpmLimit() {
+	m.rpm_limit = nil
+	m.addrpm_limit = nil
+}
+
+// SetUnlimitedRpm sets the "unlimited_rpm" field.
+func (m *VIPTierMutation) SetUnlimitedRpm(b bool) {
+	m.unlimited_rpm = &b
+}
+
+// UnlimitedRpm returns the value of the "unlimited_rpm" field in the mutation.
+func (m *VIPTierMutation) UnlimitedRpm() (r bool, exists bool) {
+	v := m.unlimited_rpm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnlimitedRpm returns the old "unlimited_rpm" field's value of the VIPTier entity.
+// If the VIPTier object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VIPTierMutation) OldUnlimitedRpm(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnlimitedRpm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnlimitedRpm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnlimitedRpm: %w", err)
+	}
+	return oldValue.UnlimitedRpm, nil
+}
+
+// ResetUnlimitedRpm resets all changes to the "unlimited_rpm" field.
+func (m *VIPTierMutation) ResetUnlimitedRpm() {
+	m.unlimited_rpm = nil
+}
+
+// SetUnlimitedConcurrency sets the "unlimited_concurrency" field.
+func (m *VIPTierMutation) SetUnlimitedConcurrency(b bool) {
+	m.unlimited_concurrency = &b
+}
+
+// UnlimitedConcurrency returns the value of the "unlimited_concurrency" field in the mutation.
+func (m *VIPTierMutation) UnlimitedConcurrency() (r bool, exists bool) {
+	v := m.unlimited_concurrency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnlimitedConcurrency returns the old "unlimited_concurrency" field's value of the VIPTier entity.
+// If the VIPTier object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VIPTierMutation) OldUnlimitedConcurrency(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnlimitedConcurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnlimitedConcurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnlimitedConcurrency: %w", err)
+	}
+	return oldValue.UnlimitedConcurrency, nil
+}
+
+// ResetUnlimitedConcurrency resets all changes to the "unlimited_concurrency" field.
+func (m *VIPTierMutation) ResetUnlimitedConcurrency() {
+	m.unlimited_concurrency = nil
+}
+
 // SetGraceDays sets the "grace_days" field.
 func (m *VIPTierMutation) SetGraceDays(i int) {
 	m.grace_days = &i
@@ -59825,7 +59957,7 @@ func (m *VIPTierMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VIPTierMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 13)
 	if m.level != nil {
 		fields = append(fields, viptier.FieldLevel)
 	}
@@ -59840,6 +59972,15 @@ func (m *VIPTierMutation) Fields() []string {
 	}
 	if m.concurrency != nil {
 		fields = append(fields, viptier.FieldConcurrency)
+	}
+	if m.rpm_limit != nil {
+		fields = append(fields, viptier.FieldRpmLimit)
+	}
+	if m.unlimited_rpm != nil {
+		fields = append(fields, viptier.FieldUnlimitedRpm)
+	}
+	if m.unlimited_concurrency != nil {
+		fields = append(fields, viptier.FieldUnlimitedConcurrency)
 	}
 	if m.grace_days != nil {
 		fields = append(fields, viptier.FieldGraceDays)
@@ -59874,6 +60015,12 @@ func (m *VIPTierMutation) Field(name string) (ent.Value, bool) {
 		return m.RateMultiplier()
 	case viptier.FieldConcurrency:
 		return m.Concurrency()
+	case viptier.FieldRpmLimit:
+		return m.RpmLimit()
+	case viptier.FieldUnlimitedRpm:
+		return m.UnlimitedRpm()
+	case viptier.FieldUnlimitedConcurrency:
+		return m.UnlimitedConcurrency()
 	case viptier.FieldGraceDays:
 		return m.GraceDays()
 	case viptier.FieldBadgeColor:
@@ -59903,6 +60050,12 @@ func (m *VIPTierMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldRateMultiplier(ctx)
 	case viptier.FieldConcurrency:
 		return m.OldConcurrency(ctx)
+	case viptier.FieldRpmLimit:
+		return m.OldRpmLimit(ctx)
+	case viptier.FieldUnlimitedRpm:
+		return m.OldUnlimitedRpm(ctx)
+	case viptier.FieldUnlimitedConcurrency:
+		return m.OldUnlimitedConcurrency(ctx)
 	case viptier.FieldGraceDays:
 		return m.OldGraceDays(ctx)
 	case viptier.FieldBadgeColor:
@@ -59956,6 +60109,27 @@ func (m *VIPTierMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetConcurrency(v)
+		return nil
+	case viptier.FieldRpmLimit:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRpmLimit(v)
+		return nil
+	case viptier.FieldUnlimitedRpm:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnlimitedRpm(v)
+		return nil
+	case viptier.FieldUnlimitedConcurrency:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnlimitedConcurrency(v)
 		return nil
 	case viptier.FieldGraceDays:
 		v, ok := value.(int)
@@ -60012,6 +60186,9 @@ func (m *VIPTierMutation) AddedFields() []string {
 	if m.addconcurrency != nil {
 		fields = append(fields, viptier.FieldConcurrency)
 	}
+	if m.addrpm_limit != nil {
+		fields = append(fields, viptier.FieldRpmLimit)
+	}
 	if m.addgrace_days != nil {
 		fields = append(fields, viptier.FieldGraceDays)
 	}
@@ -60031,6 +60208,8 @@ func (m *VIPTierMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedRateMultiplier()
 	case viptier.FieldConcurrency:
 		return m.AddedConcurrency()
+	case viptier.FieldRpmLimit:
+		return m.AddedRpmLimit()
 	case viptier.FieldGraceDays:
 		return m.AddedGraceDays()
 	}
@@ -60069,6 +60248,13 @@ func (m *VIPTierMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddConcurrency(v)
+		return nil
+	case viptier.FieldRpmLimit:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRpmLimit(v)
 		return nil
 	case viptier.FieldGraceDays:
 		v, ok := value.(int)
@@ -60118,6 +60304,15 @@ func (m *VIPTierMutation) ResetField(name string) error {
 		return nil
 	case viptier.FieldConcurrency:
 		m.ResetConcurrency()
+		return nil
+	case viptier.FieldRpmLimit:
+		m.ResetRpmLimit()
+		return nil
+	case viptier.FieldUnlimitedRpm:
+		m.ResetUnlimitedRpm()
+		return nil
+	case viptier.FieldUnlimitedConcurrency:
+		m.ResetUnlimitedConcurrency()
 		return nil
 	case viptier.FieldGraceDays:
 		m.ResetGraceDays()

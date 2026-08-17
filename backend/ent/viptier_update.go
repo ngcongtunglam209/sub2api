@@ -126,6 +126,55 @@ func (_u *VIPTierUpdate) AddConcurrency(v int) *VIPTierUpdate {
 	return _u
 }
 
+// SetRpmLimit sets the "rpm_limit" field.
+func (_u *VIPTierUpdate) SetRpmLimit(v int) *VIPTierUpdate {
+	_u.mutation.ResetRpmLimit()
+	_u.mutation.SetRpmLimit(v)
+	return _u
+}
+
+// SetNillableRpmLimit sets the "rpm_limit" field if the given value is not nil.
+func (_u *VIPTierUpdate) SetNillableRpmLimit(v *int) *VIPTierUpdate {
+	if v != nil {
+		_u.SetRpmLimit(*v)
+	}
+	return _u
+}
+
+// AddRpmLimit adds value to the "rpm_limit" field.
+func (_u *VIPTierUpdate) AddRpmLimit(v int) *VIPTierUpdate {
+	_u.mutation.AddRpmLimit(v)
+	return _u
+}
+
+// SetUnlimitedRpm sets the "unlimited_rpm" field.
+func (_u *VIPTierUpdate) SetUnlimitedRpm(v bool) *VIPTierUpdate {
+	_u.mutation.SetUnlimitedRpm(v)
+	return _u
+}
+
+// SetNillableUnlimitedRpm sets the "unlimited_rpm" field if the given value is not nil.
+func (_u *VIPTierUpdate) SetNillableUnlimitedRpm(v *bool) *VIPTierUpdate {
+	if v != nil {
+		_u.SetUnlimitedRpm(*v)
+	}
+	return _u
+}
+
+// SetUnlimitedConcurrency sets the "unlimited_concurrency" field.
+func (_u *VIPTierUpdate) SetUnlimitedConcurrency(v bool) *VIPTierUpdate {
+	_u.mutation.SetUnlimitedConcurrency(v)
+	return _u
+}
+
+// SetNillableUnlimitedConcurrency sets the "unlimited_concurrency" field if the given value is not nil.
+func (_u *VIPTierUpdate) SetNillableUnlimitedConcurrency(v *bool) *VIPTierUpdate {
+	if v != nil {
+		_u.SetUnlimitedConcurrency(*v)
+	}
+	return _u
+}
+
 // SetGraceDays sets the "grace_days" field.
 func (_u *VIPTierUpdate) SetGraceDays(v int) *VIPTierUpdate {
 	_u.mutation.ResetGraceDays()
@@ -239,6 +288,11 @@ func (_u *VIPTierUpdate) check() error {
 			return &ValidationError{Name: "concurrency", err: fmt.Errorf(`ent: validator failed for field "VIPTier.concurrency": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.RpmLimit(); ok {
+		if err := viptier.RpmLimitValidator(v); err != nil {
+			return &ValidationError{Name: "rpm_limit", err: fmt.Errorf(`ent: validator failed for field "VIPTier.rpm_limit": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.GraceDays(); ok {
 		if err := viptier.GraceDaysValidator(v); err != nil {
 			return &ValidationError{Name: "grace_days", err: fmt.Errorf(`ent: validator failed for field "VIPTier.grace_days": %w`, err)}
@@ -290,6 +344,18 @@ func (_u *VIPTierUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedConcurrency(); ok {
 		_spec.AddField(viptier.FieldConcurrency, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.RpmLimit(); ok {
+		_spec.SetField(viptier.FieldRpmLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRpmLimit(); ok {
+		_spec.AddField(viptier.FieldRpmLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.UnlimitedRpm(); ok {
+		_spec.SetField(viptier.FieldUnlimitedRpm, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.UnlimitedConcurrency(); ok {
+		_spec.SetField(viptier.FieldUnlimitedConcurrency, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.GraceDays(); ok {
 		_spec.SetField(viptier.FieldGraceDays, field.TypeInt, value)
@@ -424,6 +490,55 @@ func (_u *VIPTierUpdateOne) AddConcurrency(v int) *VIPTierUpdateOne {
 	return _u
 }
 
+// SetRpmLimit sets the "rpm_limit" field.
+func (_u *VIPTierUpdateOne) SetRpmLimit(v int) *VIPTierUpdateOne {
+	_u.mutation.ResetRpmLimit()
+	_u.mutation.SetRpmLimit(v)
+	return _u
+}
+
+// SetNillableRpmLimit sets the "rpm_limit" field if the given value is not nil.
+func (_u *VIPTierUpdateOne) SetNillableRpmLimit(v *int) *VIPTierUpdateOne {
+	if v != nil {
+		_u.SetRpmLimit(*v)
+	}
+	return _u
+}
+
+// AddRpmLimit adds value to the "rpm_limit" field.
+func (_u *VIPTierUpdateOne) AddRpmLimit(v int) *VIPTierUpdateOne {
+	_u.mutation.AddRpmLimit(v)
+	return _u
+}
+
+// SetUnlimitedRpm sets the "unlimited_rpm" field.
+func (_u *VIPTierUpdateOne) SetUnlimitedRpm(v bool) *VIPTierUpdateOne {
+	_u.mutation.SetUnlimitedRpm(v)
+	return _u
+}
+
+// SetNillableUnlimitedRpm sets the "unlimited_rpm" field if the given value is not nil.
+func (_u *VIPTierUpdateOne) SetNillableUnlimitedRpm(v *bool) *VIPTierUpdateOne {
+	if v != nil {
+		_u.SetUnlimitedRpm(*v)
+	}
+	return _u
+}
+
+// SetUnlimitedConcurrency sets the "unlimited_concurrency" field.
+func (_u *VIPTierUpdateOne) SetUnlimitedConcurrency(v bool) *VIPTierUpdateOne {
+	_u.mutation.SetUnlimitedConcurrency(v)
+	return _u
+}
+
+// SetNillableUnlimitedConcurrency sets the "unlimited_concurrency" field if the given value is not nil.
+func (_u *VIPTierUpdateOne) SetNillableUnlimitedConcurrency(v *bool) *VIPTierUpdateOne {
+	if v != nil {
+		_u.SetUnlimitedConcurrency(*v)
+	}
+	return _u
+}
+
 // SetGraceDays sets the "grace_days" field.
 func (_u *VIPTierUpdateOne) SetGraceDays(v int) *VIPTierUpdateOne {
 	_u.mutation.ResetGraceDays()
@@ -550,6 +665,11 @@ func (_u *VIPTierUpdateOne) check() error {
 			return &ValidationError{Name: "concurrency", err: fmt.Errorf(`ent: validator failed for field "VIPTier.concurrency": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.RpmLimit(); ok {
+		if err := viptier.RpmLimitValidator(v); err != nil {
+			return &ValidationError{Name: "rpm_limit", err: fmt.Errorf(`ent: validator failed for field "VIPTier.rpm_limit": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.GraceDays(); ok {
 		if err := viptier.GraceDaysValidator(v); err != nil {
 			return &ValidationError{Name: "grace_days", err: fmt.Errorf(`ent: validator failed for field "VIPTier.grace_days": %w`, err)}
@@ -618,6 +738,18 @@ func (_u *VIPTierUpdateOne) sqlSave(ctx context.Context) (_node *VIPTier, err er
 	}
 	if value, ok := _u.mutation.AddedConcurrency(); ok {
 		_spec.AddField(viptier.FieldConcurrency, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.RpmLimit(); ok {
+		_spec.SetField(viptier.FieldRpmLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRpmLimit(); ok {
+		_spec.AddField(viptier.FieldRpmLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.UnlimitedRpm(); ok {
+		_spec.SetField(viptier.FieldUnlimitedRpm, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.UnlimitedConcurrency(); ok {
+		_spec.SetField(viptier.FieldUnlimitedConcurrency, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.GraceDays(); ok {
 		_spec.SetField(viptier.FieldGraceDays, field.TypeInt, value)

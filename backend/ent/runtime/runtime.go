@@ -2665,28 +2665,42 @@ func init() {
 	viptier.DefaultConcurrency = viptierDescConcurrency.Default.(int)
 	// viptier.ConcurrencyValidator is a validator for the "concurrency" field. It is called by the builders before save.
 	viptier.ConcurrencyValidator = viptierDescConcurrency.Validators[0].(func(int) error)
+	// viptierDescRpmLimit is the schema descriptor for rpm_limit field.
+	viptierDescRpmLimit := viptierFields[5].Descriptor()
+	// viptier.DefaultRpmLimit holds the default value on creation for the rpm_limit field.
+	viptier.DefaultRpmLimit = viptierDescRpmLimit.Default.(int)
+	// viptier.RpmLimitValidator is a validator for the "rpm_limit" field. It is called by the builders before save.
+	viptier.RpmLimitValidator = viptierDescRpmLimit.Validators[0].(func(int) error)
+	// viptierDescUnlimitedRpm is the schema descriptor for unlimited_rpm field.
+	viptierDescUnlimitedRpm := viptierFields[6].Descriptor()
+	// viptier.DefaultUnlimitedRpm holds the default value on creation for the unlimited_rpm field.
+	viptier.DefaultUnlimitedRpm = viptierDescUnlimitedRpm.Default.(bool)
+	// viptierDescUnlimitedConcurrency is the schema descriptor for unlimited_concurrency field.
+	viptierDescUnlimitedConcurrency := viptierFields[7].Descriptor()
+	// viptier.DefaultUnlimitedConcurrency holds the default value on creation for the unlimited_concurrency field.
+	viptier.DefaultUnlimitedConcurrency = viptierDescUnlimitedConcurrency.Default.(bool)
 	// viptierDescGraceDays is the schema descriptor for grace_days field.
-	viptierDescGraceDays := viptierFields[5].Descriptor()
+	viptierDescGraceDays := viptierFields[8].Descriptor()
 	// viptier.DefaultGraceDays holds the default value on creation for the grace_days field.
 	viptier.DefaultGraceDays = viptierDescGraceDays.Default.(int)
 	// viptier.GraceDaysValidator is a validator for the "grace_days" field. It is called by the builders before save.
 	viptier.GraceDaysValidator = viptierDescGraceDays.Validators[0].(func(int) error)
 	// viptierDescBadgeColor is the schema descriptor for badge_color field.
-	viptierDescBadgeColor := viptierFields[6].Descriptor()
+	viptierDescBadgeColor := viptierFields[9].Descriptor()
 	// viptier.DefaultBadgeColor holds the default value on creation for the badge_color field.
 	viptier.DefaultBadgeColor = viptierDescBadgeColor.Default.(string)
 	// viptier.BadgeColorValidator is a validator for the "badge_color" field. It is called by the builders before save.
 	viptier.BadgeColorValidator = viptierDescBadgeColor.Validators[0].(func(string) error)
 	// viptierDescEnabled is the schema descriptor for enabled field.
-	viptierDescEnabled := viptierFields[7].Descriptor()
+	viptierDescEnabled := viptierFields[10].Descriptor()
 	// viptier.DefaultEnabled holds the default value on creation for the enabled field.
 	viptier.DefaultEnabled = viptierDescEnabled.Default.(bool)
 	// viptierDescCreatedAt is the schema descriptor for created_at field.
-	viptierDescCreatedAt := viptierFields[8].Descriptor()
+	viptierDescCreatedAt := viptierFields[11].Descriptor()
 	// viptier.DefaultCreatedAt holds the default value on creation for the created_at field.
 	viptier.DefaultCreatedAt = viptierDescCreatedAt.Default.(func() time.Time)
 	// viptierDescUpdatedAt is the schema descriptor for updated_at field.
-	viptierDescUpdatedAt := viptierFields[9].Descriptor()
+	viptierDescUpdatedAt := viptierFields[12].Descriptor()
 	// viptier.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	viptier.DefaultUpdatedAt = viptierDescUpdatedAt.Default.(func() time.Time)
 	// viptier.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

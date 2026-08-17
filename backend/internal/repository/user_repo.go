@@ -878,18 +878,30 @@ func (r *userRepository) GetVIPRateMultiplier(ctx context.Context, userID int64)
 	return tier.RateMultiplier, nil
 }
 
-// GetVIPConcurrency returns the concurrency bonus of the user's active tier,
-// or 0 when they hold none.
+// GetVIPBenefits returns what the user's active tier grants, or a zero value
+// when they hold none.
 //
-// The caller adds this to `users.concurrency` rather than replacing it, so a
-// tier perk and a purchased add-on stack. 0 therefore means "no bonus", not
-// "no limit".
-func (r *userRepository) GetVIPConcurrency(ctx context.Context, userID int64) (int, error) {
+// The caller adds Concurrency and RPM to `users.concurrency` and
+// `users.rpm_limit` rather than replacing them, so a tier perk and a purchased
+// add-on stack. 0 therefore means "no bonus", not "no limit" — the exemptions
+// travel in the two Unlimited flags, which the caller applies last so a later
+// addend cannot turn "no ceiling" back into a finite number.
+func (r *userRepository) GetVIPBenefits(ctx context.Context, userID int64) (service.VIPBenefits, error) {
 	tier, err := r.activeVIPTier(ctx, userID)
-	if err != nil || tier == nil || tier.Concurrency <= 0 {
-		return 0, err
+	if err != nil || tier == nil {
+		return service.VIPBenefits{}, err
 	}
-	return tier.Concurrency, nil
+	benefits := service.VIPBenefits{
+		UnlimitedConcurrency: tier.UnlimitedConcurrency,
+		UnlimitedRPM:         tier.UnlimitedRpm,
+	}
+	if tier.Concurrency > 0 {
+		benefits.Concurrency = tier.Concurrency
+	}
+	if tier.RpmLimit > 0 {
+		benefits.RPM = tier.RpmLimit
+	}
+	return benefits, nil
 }
 
 // ListExpiredVIPUserIDs returns users whose tier lapsed at or before now.

@@ -82,6 +82,8 @@ export default {
     qualifyingSpend: 'Spend counted towards your tier',
     totalPaid: 'Total paid',
     concurrency: 'Bonus concurrency',
+    rpm: 'Bonus requests/min',
+    unlimited: 'Unlimited',
     discountBadge: '{percent}% off usage',
     spendToNext: '{amount} more to reach {tier}',
     topTier: 'You are on the highest tier'

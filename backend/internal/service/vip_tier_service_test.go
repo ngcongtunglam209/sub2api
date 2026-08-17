@@ -52,6 +52,80 @@ func TestValidateVIPLadder(t *testing.T) {
 	require.Error(t, validateVIPLadder(duplicateLevel))
 }
 
+// The perks have to climb with the price too, or a customer is again better off
+// having spent less. This is the shape that shipped unnoticed: tiers granting
+// 1, 2 and 3 slots with a fourth granting 32, and later the reverse.
+func TestValidateVIPLadderRejectsShrinkingPerks(t *testing.T) {
+	withPerks := func(level int, minSpend, rate float64, concurrency, rpm int) VIPTier {
+		tier := ladderTier(level, minSpend, rate)
+		tier.Concurrency = concurrency
+		tier.RPMLimit = rpm
+		return tier
+	}
+
+	rising := []VIPTier{
+		withPerks(1, 20, 0.95, 1, 0),
+		withPerks(2, 100, 0.90, 2, 60),
+		withPerks(3, 400, 0.82, 3, 120),
+	}
+	require.NoError(t, validateVIPLadder(rising))
+
+	// Equal rungs are allowed: a tier may improve only the discount.
+	flat := []VIPTier{withPerks(1, 20, 0.95, 4, 60), withPerks(2, 100, 0.90, 4, 60)}
+	require.NoError(t, validateVIPLadder(flat))
+
+	shrinkingConcurrency := []VIPTier{withPerks(1, 20, 0.95, 8, 60), withPerks(2, 100, 0.90, 4, 60)}
+	require.Error(t, validateVIPLadder(shrinkingConcurrency))
+
+	shrinkingRPM := []VIPTier{withPerks(1, 20, 0.95, 4, 120), withPerks(2, 100, 0.90, 4, 60)}
+	require.Error(t, validateVIPLadder(shrinkingRPM))
+}
+
+// An exemption outranks every finite amount, and it has to be compared that way
+// rather than by the addend beside it. An unlimited top tier normally leaves
+// rpm_limit at 0 because the number is unused, so comparing the raw values would
+// read it as granting less than the tier below and reject a correct ladder.
+func TestValidateVIPLadderRanksExemptionsAboveFiniteGrants(t *testing.T) {
+	unlimitedTop := []VIPTier{
+		ladderTier(1, 20, 0.95),
+		func() VIPTier {
+			tier := ladderTier(2, 100, 0.90)
+			tier.Concurrency = 1
+			tier.RPMLimit = 0
+			tier.UnlimitedConcurrency = true
+			tier.UnlimitedRPM = true
+			return tier
+		}(),
+	}
+	require.NoError(t, validateVIPLadder(unlimitedTop))
+
+	// Inverted: the exemption sits on the cheaper rung, so the expensive tier is
+	// strictly worse than the one below it.
+	unlimitedBottom := []VIPTier{
+		func() VIPTier {
+			tier := ladderTier(1, 20, 0.95)
+			tier.UnlimitedConcurrency = true
+			return tier
+		}(),
+		ladderTier(2, 100, 0.90),
+	}
+	require.Error(t, validateVIPLadder(unlimitedBottom))
+}
+
+// rpm_limit 0 is a real configuration ("this tier adds no RPM"), unlike
+// concurrency where 0 is both meaningless and unstorable.
+func TestValidateVIPTierFieldsAllowsZeroRPMButRejectsNegative(t *testing.T) {
+	base := ladderTier(1, 20, 0.95)
+
+	noRPMGrant := base
+	noRPMGrant.RPMLimit = 0
+	require.NoError(t, validateVIPTierFields(noRPMGrant))
+
+	negative := base
+	negative.RPMLimit = -1
+	require.Error(t, validateVIPTierFields(negative))
+}
+
 func TestValidateVIPTierFields(t *testing.T) {
 	base := ladderTier(1, 20, 0.95)
 	require.NoError(t, validateVIPTierFields(base))

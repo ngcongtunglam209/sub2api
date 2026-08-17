@@ -1,3 +1,11 @@
+//go:build unit
+
+// Tagged to match reseller_domain_branding_test.go, which shares this file's
+// stub. Without the tag the two halves of one stub sat on opposite sides of a
+// build constraint, and golangci-lint — which runs with no tags — saw the
+// declaration of brandingState but not the tagged file calling it, so it
+// reported a live helper as dead code and turned the lint job red on main.
+
 package service
 
 import (

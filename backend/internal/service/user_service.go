@@ -201,10 +201,17 @@ type RedeemUserAdjustmentRepository interface {
 // while the billing hot path needs the multiplier, and neither should pull the
 // other's query along.
 type VIPTierBenefitRepository interface {
-	// GetVIPConcurrency returns the concurrency bonus of the user's active
-	// tier, or 0 when they have none. It is added to `users.concurrency`,
-	// not substituted for it.
-	GetVIPConcurrency(ctx context.Context, userID int64) (int, error)
+	// GetVIPBenefits returns what the user's active tier grants, or a zero
+	// value when they hold none.
+	//
+	// Concurrency and RPM are added to `users.concurrency` and
+	// `users.rpm_limit`, not substituted for them. The two Unlimited flags are
+	// separate because an addend cannot express "no ceiling" — 0 means "add
+	// nothing" here, while 0 in the user's own column means unlimited.
+	//
+	// One call rather than one per perk: this is on the auth snapshot path, so
+	// the tier is read once per snapshot instead of once per benefit.
+	GetVIPBenefits(ctx context.Context, userID int64) (VIPBenefits, error)
 }
 
 // VIPExpiryRepository backs the sweep that retires lapsed tiers.

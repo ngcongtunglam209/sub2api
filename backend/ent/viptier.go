@@ -27,6 +27,12 @@ type VIPTier struct {
 	RateMultiplier float64 `json:"rate_multiplier,omitempty"`
 	// Concurrency holds the value of the "concurrency" field.
 	Concurrency int `json:"concurrency,omitempty"`
+	// RpmLimit holds the value of the "rpm_limit" field.
+	RpmLimit int `json:"rpm_limit,omitempty"`
+	// UnlimitedRpm holds the value of the "unlimited_rpm" field.
+	UnlimitedRpm bool `json:"unlimited_rpm,omitempty"`
+	// UnlimitedConcurrency holds the value of the "unlimited_concurrency" field.
+	UnlimitedConcurrency bool `json:"unlimited_concurrency,omitempty"`
 	// GraceDays holds the value of the "grace_days" field.
 	GraceDays int `json:"grace_days,omitempty"`
 	// BadgeColor holds the value of the "badge_color" field.
@@ -45,11 +51,11 @@ func (*VIPTier) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case viptier.FieldEnabled:
+		case viptier.FieldUnlimitedRpm, viptier.FieldUnlimitedConcurrency, viptier.FieldEnabled:
 			values[i] = new(sql.NullBool)
 		case viptier.FieldMinSpendUsd, viptier.FieldRateMultiplier:
 			values[i] = new(sql.NullFloat64)
-		case viptier.FieldID, viptier.FieldLevel, viptier.FieldConcurrency, viptier.FieldGraceDays:
+		case viptier.FieldID, viptier.FieldLevel, viptier.FieldConcurrency, viptier.FieldRpmLimit, viptier.FieldGraceDays:
 			values[i] = new(sql.NullInt64)
 		case viptier.FieldName, viptier.FieldBadgeColor:
 			values[i] = new(sql.NullString)
@@ -105,6 +111,24 @@ func (_m *VIPTier) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field concurrency", values[i])
 			} else if value.Valid {
 				_m.Concurrency = int(value.Int64)
+			}
+		case viptier.FieldRpmLimit:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field rpm_limit", values[i])
+			} else if value.Valid {
+				_m.RpmLimit = int(value.Int64)
+			}
+		case viptier.FieldUnlimitedRpm:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field unlimited_rpm", values[i])
+			} else if value.Valid {
+				_m.UnlimitedRpm = value.Bool
+			}
+		case viptier.FieldUnlimitedConcurrency:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field unlimited_concurrency", values[i])
+			} else if value.Valid {
+				_m.UnlimitedConcurrency = value.Bool
 			}
 		case viptier.FieldGraceDays:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -186,6 +210,15 @@ func (_m *VIPTier) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("concurrency=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Concurrency))
+	builder.WriteString(", ")
+	builder.WriteString("rpm_limit=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RpmLimit))
+	builder.WriteString(", ")
+	builder.WriteString("unlimited_rpm=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UnlimitedRpm))
+	builder.WriteString(", ")
+	builder.WriteString("unlimited_concurrency=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UnlimitedConcurrency))
 	builder.WriteString(", ")
 	builder.WriteString("grace_days=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GraceDays))

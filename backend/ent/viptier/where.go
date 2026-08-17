@@ -79,6 +79,21 @@ func Concurrency(v int) predicate.VIPTier {
 	return predicate.VIPTier(sql.FieldEQ(FieldConcurrency, v))
 }
 
+// RpmLimit applies equality check predicate on the "rpm_limit" field. It's identical to RpmLimitEQ.
+func RpmLimit(v int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldEQ(FieldRpmLimit, v))
+}
+
+// UnlimitedRpm applies equality check predicate on the "unlimited_rpm" field. It's identical to UnlimitedRpmEQ.
+func UnlimitedRpm(v bool) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldEQ(FieldUnlimitedRpm, v))
+}
+
+// UnlimitedConcurrency applies equality check predicate on the "unlimited_concurrency" field. It's identical to UnlimitedConcurrencyEQ.
+func UnlimitedConcurrency(v bool) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldEQ(FieldUnlimitedConcurrency, v))
+}
+
 // GraceDays applies equality check predicate on the "grace_days" field. It's identical to GraceDaysEQ.
 func GraceDays(v int) predicate.VIPTier {
 	return predicate.VIPTier(sql.FieldEQ(FieldGraceDays, v))
@@ -327,6 +342,66 @@ func ConcurrencyLT(v int) predicate.VIPTier {
 // ConcurrencyLTE applies the LTE predicate on the "concurrency" field.
 func ConcurrencyLTE(v int) predicate.VIPTier {
 	return predicate.VIPTier(sql.FieldLTE(FieldConcurrency, v))
+}
+
+// RpmLimitEQ applies the EQ predicate on the "rpm_limit" field.
+func RpmLimitEQ(v int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldEQ(FieldRpmLimit, v))
+}
+
+// RpmLimitNEQ applies the NEQ predicate on the "rpm_limit" field.
+func RpmLimitNEQ(v int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldNEQ(FieldRpmLimit, v))
+}
+
+// RpmLimitIn applies the In predicate on the "rpm_limit" field.
+func RpmLimitIn(vs ...int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldIn(FieldRpmLimit, vs...))
+}
+
+// RpmLimitNotIn applies the NotIn predicate on the "rpm_limit" field.
+func RpmLimitNotIn(vs ...int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldNotIn(FieldRpmLimit, vs...))
+}
+
+// RpmLimitGT applies the GT predicate on the "rpm_limit" field.
+func RpmLimitGT(v int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldGT(FieldRpmLimit, v))
+}
+
+// RpmLimitGTE applies the GTE predicate on the "rpm_limit" field.
+func RpmLimitGTE(v int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldGTE(FieldRpmLimit, v))
+}
+
+// RpmLimitLT applies the LT predicate on the "rpm_limit" field.
+func RpmLimitLT(v int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldLT(FieldRpmLimit, v))
+}
+
+// RpmLimitLTE applies the LTE predicate on the "rpm_limit" field.
+func RpmLimitLTE(v int) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldLTE(FieldRpmLimit, v))
+}
+
+// UnlimitedRpmEQ applies the EQ predicate on the "unlimited_rpm" field.
+func UnlimitedRpmEQ(v bool) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldEQ(FieldUnlimitedRpm, v))
+}
+
+// UnlimitedRpmNEQ applies the NEQ predicate on the "unlimited_rpm" field.
+func UnlimitedRpmNEQ(v bool) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldNEQ(FieldUnlimitedRpm, v))
+}
+
+// UnlimitedConcurrencyEQ applies the EQ predicate on the "unlimited_concurrency" field.
+func UnlimitedConcurrencyEQ(v bool) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldEQ(FieldUnlimitedConcurrency, v))
+}
+
+// UnlimitedConcurrencyNEQ applies the NEQ predicate on the "unlimited_concurrency" field.
+func UnlimitedConcurrencyNEQ(v bool) predicate.VIPTier {
+	return predicate.VIPTier(sql.FieldNEQ(FieldUnlimitedConcurrency, v))
 }
 
 // GraceDaysEQ applies the EQ predicate on the "grace_days" field.
