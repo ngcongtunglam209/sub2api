@@ -68,6 +68,48 @@ func (_c *VIPTierCreate) SetNillableConcurrency(v *int) *VIPTierCreate {
 	return _c
 }
 
+// SetRpmLimit sets the "rpm_limit" field.
+func (_c *VIPTierCreate) SetRpmLimit(v int) *VIPTierCreate {
+	_c.mutation.SetRpmLimit(v)
+	return _c
+}
+
+// SetNillableRpmLimit sets the "rpm_limit" field if the given value is not nil.
+func (_c *VIPTierCreate) SetNillableRpmLimit(v *int) *VIPTierCreate {
+	if v != nil {
+		_c.SetRpmLimit(*v)
+	}
+	return _c
+}
+
+// SetUnlimitedRpm sets the "unlimited_rpm" field.
+func (_c *VIPTierCreate) SetUnlimitedRpm(v bool) *VIPTierCreate {
+	_c.mutation.SetUnlimitedRpm(v)
+	return _c
+}
+
+// SetNillableUnlimitedRpm sets the "unlimited_rpm" field if the given value is not nil.
+func (_c *VIPTierCreate) SetNillableUnlimitedRpm(v *bool) *VIPTierCreate {
+	if v != nil {
+		_c.SetUnlimitedRpm(*v)
+	}
+	return _c
+}
+
+// SetUnlimitedConcurrency sets the "unlimited_concurrency" field.
+func (_c *VIPTierCreate) SetUnlimitedConcurrency(v bool) *VIPTierCreate {
+	_c.mutation.SetUnlimitedConcurrency(v)
+	return _c
+}
+
+// SetNillableUnlimitedConcurrency sets the "unlimited_concurrency" field if the given value is not nil.
+func (_c *VIPTierCreate) SetNillableUnlimitedConcurrency(v *bool) *VIPTierCreate {
+	if v != nil {
+		_c.SetUnlimitedConcurrency(*v)
+	}
+	return _c
+}
+
 // SetGraceDays sets the "grace_days" field.
 func (_c *VIPTierCreate) SetGraceDays(v int) *VIPTierCreate {
 	_c.mutation.SetGraceDays(v)
@@ -181,6 +223,18 @@ func (_c *VIPTierCreate) defaults() {
 		v := viptier.DefaultConcurrency
 		_c.mutation.SetConcurrency(v)
 	}
+	if _, ok := _c.mutation.RpmLimit(); !ok {
+		v := viptier.DefaultRpmLimit
+		_c.mutation.SetRpmLimit(v)
+	}
+	if _, ok := _c.mutation.UnlimitedRpm(); !ok {
+		v := viptier.DefaultUnlimitedRpm
+		_c.mutation.SetUnlimitedRpm(v)
+	}
+	if _, ok := _c.mutation.UnlimitedConcurrency(); !ok {
+		v := viptier.DefaultUnlimitedConcurrency
+		_c.mutation.SetUnlimitedConcurrency(v)
+	}
 	if _, ok := _c.mutation.GraceDays(); !ok {
 		v := viptier.DefaultGraceDays
 		_c.mutation.SetGraceDays(v)
@@ -234,6 +288,20 @@ func (_c *VIPTierCreate) check() error {
 		if err := viptier.ConcurrencyValidator(v); err != nil {
 			return &ValidationError{Name: "concurrency", err: fmt.Errorf(`ent: validator failed for field "VIPTier.concurrency": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.RpmLimit(); !ok {
+		return &ValidationError{Name: "rpm_limit", err: errors.New(`ent: missing required field "VIPTier.rpm_limit"`)}
+	}
+	if v, ok := _c.mutation.RpmLimit(); ok {
+		if err := viptier.RpmLimitValidator(v); err != nil {
+			return &ValidationError{Name: "rpm_limit", err: fmt.Errorf(`ent: validator failed for field "VIPTier.rpm_limit": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.UnlimitedRpm(); !ok {
+		return &ValidationError{Name: "unlimited_rpm", err: errors.New(`ent: missing required field "VIPTier.unlimited_rpm"`)}
+	}
+	if _, ok := _c.mutation.UnlimitedConcurrency(); !ok {
+		return &ValidationError{Name: "unlimited_concurrency", err: errors.New(`ent: missing required field "VIPTier.unlimited_concurrency"`)}
 	}
 	if _, ok := _c.mutation.GraceDays(); !ok {
 		return &ValidationError{Name: "grace_days", err: errors.New(`ent: missing required field "VIPTier.grace_days"`)}
@@ -306,6 +374,18 @@ func (_c *VIPTierCreate) createSpec() (*VIPTier, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Concurrency(); ok {
 		_spec.SetField(viptier.FieldConcurrency, field.TypeInt, value)
 		_node.Concurrency = value
+	}
+	if value, ok := _c.mutation.RpmLimit(); ok {
+		_spec.SetField(viptier.FieldRpmLimit, field.TypeInt, value)
+		_node.RpmLimit = value
+	}
+	if value, ok := _c.mutation.UnlimitedRpm(); ok {
+		_spec.SetField(viptier.FieldUnlimitedRpm, field.TypeBool, value)
+		_node.UnlimitedRpm = value
+	}
+	if value, ok := _c.mutation.UnlimitedConcurrency(); ok {
+		_spec.SetField(viptier.FieldUnlimitedConcurrency, field.TypeBool, value)
+		_node.UnlimitedConcurrency = value
 	}
 	if value, ok := _c.mutation.GraceDays(); ok {
 		_spec.SetField(viptier.FieldGraceDays, field.TypeInt, value)
@@ -460,6 +540,48 @@ func (u *VIPTierUpsert) UpdateConcurrency() *VIPTierUpsert {
 // AddConcurrency adds v to the "concurrency" field.
 func (u *VIPTierUpsert) AddConcurrency(v int) *VIPTierUpsert {
 	u.Add(viptier.FieldConcurrency, v)
+	return u
+}
+
+// SetRpmLimit sets the "rpm_limit" field.
+func (u *VIPTierUpsert) SetRpmLimit(v int) *VIPTierUpsert {
+	u.Set(viptier.FieldRpmLimit, v)
+	return u
+}
+
+// UpdateRpmLimit sets the "rpm_limit" field to the value that was provided on create.
+func (u *VIPTierUpsert) UpdateRpmLimit() *VIPTierUpsert {
+	u.SetExcluded(viptier.FieldRpmLimit)
+	return u
+}
+
+// AddRpmLimit adds v to the "rpm_limit" field.
+func (u *VIPTierUpsert) AddRpmLimit(v int) *VIPTierUpsert {
+	u.Add(viptier.FieldRpmLimit, v)
+	return u
+}
+
+// SetUnlimitedRpm sets the "unlimited_rpm" field.
+func (u *VIPTierUpsert) SetUnlimitedRpm(v bool) *VIPTierUpsert {
+	u.Set(viptier.FieldUnlimitedRpm, v)
+	return u
+}
+
+// UpdateUnlimitedRpm sets the "unlimited_rpm" field to the value that was provided on create.
+func (u *VIPTierUpsert) UpdateUnlimitedRpm() *VIPTierUpsert {
+	u.SetExcluded(viptier.FieldUnlimitedRpm)
+	return u
+}
+
+// SetUnlimitedConcurrency sets the "unlimited_concurrency" field.
+func (u *VIPTierUpsert) SetUnlimitedConcurrency(v bool) *VIPTierUpsert {
+	u.Set(viptier.FieldUnlimitedConcurrency, v)
+	return u
+}
+
+// UpdateUnlimitedConcurrency sets the "unlimited_concurrency" field to the value that was provided on create.
+func (u *VIPTierUpsert) UpdateUnlimitedConcurrency() *VIPTierUpsert {
+	u.SetExcluded(viptier.FieldUnlimitedConcurrency)
 	return u
 }
 
@@ -657,6 +779,55 @@ func (u *VIPTierUpsertOne) AddConcurrency(v int) *VIPTierUpsertOne {
 func (u *VIPTierUpsertOne) UpdateConcurrency() *VIPTierUpsertOne {
 	return u.Update(func(s *VIPTierUpsert) {
 		s.UpdateConcurrency()
+	})
+}
+
+// SetRpmLimit sets the "rpm_limit" field.
+func (u *VIPTierUpsertOne) SetRpmLimit(v int) *VIPTierUpsertOne {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.SetRpmLimit(v)
+	})
+}
+
+// AddRpmLimit adds v to the "rpm_limit" field.
+func (u *VIPTierUpsertOne) AddRpmLimit(v int) *VIPTierUpsertOne {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.AddRpmLimit(v)
+	})
+}
+
+// UpdateRpmLimit sets the "rpm_limit" field to the value that was provided on create.
+func (u *VIPTierUpsertOne) UpdateRpmLimit() *VIPTierUpsertOne {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.UpdateRpmLimit()
+	})
+}
+
+// SetUnlimitedRpm sets the "unlimited_rpm" field.
+func (u *VIPTierUpsertOne) SetUnlimitedRpm(v bool) *VIPTierUpsertOne {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.SetUnlimitedRpm(v)
+	})
+}
+
+// UpdateUnlimitedRpm sets the "unlimited_rpm" field to the value that was provided on create.
+func (u *VIPTierUpsertOne) UpdateUnlimitedRpm() *VIPTierUpsertOne {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.UpdateUnlimitedRpm()
+	})
+}
+
+// SetUnlimitedConcurrency sets the "unlimited_concurrency" field.
+func (u *VIPTierUpsertOne) SetUnlimitedConcurrency(v bool) *VIPTierUpsertOne {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.SetUnlimitedConcurrency(v)
+	})
+}
+
+// UpdateUnlimitedConcurrency sets the "unlimited_concurrency" field to the value that was provided on create.
+func (u *VIPTierUpsertOne) UpdateUnlimitedConcurrency() *VIPTierUpsertOne {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.UpdateUnlimitedConcurrency()
 	})
 }
 
@@ -1029,6 +1200,55 @@ func (u *VIPTierUpsertBulk) AddConcurrency(v int) *VIPTierUpsertBulk {
 func (u *VIPTierUpsertBulk) UpdateConcurrency() *VIPTierUpsertBulk {
 	return u.Update(func(s *VIPTierUpsert) {
 		s.UpdateConcurrency()
+	})
+}
+
+// SetRpmLimit sets the "rpm_limit" field.
+func (u *VIPTierUpsertBulk) SetRpmLimit(v int) *VIPTierUpsertBulk {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.SetRpmLimit(v)
+	})
+}
+
+// AddRpmLimit adds v to the "rpm_limit" field.
+func (u *VIPTierUpsertBulk) AddRpmLimit(v int) *VIPTierUpsertBulk {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.AddRpmLimit(v)
+	})
+}
+
+// UpdateRpmLimit sets the "rpm_limit" field to the value that was provided on create.
+func (u *VIPTierUpsertBulk) UpdateRpmLimit() *VIPTierUpsertBulk {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.UpdateRpmLimit()
+	})
+}
+
+// SetUnlimitedRpm sets the "unlimited_rpm" field.
+func (u *VIPTierUpsertBulk) SetUnlimitedRpm(v bool) *VIPTierUpsertBulk {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.SetUnlimitedRpm(v)
+	})
+}
+
+// UpdateUnlimitedRpm sets the "unlimited_rpm" field to the value that was provided on create.
+func (u *VIPTierUpsertBulk) UpdateUnlimitedRpm() *VIPTierUpsertBulk {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.UpdateUnlimitedRpm()
+	})
+}
+
+// SetUnlimitedConcurrency sets the "unlimited_concurrency" field.
+func (u *VIPTierUpsertBulk) SetUnlimitedConcurrency(v bool) *VIPTierUpsertBulk {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.SetUnlimitedConcurrency(v)
+	})
+}
+
+// UpdateUnlimitedConcurrency sets the "unlimited_concurrency" field to the value that was provided on create.
+func (u *VIPTierUpsertBulk) UpdateUnlimitedConcurrency() *VIPTierUpsertBulk {
+	return u.Update(func(s *VIPTierUpsert) {
+		s.UpdateUnlimitedConcurrency()
 	})
 }
 

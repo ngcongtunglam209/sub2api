@@ -2163,6 +2163,9 @@ var (
 		{Name: "min_spend_usd", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "decimal(20,2)"}},
 		{Name: "rate_multiplier", Type: field.TypeFloat64, Default: 1, SchemaType: map[string]string{"postgres": "decimal(6,4)"}},
 		{Name: "concurrency", Type: field.TypeInt, Default: 5},
+		{Name: "rpm_limit", Type: field.TypeInt, Default: 0},
+		{Name: "unlimited_rpm", Type: field.TypeBool, Default: false},
+		{Name: "unlimited_concurrency", Type: field.TypeBool, Default: false},
 		{Name: "grace_days", Type: field.TypeInt, Default: 60},
 		{Name: "badge_color", Type: field.TypeString, Size: 20, Default: ""},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
@@ -2178,7 +2181,7 @@ var (
 			{
 				Name:    "viptier_enabled_min_spend_usd",
 				Unique:  false,
-				Columns: []*schema.Column{VipTiersColumns[8], VipTiersColumns[3]},
+				Columns: []*schema.Column{VipTiersColumns[11], VipTiersColumns[3]},
 			},
 		},
 	}

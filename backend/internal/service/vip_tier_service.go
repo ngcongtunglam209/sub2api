@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"time"
@@ -14,31 +15,59 @@ import (
 )
 
 // VIPTier is a configured tier as the admin API sees it.
+//
+// Concurrency and RPMLimit are both *addends* over what the user already holds,
+// not ceilings. The two Unlimited flags exist because an addend cannot express
+// "no ceiling": adding 0 means "add nothing", which is a legitimate tier, so
+// the exemption needs a field of its own.
 type VIPTier struct {
-	ID             int64
-	Level          int
-	Name           string
-	MinSpendUSD    float64
-	RateMultiplier float64
-	Concurrency    int
-	GraceDays      int
-	BadgeColor     string
-	Enabled        bool
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID                   int64
+	Level                int
+	Name                 string
+	MinSpendUSD          float64
+	RateMultiplier       float64
+	Concurrency          int
+	RPMLimit             int
+	UnlimitedConcurrency bool
+	UnlimitedRPM         bool
+	GraceDays            int
+	BadgeColor           string
+	Enabled              bool
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 // VIPTierInput carries a create or update from the admin API. Nil fields on
 // update mean "leave alone".
 type VIPTierInput struct {
-	Level          *int
-	Name           *string
-	MinSpendUSD    *float64
-	RateMultiplier *float64
-	Concurrency    *int
-	GraceDays      *int
-	BadgeColor     *string
-	Enabled        *bool
+	Level                *int
+	Name                 *string
+	MinSpendUSD          *float64
+	RateMultiplier       *float64
+	Concurrency          *int
+	RPMLimit             *int
+	UnlimitedConcurrency *bool
+	UnlimitedRPM         *bool
+	GraceDays            *int
+	BadgeColor           *string
+	Enabled              *bool
+}
+
+// VIPBenefits is what a user's active tier grants on top of their own limits.
+//
+// Returned as one value rather than a getter per perk so the auth snapshot
+// resolves the tier in a single query: it is on the hot path, and a second
+// round trip per request buys nothing.
+type VIPBenefits struct {
+	Concurrency          int
+	RPM                  int
+	UnlimitedConcurrency bool
+	UnlimitedRPM         bool
+}
+
+// Empty reports whether the tier grants nothing, so callers can skip the work.
+func (b VIPBenefits) Empty() bool {
+	return b.Concurrency <= 0 && b.RPM <= 0 && !b.UnlimitedConcurrency && !b.UnlimitedRPM
 }
 
 // VIPStatus is what a user sees about their own standing.
@@ -78,17 +107,33 @@ func vipTierFromEnt(t *dbent.VIPTier) *VIPTier {
 		return nil
 	}
 	return &VIPTier{
-		ID:             t.ID,
-		Level:          t.Level,
-		Name:           t.Name,
-		MinSpendUSD:    t.MinSpendUsd,
-		RateMultiplier: t.RateMultiplier,
-		Concurrency:    t.Concurrency,
-		GraceDays:      t.GraceDays,
-		BadgeColor:     t.BadgeColor,
-		Enabled:        t.Enabled,
-		CreatedAt:      t.CreatedAt,
-		UpdatedAt:      t.UpdatedAt,
+		ID:                   t.ID,
+		Level:                t.Level,
+		Name:                 t.Name,
+		MinSpendUSD:          t.MinSpendUsd,
+		RateMultiplier:       t.RateMultiplier,
+		Concurrency:          t.Concurrency,
+		RPMLimit:             t.RpmLimit,
+		UnlimitedConcurrency: t.UnlimitedConcurrency,
+		UnlimitedRPM:         t.UnlimitedRpm,
+		GraceDays:            t.GraceDays,
+		BadgeColor:           t.BadgeColor,
+		Enabled:              t.Enabled,
+		CreatedAt:            t.CreatedAt,
+		UpdatedAt:            t.UpdatedAt,
+	}
+}
+
+// Benefits reduces a tier to what the auth snapshot needs from it.
+func (t *VIPTier) Benefits() VIPBenefits {
+	if t == nil {
+		return VIPBenefits{}
+	}
+	return VIPBenefits{
+		Concurrency:          t.Concurrency,
+		RPM:                  t.RPMLimit,
+		UnlimitedConcurrency: t.UnlimitedConcurrency,
+		UnlimitedRPM:         t.UnlimitedRPM,
 	}
 }
 
@@ -131,8 +176,34 @@ func validateVIPLadder(tiers []VIPTier) error {
 			return infraerrors.BadRequest("INVALID_VIP_LADDER",
 				fmt.Sprintf("%s must not bill higher than %s", cur.Name, prev.Name))
 		}
+		// The perks have to climb with the price for the same reason the discount
+		// does. Left unchecked, a VIP4 granting less concurrency than VIP3 leaves
+		// every VIP4 customer worse off for having spent more — which is how a
+		// tier of 32 slots sitting above tiers of 1, 2 and 3 goes unnoticed until
+		// somebody reads the table.
+		if vipBenefitRank(cur.Concurrency, cur.UnlimitedConcurrency) < vipBenefitRank(prev.Concurrency, prev.UnlimitedConcurrency) {
+			return infraerrors.BadRequest("INVALID_VIP_LADDER",
+				fmt.Sprintf("%s must not grant less concurrency than %s", cur.Name, prev.Name))
+		}
+		if vipBenefitRank(cur.RPMLimit, cur.UnlimitedRPM) < vipBenefitRank(prev.RPMLimit, prev.UnlimitedRPM) {
+			return infraerrors.BadRequest("INVALID_VIP_LADDER",
+				fmt.Sprintf("%s must not grant less RPM than %s", cur.Name, prev.Name))
+		}
 	}
 	return nil
+}
+
+// vipBenefitRank orders a grant for ladder comparison, sorting an exemption
+// above every finite amount.
+//
+// Comparing the raw numbers would rank an unlimited tier by whatever its unused
+// addend happens to be, so an unlimited VIP4 with rpm_limit 0 would read as
+// granting less than a VIP3 granting 60.
+func vipBenefitRank(value int, unlimited bool) int {
+	if unlimited {
+		return math.MaxInt
+	}
+	return value
 }
 
 func validateVIPTierFields(t VIPTier) error {
@@ -150,8 +221,17 @@ func validateVIPTierFields(t VIPTier) error {
 	if t.RateMultiplier <= 0 || t.RateMultiplier > 1 {
 		return infraerrors.BadRequest("INVALID_INPUT", "rate_multiplier must be greater than 0 and at most 1")
 	}
+	// Positive, not non-negative: a tier granting no concurrency at all is
+	// indistinguishable from having no tier, and 0 is the sentinel the auth
+	// snapshot reads as "no ceiling" — storing it here would be ambiguous. Use
+	// unlimited_concurrency for the exemption instead.
 	if t.Concurrency <= 0 {
 		return infraerrors.BadRequest("INVALID_INPUT", "concurrency must be positive")
+	}
+	// RPM differs: granting no extra RPM is a real tier, so 0 is allowed and
+	// means "add nothing".
+	if t.RPMLimit < 0 {
+		return infraerrors.BadRequest("INVALID_INPUT", "rpm_limit must not be negative")
 	}
 	if t.GraceDays <= 0 {
 		return infraerrors.BadRequest("INVALID_INPUT", "grace_days must be positive")
@@ -174,6 +254,15 @@ func applyVIPTierInput(base VIPTier, in VIPTierInput) VIPTier {
 	}
 	if in.Concurrency != nil {
 		base.Concurrency = *in.Concurrency
+	}
+	if in.RPMLimit != nil {
+		base.RPMLimit = *in.RPMLimit
+	}
+	if in.UnlimitedConcurrency != nil {
+		base.UnlimitedConcurrency = *in.UnlimitedConcurrency
+	}
+	if in.UnlimitedRPM != nil {
+		base.UnlimitedRPM = *in.UnlimitedRPM
 	}
 	if in.GraceDays != nil {
 		base.GraceDays = *in.GraceDays
@@ -210,6 +299,9 @@ func (s *VIPTierService) Create(ctx context.Context, in VIPTierInput) (*VIPTier,
 		SetMinSpendUsd(candidate.MinSpendUSD).
 		SetRateMultiplier(candidate.RateMultiplier).
 		SetConcurrency(candidate.Concurrency).
+		SetRpmLimit(candidate.RPMLimit).
+		SetUnlimitedConcurrency(candidate.UnlimitedConcurrency).
+		SetUnlimitedRpm(candidate.UnlimitedRPM).
 		SetGraceDays(candidate.GraceDays).
 		SetBadgeColor(candidate.BadgeColor).
 		SetEnabled(candidate.Enabled).
@@ -260,6 +352,9 @@ func (s *VIPTierService) Update(ctx context.Context, id int64, in VIPTierInput) 
 		SetMinSpendUsd(candidate.MinSpendUSD).
 		SetRateMultiplier(candidate.RateMultiplier).
 		SetConcurrency(candidate.Concurrency).
+		SetRpmLimit(candidate.RPMLimit).
+		SetUnlimitedConcurrency(candidate.UnlimitedConcurrency).
+		SetUnlimitedRpm(candidate.UnlimitedRPM).
 		SetGraceDays(candidate.GraceDays).
 		SetBadgeColor(candidate.BadgeColor).
 		SetEnabled(candidate.Enabled).

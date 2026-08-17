@@ -16,14 +16,28 @@ import (
 )
 
 type stubVIPBenefitRepo struct {
-	concurrency int
-	err         error
-	calls       int
+	concurrency          int
+	rpm                  int
+	unlimitedConcurrency bool
+	unlimitedRPM         bool
+	err                  error
+	calls                int
 }
 
-func (s *stubVIPBenefitRepo) GetVIPConcurrency(context.Context, int64) (int, error) {
+// Mirrors the real repository on failure: a zero value, not a partial one. A
+// stub that returned its configured numbers alongside the error would hide a
+// caller that forgot to check it.
+func (s *stubVIPBenefitRepo) GetVIPBenefits(context.Context, int64) (VIPBenefits, error) {
 	s.calls++
-	return s.concurrency, s.err
+	if s.err != nil {
+		return VIPBenefits{}, s.err
+	}
+	return VIPBenefits{
+		Concurrency:          s.concurrency,
+		RPM:                  s.rpm,
+		UnlimitedConcurrency: s.unlimitedConcurrency,
+		UnlimitedRPM:         s.unlimitedRPM,
+	}, nil
 }
 
 func vipConcurrencyTestAPIKey(userConcurrency int) *APIKey {

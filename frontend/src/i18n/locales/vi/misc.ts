@@ -82,6 +82,8 @@ export default {
     qualifyingSpend: 'Chi tiêu được tính vào hạng của bạn',
     totalPaid: 'Tổng đã thanh toán',
     concurrency: 'Số luồng tặng thêm',
+    rpm: 'Request/phút tặng thêm',
+    unlimited: 'Không giới hạn',
     discountBadge: 'Giảm {percent}% phí sử dụng',
     spendToNext: 'Cần thêm {amount} để đạt {tier}',
     topTier: 'Bạn đang ở hạng cao nhất'
