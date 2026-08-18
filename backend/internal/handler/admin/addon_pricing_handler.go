@@ -13,8 +13,7 @@ import (
 //
 // The values live in the settings KV rather than a table of their own — see
 // the constants in addon_pricing_service.go. Four scalars do not earn a
-// schema, and repricing deliberately leaves existing holders alone, exactly as
-// editing a reseller tier does.
+// schema, and repricing deliberately leaves existing holders alone.
 type AddonPricingHandler struct {
 	pricingService *service.AddonPricingService
 }

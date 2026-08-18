@@ -165,13 +165,13 @@ func (r *redeemCodeRepository) ListWithFilters(ctx context.Context, params pagin
 	return outCodes, paginationResultFromTotal(int64(total), params), nil
 }
 
-// ListByCreator returns the codes a reseller minted, and only those.
+// ListByCreator returns the codes a given creator minted, and only those.
 //
 // The created_by filter is the first thing in the query and there is no way to
-// widen it from the outside: no filter argument, no "all" sentinel. A reseller
+// widen it from the outside: no filter argument, no "all" sentinel. A creator
 // listing their own stock must never be one missing WHERE clause away from
-// reading every other reseller's unsold codes, which are bearer instruments —
-// so the scope is a property of this method, not of how a handler calls it.
+// reading another creator's unsold codes, which are bearer instruments — so
+// the scope is a property of this method, not of how a handler calls it.
 func (r *redeemCodeRepository) ListByCreator(ctx context.Context, userID int64, params pagination.PaginationParams) ([]service.RedeemCode, *pagination.PaginationResult, error) {
 	q := r.client.RedeemCode.Query().Where(redeemcode.CreatedByEQ(userID))
 

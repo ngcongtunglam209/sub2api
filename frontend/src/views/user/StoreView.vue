@@ -129,110 +129,6 @@
           </div>
         </Surface>
       </div>
-
-      <!--
-        An active plan replaces the shelf rather than sitting above it. Buying a
-        second tier pays `price x credit_rate` into the balance twice for one
-        entitlement, which is a real money bug — the server refuses it, and
-        offering the button anyway only teaches users the page is broken.
-      -->
-      <Surface
-        v-if="heldPlan"
-        :title="t('store.plans.heldTitle')"
-        :description="t('store.plans.heldNotice')"
-      >
-        <Surface sunken :title="heldPlan.plan.name" data-testid="store-held-plan">
-          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <Metric :label="t('store.plans.price')" :value="formatDisplay(heldPlan.plan.price)" />
-            <Metric
-              :label="t('store.plans.creditBack')"
-              :value="formatDisplay(creditBackOf(heldPlan.plan))"
-              :caption="t('store.plans.creditBackCaption')"
-            />
-            <Metric
-              :label="t('store.plans.concurrencyBonus')"
-              :value="heldPlan.plan.concurrency_bonus"
-            />
-            <Metric
-              :label="t('store.plans.rpmLimit')"
-              :value="heldPlan.plan.rpm_limit"
-              :unit="t('store.plans.perMinute')"
-            />
-            <Metric :label="t('store.plans.maxDomains')" :value="heldPlan.plan.max_domains" />
-          </div>
-          <p class="mt-4 text-xs text-ink-secondary">
-            <template v-if="heldPlan.expires_at">
-              {{ t('store.plans.heldExpires', { date: formatDateTime(heldPlan.expires_at) }) }}
-            </template>
-            <template v-else>{{ t('store.plans.heldNoExpiry') }}</template>
-          </p>
-        </Surface>
-      </Surface>
-
-      <Surface
-        v-else
-        :title="t('store.plans.title')"
-        :description="t('store.plans.description')"
-      >
-        <div v-if="loadingPlans" class="space-y-3">
-          <div class="skeleton h-3 w-1/3"></div>
-          <div class="skeleton h-3 w-2/3"></div>
-          <div class="skeleton h-3 w-1/2"></div>
-        </div>
-
-        <div v-else-if="sellablePlans.length" class="grid gap-4 sm:grid-cols-2">
-          <Surface
-            v-for="plan in sellablePlans"
-            :key="plan.id"
-            sunken
-            :title="plan.name"
-            :data-testid="`store-plan-${plan.id}`"
-          >
-            <div class="space-y-4">
-              <div class="grid gap-6 sm:grid-cols-2">
-                <Metric :label="t('store.plans.price')" :value="formatDisplay(plan.price)" />
-                <Metric
-                  :label="t('store.plans.creditBack')"
-                  :value="formatDisplay(creditBackOf(plan))"
-                  :caption="t('store.plans.creditBackCaption')"
-                />
-                <Metric
-                  :label="t('store.plans.concurrencyBonus')"
-                  :value="plan.concurrency_bonus"
-                />
-                <Metric
-                  :label="t('store.plans.rpmLimit')"
-                  :value="plan.rpm_limit"
-                  :unit="t('store.plans.perMinute')"
-                />
-                <Metric :label="t('store.plans.maxDomains')" :value="plan.max_domains" />
-              </div>
-
-              <p class="text-xs text-ink-secondary">
-                {{ t('store.plans.validity', { days: plan.validity_days }) }}
-              </p>
-
-              <p v-if="!canAfford(balance, plan.price)" class="text-xs text-danger">
-                {{ t('store.insufficientBalance') }}
-              </p>
-
-              <div class="flex justify-end">
-                <Button
-                  size="md"
-                  :loading="purchasingPlanId === plan.id"
-                  :disabled="!canAfford(balance, plan.price) || purchasingPlanId !== null"
-                  :data-testid="`store-plan-${plan.id}-buy`"
-                  @click="handlePlanPurchase(plan)"
-                >
-                  {{ t('store.plans.buy') }}
-                </Button>
-              </div>
-            </div>
-          </Surface>
-        </div>
-
-        <EmptyState v-else :title="t('store.plans.empty')" />
-      </Surface>
     </div>
   </AppLayout>
 </template>
@@ -242,9 +138,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import addonsAPI from '@/api/addons'
-import resellerAPI from '@/api/reseller'
 import Button from '@/components/common/Button.vue'
-import EmptyState from '@/components/common/EmptyState.vue'
 import FormField from '@/components/common/FormField.vue'
 import Meter from '@/components/common/Meter.vue'
 import Metric from '@/components/common/Metric.vue'
@@ -254,14 +148,12 @@ import { useDisplayCurrency } from '@/composables/useDisplayCurrency'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { formatDateTime } from '@/utils/format'
-import { canAfford, quoteAddon, resolveHeldPlan, type AddonBlockReason } from './storePricing'
+import { quoteAddon, type AddonBlockReason } from './storePricing'
 import type {
   AddonHolding,
   AddonKind,
   AddonPricing,
-  AddonsResponse,
-  ResellerAssignment,
-  ResellerPlan
+  AddonsResponse
 } from '@/types'
 
 const { t } = useI18n()
@@ -273,12 +165,7 @@ const loadingAddons = ref(false)
 const pricing = ref<AddonPricing | null>(null)
 const held = ref<AddonsResponse['held']>({ concurrency: null, rpm: null })
 
-const loadingPlans = ref(false)
-const plans = ref<ResellerPlan[]>([])
-const assignment = ref<ResellerAssignment | null>(null)
-
 const purchasingKind = ref<AddonKind | null>(null)
-const purchasingPlanId = ref<number | null>(null)
 
 const forms = reactive<Record<AddonKind, { amount: number; months: number }>>({
   concurrency: { amount: 1, months: 1 },
@@ -294,18 +181,6 @@ const balance = computed<number | null>(() => authStore.user?.balance ?? null)
 
 const balanceText = computed<string | null>(() =>
   balance.value === null ? null : formatDisplay(balance.value)
-)
-
-/** What a tier pays straight back into the balance when it is bought. */
-function creditBackOf(plan: ResellerPlan): number {
-  return plan.price * plan.credit_rate
-}
-
-const heldPlan = computed<ResellerAssignment | null>(() => resolveHeldPlan(assignment.value))
-
-/** Defence in depth: the endpoint is meant to publish only purchasable tiers. */
-const sellablePlans = computed<ResellerPlan[]>(() =>
-  plans.value.filter((plan) => plan.enabled).slice().sort((a, b) => a.level - b.level)
 )
 
 interface AddonCard {
@@ -433,23 +308,6 @@ async function loadAddons(): Promise<void> {
   }
 }
 
-async function loadPlans(): Promise<void> {
-  loadingPlans.value = true
-  try {
-    const [list, current] = await Promise.all([
-      addonsAPI.listResellerPlans(),
-      resellerAPI.getPlan()
-    ])
-    plans.value = list
-    assignment.value = current
-  } catch (error) {
-    console.error('Failed to load reseller plans:', error)
-    appStore.showError(t('store.plans.loadFailed'))
-  } finally {
-    loadingPlans.value = false
-  }
-}
-
 /**
  * Re-read the balance from the server after money moved.
  *
@@ -491,30 +349,7 @@ async function handleAddonPurchase(card: AddonCard): Promise<void> {
   }
 }
 
-async function handlePlanPurchase(plan: ResellerPlan): Promise<void> {
-  if (purchasingPlanId.value !== null || heldPlan.value || !canAfford(balance.value, plan.price)) {
-    return
-  }
-
-  purchasingPlanId.value = plan.id
-  try {
-    await addonsAPI.purchaseResellerPlan(plan.id)
-    appStore.showSuccess(t('store.plans.purchaseSuccess'))
-    await loadPlans()
-    await refreshBalance()
-  } catch (error: any) {
-    appStore.showError(
-      error?.response?.data?.message ||
-        error?.response?.data?.detail ||
-        t('store.plans.purchaseFailed')
-    )
-  } finally {
-    purchasingPlanId.value = null
-  }
-}
-
 onMounted(() => {
   loadAddons()
-  loadPlans()
 })
 </script>

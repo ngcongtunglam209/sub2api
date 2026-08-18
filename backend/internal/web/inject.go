@@ -16,9 +16,8 @@ const NonceHTMLPlaceholder = "__CSP_NONCE_VALUE__"
 // renderIndexHTML produces the served index.html for one settings snapshot.
 //
 // Split out of the embed-only server so it can be exercised without a built
-// frontend: this function is what makes two hosts' HTML differ, and "reseller
-// A's page was served to reseller B" is not a bug worth discovering in
-// production for want of a `dist` directory.
+// frontend: what lands in the served HTML is worth testing without needing a
+// `dist` directory to exist.
 func renderIndexHTML(baseHTML, settingsJSON []byte) []byte {
 	// Create the script tag to inject with nonce placeholder
 	// The placeholder will be replaced with actual nonce at request time
@@ -28,11 +27,10 @@ func renderIndexHTML(baseHTML, settingsJSON []byte) []byte {
 	headClose := []byte("</head>")
 	result := bytes.Replace(baseHTML, headClose, append(script, headClose...), 1)
 
-	// Apply custom branding before the browser paints the static defaults.
-	// Both read the same settings snapshot the config script carries, so a
-	// per-host override reaches the tab title and the favicon as well as the
-	// app — a reseller whose page says their name but whose tab says ours has
-	// not really been rebranded.
+	// Apply the site's name and logo before the browser paints the static
+	// defaults. Both read the same settings snapshot the config script carries,
+	// so a renamed site reaches the tab title and the favicon as well as the
+	// app.
 	result = injectSiteTitle(result, settingsJSON)
 	result = injectSiteFavicon(result, settingsJSON)
 

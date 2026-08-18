@@ -535,53 +535,6 @@ func (_u *UserUpdate) SetNillableVipTierLocked(v *bool) *UserUpdate {
 	return _u
 }
 
-// SetResellerPlanID sets the "reseller_plan_id" field.
-func (_u *UserUpdate) SetResellerPlanID(v int64) *UserUpdate {
-	_u.mutation.ResetResellerPlanID()
-	_u.mutation.SetResellerPlanID(v)
-	return _u
-}
-
-// SetNillableResellerPlanID sets the "reseller_plan_id" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableResellerPlanID(v *int64) *UserUpdate {
-	if v != nil {
-		_u.SetResellerPlanID(*v)
-	}
-	return _u
-}
-
-// AddResellerPlanID adds value to the "reseller_plan_id" field.
-func (_u *UserUpdate) AddResellerPlanID(v int64) *UserUpdate {
-	_u.mutation.AddResellerPlanID(v)
-	return _u
-}
-
-// ClearResellerPlanID clears the value of the "reseller_plan_id" field.
-func (_u *UserUpdate) ClearResellerPlanID() *UserUpdate {
-	_u.mutation.ClearResellerPlanID()
-	return _u
-}
-
-// SetResellerPlanExpiresAt sets the "reseller_plan_expires_at" field.
-func (_u *UserUpdate) SetResellerPlanExpiresAt(v time.Time) *UserUpdate {
-	_u.mutation.SetResellerPlanExpiresAt(v)
-	return _u
-}
-
-// SetNillableResellerPlanExpiresAt sets the "reseller_plan_expires_at" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableResellerPlanExpiresAt(v *time.Time) *UserUpdate {
-	if v != nil {
-		_u.SetResellerPlanExpiresAt(*v)
-	}
-	return _u
-}
-
-// ClearResellerPlanExpiresAt clears the value of the "reseller_plan_expires_at" field.
-func (_u *UserUpdate) ClearResellerPlanExpiresAt() *UserUpdate {
-	_u.mutation.ClearResellerPlanExpiresAt()
-	return _u
-}
-
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_u *UserUpdate) AddAPIKeyIDs(ids ...int64) *UserUpdate {
 	_u.mutation.AddAPIKeyIDs(ids...)
@@ -1278,21 +1231,6 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.VipTierLocked(); ok {
 		_spec.SetField(user.FieldVipTierLocked, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.ResellerPlanID(); ok {
-		_spec.SetField(user.FieldResellerPlanID, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedResellerPlanID(); ok {
-		_spec.AddField(user.FieldResellerPlanID, field.TypeInt64, value)
-	}
-	if _u.mutation.ResellerPlanIDCleared() {
-		_spec.ClearField(user.FieldResellerPlanID, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.ResellerPlanExpiresAt(); ok {
-		_spec.SetField(user.FieldResellerPlanExpiresAt, field.TypeTime, value)
-	}
-	if _u.mutation.ResellerPlanExpiresAtCleared() {
-		_spec.ClearField(user.FieldResellerPlanExpiresAt, field.TypeTime)
 	}
 	if _u.mutation.APIKeysCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -2406,53 +2344,6 @@ func (_u *UserUpdateOne) SetNillableVipTierLocked(v *bool) *UserUpdateOne {
 	return _u
 }
 
-// SetResellerPlanID sets the "reseller_plan_id" field.
-func (_u *UserUpdateOne) SetResellerPlanID(v int64) *UserUpdateOne {
-	_u.mutation.ResetResellerPlanID()
-	_u.mutation.SetResellerPlanID(v)
-	return _u
-}
-
-// SetNillableResellerPlanID sets the "reseller_plan_id" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableResellerPlanID(v *int64) *UserUpdateOne {
-	if v != nil {
-		_u.SetResellerPlanID(*v)
-	}
-	return _u
-}
-
-// AddResellerPlanID adds value to the "reseller_plan_id" field.
-func (_u *UserUpdateOne) AddResellerPlanID(v int64) *UserUpdateOne {
-	_u.mutation.AddResellerPlanID(v)
-	return _u
-}
-
-// ClearResellerPlanID clears the value of the "reseller_plan_id" field.
-func (_u *UserUpdateOne) ClearResellerPlanID() *UserUpdateOne {
-	_u.mutation.ClearResellerPlanID()
-	return _u
-}
-
-// SetResellerPlanExpiresAt sets the "reseller_plan_expires_at" field.
-func (_u *UserUpdateOne) SetResellerPlanExpiresAt(v time.Time) *UserUpdateOne {
-	_u.mutation.SetResellerPlanExpiresAt(v)
-	return _u
-}
-
-// SetNillableResellerPlanExpiresAt sets the "reseller_plan_expires_at" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableResellerPlanExpiresAt(v *time.Time) *UserUpdateOne {
-	if v != nil {
-		_u.SetResellerPlanExpiresAt(*v)
-	}
-	return _u
-}
-
-// ClearResellerPlanExpiresAt clears the value of the "reseller_plan_expires_at" field.
-func (_u *UserUpdateOne) ClearResellerPlanExpiresAt() *UserUpdateOne {
-	_u.mutation.ClearResellerPlanExpiresAt()
-	return _u
-}
-
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_u *UserUpdateOne) AddAPIKeyIDs(ids ...int64) *UserUpdateOne {
 	_u.mutation.AddAPIKeyIDs(ids...)
@@ -3179,21 +3070,6 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.VipTierLocked(); ok {
 		_spec.SetField(user.FieldVipTierLocked, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.ResellerPlanID(); ok {
-		_spec.SetField(user.FieldResellerPlanID, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedResellerPlanID(); ok {
-		_spec.AddField(user.FieldResellerPlanID, field.TypeInt64, value)
-	}
-	if _u.mutation.ResellerPlanIDCleared() {
-		_spec.ClearField(user.FieldResellerPlanID, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.ResellerPlanExpiresAt(); ok {
-		_spec.SetField(user.FieldResellerPlanExpiresAt, field.TypeTime, value)
-	}
-	if _u.mutation.ResellerPlanExpiresAtCleared() {
-		_spec.ClearField(user.FieldResellerPlanExpiresAt, field.TypeTime)
 	}
 	if _u.mutation.APIKeysCleared() {
 		edge := &sqlgraph.EdgeSpec{

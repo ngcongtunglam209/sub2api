@@ -279,18 +279,6 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/reseller',
-    name: 'Reseller',
-    component: () => import('@/views/user/ResellerView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: false,
-      title: 'Reseller',
-      titleKey: 'reseller.title',
-      descriptionKey: 'reseller.description'
-    }
-  },
-  {
     path: '/affiliate',
     name: 'Affiliate',
     component: () => import('@/views/user/AffiliateView.vue'),
@@ -537,30 +525,6 @@ const routes: RouteRecordRaw[] = [
       title: 'VIP Tiers',
       titleKey: 'admin.vipTiers.title',
       descriptionKey: 'admin.vipTiers.description'
-    }
-  },
-  {
-    path: '/admin/reseller-plans',
-    name: 'AdminResellerPlans',
-    component: () => import('@/views/admin/ResellerPlansView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Reseller Plans',
-      titleKey: 'admin.resellerPlans.title',
-      descriptionKey: 'admin.resellerPlans.description'
-    }
-  },
-  {
-    path: '/admin/reseller-domains',
-    name: 'AdminResellerDomains',
-    component: () => import('@/views/admin/ResellerDomainsView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Reseller Domains',
-      titleKey: 'admin.resellerDomains.title',
-      descriptionKey: 'admin.resellerDomains.description'
     }
   },
   {

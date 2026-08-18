@@ -86,7 +86,6 @@ type Config struct {
 	VNDRate                 VNDRateConfig                 `mapstructure:"vnd_rate"`
 	Gateway                 GatewayConfig                 `mapstructure:"gateway"`
 	APIKeyAuth              APIKeyAuthCacheConfig         `mapstructure:"api_key_auth_cache"`
-	CustomDomain            CustomDomainConfig            `mapstructure:"custom_domain"`
 	SubscriptionCache       SubscriptionCacheConfig       `mapstructure:"subscription_cache"`
 	SubscriptionMaintenance SubscriptionMaintenanceConfig `mapstructure:"subscription_maintenance"`
 	Dashboard               DashboardCacheConfig          `mapstructure:"dashboard_cache"`
@@ -1648,17 +1647,6 @@ type InvalidAuthAbuseConfig struct {
 	Capacity      int  `mapstructure:"capacity"`
 }
 
-// CustomDomainConfig 分销商自定义域名。
-//
-// Enabled 默认关闭：打开后未列入 CanonicalHosts 的 Host 会被直接拒绝，
-// 漏填一个域名就等于把自己关在门外，这种代价不该由默认值悄悄承担。
-type CustomDomainConfig struct {
-	Enabled bool `mapstructure:"enabled"`
-	// CanonicalHosts 是本站自己的域名（可多个，例如面板域名与 API 域名）。
-	// 分销商域名来自数据库，不写在这里。
-	CanonicalHosts []string `mapstructure:"canonical_hosts"`
-}
-
 // SubscriptionCacheConfig 订阅认证 L1 缓存配置
 type SubscriptionCacheConfig struct {
 	L1Size        int `mapstructure:"l1_size"`
@@ -2279,10 +2267,6 @@ func setDefaults() {
 	viper.SetDefault("api_key_auth_cache.jitter_percent", 10)
 	viper.SetDefault("api_key_auth_cache.singleflight", true)
 	viper.SetDefault("api_key_auth_cache.lookup_concurrency", 64)
-
-	// Reseller custom domains
-	viper.SetDefault("custom_domain.enabled", false)
-	viper.SetDefault("custom_domain.canonical_hosts", []string{})
 	viper.SetDefault("api_key_auth_cache.invalid_abuse.enabled", true)
 	viper.SetDefault("api_key_auth_cache.invalid_abuse.threshold", 120)
 	viper.SetDefault("api_key_auth_cache.invalid_abuse.window_seconds", 60)

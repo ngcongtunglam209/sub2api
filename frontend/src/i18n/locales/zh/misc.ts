@@ -81,71 +81,17 @@ export default {
     qualifyingSpend: '计入等级的消费',
     totalPaid: '累计付费',
     concurrency: '赠送并发数',
+    rpm: '赠送每分钟请求数',
+    unlimited: '不限量',
     discountBadge: '用量省 {percent}%',
     spendToNext: '再消费 {amount} 可达 {tier}',
     topTier: '已是最高等级'
   },
 
-  // 代理中心
-  reseller: {
-    title: '代理中心',
-    description: '查看你的代理套餐，以及你生成过的兑换码',
-    planTitle: '我的套餐',
-    planName: '套餐',
-    creditRate: '额度倍率',
-    creditRateCaption: '每 1 美元额度可兑面值',
-    rpmLimit: '速率上限',
-    perMinute: '次/分钟',
-    maxDomains: '域名数',
-    expiresOn: '有效期至 {date}',
-    noExpiry: '该套餐不会过期',
-    noPlanTitle: '你还没有代理套餐',
-    noPlanDescription: '请联系管理员为你指派套餐后再生成兑换码。',
-    planLoadFailed: '代理套餐加载失败',
-    generateTitle: '生成兑换码',
-    generateDescription: '生成时按你的套餐倍率从额度中扣除',
-    generateButton: '生成',
-    generateSuccess: '已生成 {count} 个兑换码',
-    generateFailed: '兑换码生成失败',
-    countRequired: '请填写要生成的数量',
-    valueRequired: '请填写大于 0 的面值',
-    fields: {
-      count: '数量',
-      countHint: '本批要生成多少个兑换码',
-      value: '面值（美元）',
-      valueHint: '每个兑换码兑换时的价值',
-      group: '分组',
-      groupHint: '把兑换码限定到某个分组',
-      noGroup: '不限分组',
-      notes: '备注',
-      notesHint: '仅你自己可见'
-    },
-    mintedTitle: '本次生成的兑换码',
-    mintedWarning: '这些码只显示这一次，之后无法再取回，请立即复制保存。',
-    copyAll: '复制全部',
-    copiedAll: '已复制 {count} 个兑换码',
-    codesTitle: '我的兑换码',
-    noCodes: '你还没有生成过兑换码',
-    codesLoadFailed: '兑换码加载失败',
-    columns: {
-      code: '兑换码',
-      value: '面值',
-      status: '状态',
-      createdAt: '生成时间',
-      usedAt: '兑换时间'
-    },
-    status: {
-      unused: '未使用',
-      used: '已兑换',
-      expired: '已过期',
-      disabled: '已停用'
-    }
-  },
-
   // Add-on Store
   store: {
     title: '增值商店',
-    description: '使用余额购买额外配额和代理套餐',
+    description: '使用余额购买额外配额',
     balanceLabel: '当前余额',
     loadFailed: '加载商店失败',
     unitPriceLabel: '单价',
@@ -177,27 +123,6 @@ export default {
       amountLabel: '{step} 次/分 的档数',
       amountHint: '按每档 {step} 次/分 出售',
       unit: '次/分'
-    },
-    plans: {
-      title: '代理套餐',
-      description: '使用余额购买代理等级',
-      loadFailed: '加载代理套餐失败',
-      empty: '当前没有在售的代理套餐',
-      price: '价格',
-      creditBack: '返还额度',
-      creditBackCaption: '购买后返还至你的余额',
-      concurrencyBonus: '并发加成',
-      rpmLimit: '速率上限',
-      perMinute: '次/分',
-      maxDomains: '域名数',
-      validity: '有效期 {days} 天',
-      buy: '购买套餐',
-      purchaseSuccess: '代理套餐已生效',
-      purchaseFailed: '购买代理套餐失败',
-      heldTitle: '你的代理套餐',
-      heldNotice: '你已持有代理套餐。重复购买会重复发放返还额度，因此在当前套餐有效期内服务端会拒绝。',
-      heldExpires: '有效期至 {date}',
-      heldNoExpiry: '该套餐不会过期'
     }
   },
   announcements: {

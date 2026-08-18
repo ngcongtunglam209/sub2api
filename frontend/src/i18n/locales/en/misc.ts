@@ -82,71 +82,17 @@ export default {
     qualifyingSpend: 'Spend counted towards your tier',
     totalPaid: 'Total paid',
     concurrency: 'Bonus concurrency',
+    rpm: 'Bonus requests/min',
+    unlimited: 'Unlimited',
     discountBadge: '{percent}% off usage',
     spendToNext: '{amount} more to reach {tier}',
     topTier: 'You are on the highest tier'
   },
 
-  // Reseller Panel
-  reseller: {
-    title: 'Reseller',
-    description: 'Your reseller plan and the codes you have minted',
-    planTitle: 'Your plan',
-    planName: 'Plan',
-    creditRate: 'Credit rate',
-    creditRateCaption: 'Face value per $1 of credit',
-    rpmLimit: 'Rate limit',
-    perMinute: 'req/min',
-    maxDomains: 'Domains',
-    expiresOn: 'Valid until {date}',
-    noExpiry: 'This plan does not expire',
-    noPlanTitle: 'You have no reseller plan',
-    noPlanDescription: 'Contact an administrator to be assigned one before you can mint codes.',
-    planLoadFailed: 'Failed to load your reseller plan',
-    generateTitle: 'Generate codes',
-    generateDescription: 'Codes are billed against your credit at your plan rate',
-    generateButton: 'Generate',
-    generateSuccess: '{count} code(s) generated',
-    generateFailed: 'Failed to generate codes',
-    countRequired: 'Enter how many codes to generate',
-    valueRequired: 'Enter a face value greater than zero',
-    fields: {
-      count: 'How many',
-      countHint: 'Number of codes in this batch',
-      value: 'Face value (USD)',
-      valueHint: 'What each code is worth when redeemed',
-      group: 'Group',
-      groupHint: 'Restrict the codes to one group',
-      noGroup: 'No group',
-      notes: 'Notes',
-      notesHint: 'Only you see this'
-    },
-    mintedTitle: 'Your new codes',
-    mintedWarning: 'These strings are shown once and cannot be retrieved again. Copy them now.',
-    copyAll: 'Copy all',
-    copiedAll: '{count} code(s) copied',
-    codesTitle: 'Your codes',
-    noCodes: 'You have not generated any codes yet',
-    codesLoadFailed: 'Failed to load your codes',
-    columns: {
-      code: 'Code',
-      value: 'Value',
-      status: 'Status',
-      createdAt: 'Generated',
-      usedAt: 'Redeemed'
-    },
-    status: {
-      unused: 'Unused',
-      used: 'Redeemed',
-      expired: 'Expired',
-      disabled: 'Disabled'
-    }
-  },
-
   // Add-on Store
   store: {
     title: 'Add-on Store',
-    description: 'Spend your balance on extra capacity and reseller tiers',
+    description: 'Spend your balance on extra capacity',
     balanceLabel: 'Your balance',
     loadFailed: 'Failed to load the store',
     unitPriceLabel: 'Unit price',
@@ -178,27 +124,6 @@ export default {
       amountLabel: 'Blocks of {step} req/min',
       amountHint: 'Sold in blocks of {step} requests per minute',
       unit: 'req/min'
-    },
-    plans: {
-      title: 'Reseller plans',
-      description: 'Buy a reseller tier with your balance',
-      loadFailed: 'Failed to load reseller plans',
-      empty: 'No reseller plans are on sale right now',
-      price: 'Price',
-      creditBack: 'Credit back',
-      creditBackCaption: 'Returned to your balance on purchase',
-      concurrencyBonus: 'Bonus concurrency',
-      rpmLimit: 'Rate limit',
-      perMinute: 'req/min',
-      maxDomains: 'Domains',
-      validity: 'Valid for {days} days',
-      buy: 'Buy plan',
-      purchaseSuccess: 'Reseller plan activated',
-      purchaseFailed: 'Failed to buy the reseller plan',
-      heldTitle: 'Your reseller plan',
-      heldNotice: 'You already hold a reseller plan. A second purchase would pay the credit twice, so the server refuses it while this one is active.',
-      heldExpires: 'Valid until {date}',
-      heldNoExpiry: 'This plan does not expire'
     }
   },
   announcements: {

@@ -44,8 +44,23 @@
           The tier figure is a bonus added to the user's own concurrency, not
           their total, so it is signed. Printing it bare read as "your limit is
           5" to someone whose actual limit was 7.
+
+          An exemption has to short-circuit that: the addend is left at whatever
+          it was when the ceiling was lifted, so "+1" is what an unlimited tier
+          would otherwise advertise.
         -->
-        <div class="font-mono tabular-nums text-ink">+{{ status.tier.concurrency }}</div>
+        <div v-if="status.tier.unlimited_concurrency" class="font-medium text-success">
+          {{ t('vip.unlimited') }}
+        </div>
+        <div v-else class="font-mono tabular-nums text-ink">+{{ status.tier.concurrency }}</div>
+      </div>
+      <!-- Hidden when the tier grants no RPM at all, rather than showing "+0". -->
+      <div v-if="status.tier && (status.tier.unlimited_rpm || status.tier.rpm_limit > 0)">
+        <div class="text-ink-tertiary">{{ t('vip.rpm') }}</div>
+        <div v-if="status.tier.unlimited_rpm" class="font-medium text-success">
+          {{ t('vip.unlimited') }}
+        </div>
+        <div v-else class="font-mono tabular-nums text-ink">+{{ status.tier.rpm_limit }}</div>
       </div>
       <div>
         <div class="text-ink-tertiary">{{ t('vip.totalPaid') }}</div>

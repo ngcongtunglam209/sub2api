@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { canAfford, quoteAddon, resolveHeldPlan } from '../storePricing'
-import type { ResellerAssignment, ResellerPlan } from '@/types'
+import { canAfford, quoteAddon } from '../storePricing'
 
 /**
  * The add-on store spends real balance, so these tests pin the arithmetic that
@@ -184,48 +183,5 @@ describe('canAfford', () => {
 
   it('refuses everything when the balance has not loaded', () => {
     expect(canAfford(null, 0)).toBe(false)
-  })
-})
-
-function assignmentExpiring(expiresAt: string | null): ResellerAssignment {
-  return {
-    plan: { id: 1, name: 'Gold', price: 100, credit_rate: 1.2 } as ResellerPlan,
-    expires_at: expiresAt
-  }
-}
-
-describe('resolveHeldPlan', () => {
-  const now = Date.parse('2026-06-01T00:00:00Z')
-
-  it('treats a lapsed plan as not held so a replacement can be bought', () => {
-    expect(resolveHeldPlan(assignmentExpiring('2026-05-31T23:59:59Z'), now)).toBeNull()
-  })
-
-  it('keeps a plan that has not expired yet', () => {
-    const assignment = assignmentExpiring('2026-06-02T00:00:00Z')
-
-    expect(resolveHeldPlan(assignment, now)).toBe(assignment)
-  })
-
-  it('keeps a plan with no expiry at all', () => {
-    const assignment = assignmentExpiring(null)
-
-    expect(resolveHeldPlan(assignment, now)).toBe(assignment)
-  })
-
-  it('keeps blocking on an unparseable expiry', () => {
-    // A wrongly blocked purchase is a support ticket; a wrongly allowed one
-    // pays price x credit_rate into the balance twice for one entitlement.
-    const assignment = assignmentExpiring('not a date')
-
-    expect(resolveHeldPlan(assignment, now)).toBe(assignment)
-  })
-
-  it('does not block when there is no assignment', () => {
-    expect(resolveHeldPlan(null, now)).toBeNull()
-  })
-
-  it('treats the exact expiry instant as lapsed', () => {
-    expect(resolveHeldPlan(assignmentExpiring('2026-06-01T00:00:00Z'), now)).toBeNull()
   })
 })

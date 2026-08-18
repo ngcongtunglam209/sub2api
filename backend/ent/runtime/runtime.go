@@ -32,8 +32,6 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
-	"github.com/Wei-Shaw/sub2api/ent/resellerdomain"
-	"github.com/Wei-Shaw/sub2api/ent/resellerplan"
 	"github.com/Wei-Shaw/sub2api/ent/schema"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
@@ -1735,138 +1733,6 @@ func init() {
 	redeemcodeDescValidityDays := redeemcodeFields[11].Descriptor()
 	// redeemcode.DefaultValidityDays holds the default value on creation for the validity_days field.
 	redeemcode.DefaultValidityDays = redeemcodeDescValidityDays.Default.(int)
-	resellerdomainMixin := schema.ResellerDomain{}.Mixin()
-	resellerdomainMixinFields0 := resellerdomainMixin[0].Fields()
-	_ = resellerdomainMixinFields0
-	resellerdomainFields := schema.ResellerDomain{}.Fields()
-	_ = resellerdomainFields
-	// resellerdomainDescCreatedAt is the schema descriptor for created_at field.
-	resellerdomainDescCreatedAt := resellerdomainMixinFields0[0].Descriptor()
-	// resellerdomain.DefaultCreatedAt holds the default value on creation for the created_at field.
-	resellerdomain.DefaultCreatedAt = resellerdomainDescCreatedAt.Default.(func() time.Time)
-	// resellerdomainDescUpdatedAt is the schema descriptor for updated_at field.
-	resellerdomainDescUpdatedAt := resellerdomainMixinFields0[1].Descriptor()
-	// resellerdomain.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	resellerdomain.DefaultUpdatedAt = resellerdomainDescUpdatedAt.Default.(func() time.Time)
-	// resellerdomain.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	resellerdomain.UpdateDefaultUpdatedAt = resellerdomainDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// resellerdomainDescDomain is the schema descriptor for domain field.
-	resellerdomainDescDomain := resellerdomainFields[0].Descriptor()
-	// resellerdomain.DomainValidator is a validator for the "domain" field. It is called by the builders before save.
-	resellerdomain.DomainValidator = func() func(string) error {
-		validators := resellerdomainDescDomain.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(domain string) error {
-			for _, fn := range fns {
-				if err := fn(domain); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// resellerdomainDescStatus is the schema descriptor for status field.
-	resellerdomainDescStatus := resellerdomainFields[2].Descriptor()
-	// resellerdomain.DefaultStatus holds the default value on creation for the status field.
-	resellerdomain.DefaultStatus = resellerdomainDescStatus.Default.(string)
-	// resellerdomain.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	resellerdomain.StatusValidator = resellerdomainDescStatus.Validators[0].(func(string) error)
-	// resellerdomainDescNotes is the schema descriptor for notes field.
-	resellerdomainDescNotes := resellerdomainFields[3].Descriptor()
-	// resellerdomain.DefaultNotes holds the default value on creation for the notes field.
-	resellerdomain.DefaultNotes = resellerdomainDescNotes.Default.(string)
-	// resellerdomainDescSiteName is the schema descriptor for site_name field.
-	resellerdomainDescSiteName := resellerdomainFields[4].Descriptor()
-	// resellerdomain.DefaultSiteName holds the default value on creation for the site_name field.
-	resellerdomain.DefaultSiteName = resellerdomainDescSiteName.Default.(string)
-	// resellerdomain.SiteNameValidator is a validator for the "site_name" field. It is called by the builders before save.
-	resellerdomain.SiteNameValidator = resellerdomainDescSiteName.Validators[0].(func(string) error)
-	// resellerdomainDescSiteLogo is the schema descriptor for site_logo field.
-	resellerdomainDescSiteLogo := resellerdomainFields[5].Descriptor()
-	// resellerdomain.DefaultSiteLogo holds the default value on creation for the site_logo field.
-	resellerdomain.DefaultSiteLogo = resellerdomainDescSiteLogo.Default.(string)
-	// resellerdomainDescSiteSubtitle is the schema descriptor for site_subtitle field.
-	resellerdomainDescSiteSubtitle := resellerdomainFields[6].Descriptor()
-	// resellerdomain.DefaultSiteSubtitle holds the default value on creation for the site_subtitle field.
-	resellerdomain.DefaultSiteSubtitle = resellerdomainDescSiteSubtitle.Default.(string)
-	// resellerdomain.SiteSubtitleValidator is a validator for the "site_subtitle" field. It is called by the builders before save.
-	resellerdomain.SiteSubtitleValidator = resellerdomainDescSiteSubtitle.Validators[0].(func(string) error)
-	resellerplanMixin := schema.ResellerPlan{}.Mixin()
-	resellerplanMixinFields0 := resellerplanMixin[0].Fields()
-	_ = resellerplanMixinFields0
-	resellerplanFields := schema.ResellerPlan{}.Fields()
-	_ = resellerplanFields
-	// resellerplanDescCreatedAt is the schema descriptor for created_at field.
-	resellerplanDescCreatedAt := resellerplanMixinFields0[0].Descriptor()
-	// resellerplan.DefaultCreatedAt holds the default value on creation for the created_at field.
-	resellerplan.DefaultCreatedAt = resellerplanDescCreatedAt.Default.(func() time.Time)
-	// resellerplanDescUpdatedAt is the schema descriptor for updated_at field.
-	resellerplanDescUpdatedAt := resellerplanMixinFields0[1].Descriptor()
-	// resellerplan.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	resellerplan.DefaultUpdatedAt = resellerplanDescUpdatedAt.Default.(func() time.Time)
-	// resellerplan.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	resellerplan.UpdateDefaultUpdatedAt = resellerplanDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// resellerplanDescLevel is the schema descriptor for level field.
-	resellerplanDescLevel := resellerplanFields[0].Descriptor()
-	// resellerplan.LevelValidator is a validator for the "level" field. It is called by the builders before save.
-	resellerplan.LevelValidator = resellerplanDescLevel.Validators[0].(func(int) error)
-	// resellerplanDescName is the schema descriptor for name field.
-	resellerplanDescName := resellerplanFields[1].Descriptor()
-	// resellerplan.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	resellerplan.NameValidator = func() func(string) error {
-		validators := resellerplanDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// resellerplanDescCreditRate is the schema descriptor for credit_rate field.
-	resellerplanDescCreditRate := resellerplanFields[3].Descriptor()
-	// resellerplan.DefaultCreditRate holds the default value on creation for the credit_rate field.
-	resellerplan.DefaultCreditRate = resellerplanDescCreditRate.Default.(float64)
-	// resellerplanDescConcurrencyBonus is the schema descriptor for concurrency_bonus field.
-	resellerplanDescConcurrencyBonus := resellerplanFields[4].Descriptor()
-	// resellerplan.DefaultConcurrencyBonus holds the default value on creation for the concurrency_bonus field.
-	resellerplan.DefaultConcurrencyBonus = resellerplanDescConcurrencyBonus.Default.(int)
-	// resellerplan.ConcurrencyBonusValidator is a validator for the "concurrency_bonus" field. It is called by the builders before save.
-	resellerplan.ConcurrencyBonusValidator = resellerplanDescConcurrencyBonus.Validators[0].(func(int) error)
-	// resellerplanDescRpmLimit is the schema descriptor for rpm_limit field.
-	resellerplanDescRpmLimit := resellerplanFields[5].Descriptor()
-	// resellerplan.DefaultRpmLimit holds the default value on creation for the rpm_limit field.
-	resellerplan.DefaultRpmLimit = resellerplanDescRpmLimit.Default.(int)
-	// resellerplan.RpmLimitValidator is a validator for the "rpm_limit" field. It is called by the builders before save.
-	resellerplan.RpmLimitValidator = resellerplanDescRpmLimit.Validators[0].(func(int) error)
-	// resellerplanDescMaxDomains is the schema descriptor for max_domains field.
-	resellerplanDescMaxDomains := resellerplanFields[6].Descriptor()
-	// resellerplan.DefaultMaxDomains holds the default value on creation for the max_domains field.
-	resellerplan.DefaultMaxDomains = resellerplanDescMaxDomains.Default.(int)
-	// resellerplan.MaxDomainsValidator is a validator for the "max_domains" field. It is called by the builders before save.
-	resellerplan.MaxDomainsValidator = resellerplanDescMaxDomains.Validators[0].(func(int) error)
-	// resellerplanDescValidityDays is the schema descriptor for validity_days field.
-	resellerplanDescValidityDays := resellerplanFields[7].Descriptor()
-	// resellerplan.DefaultValidityDays holds the default value on creation for the validity_days field.
-	resellerplan.DefaultValidityDays = resellerplanDescValidityDays.Default.(int)
-	// resellerplan.ValidityDaysValidator is a validator for the "validity_days" field. It is called by the builders before save.
-	resellerplan.ValidityDaysValidator = resellerplanDescValidityDays.Validators[0].(func(int) error)
-	// resellerplanDescAllowedGroupIds is the schema descriptor for allowed_group_ids field.
-	resellerplanDescAllowedGroupIds := resellerplanFields[8].Descriptor()
-	// resellerplan.DefaultAllowedGroupIds holds the default value on creation for the allowed_group_ids field.
-	resellerplan.DefaultAllowedGroupIds = resellerplanDescAllowedGroupIds.Default.([]int64)
-	// resellerplanDescEnabled is the schema descriptor for enabled field.
-	resellerplanDescEnabled := resellerplanFields[9].Descriptor()
-	// resellerplan.DefaultEnabled holds the default value on creation for the enabled field.
-	resellerplan.DefaultEnabled = resellerplanDescEnabled.Default.(bool)
 	securitysecretMixin := schema.SecuritySecret{}.Mixin()
 	securitysecretMixinFields0 := securitysecretMixin[0].Fields()
 	_ = securitysecretMixinFields0
@@ -2665,28 +2531,42 @@ func init() {
 	viptier.DefaultConcurrency = viptierDescConcurrency.Default.(int)
 	// viptier.ConcurrencyValidator is a validator for the "concurrency" field. It is called by the builders before save.
 	viptier.ConcurrencyValidator = viptierDescConcurrency.Validators[0].(func(int) error)
+	// viptierDescRpmLimit is the schema descriptor for rpm_limit field.
+	viptierDescRpmLimit := viptierFields[5].Descriptor()
+	// viptier.DefaultRpmLimit holds the default value on creation for the rpm_limit field.
+	viptier.DefaultRpmLimit = viptierDescRpmLimit.Default.(int)
+	// viptier.RpmLimitValidator is a validator for the "rpm_limit" field. It is called by the builders before save.
+	viptier.RpmLimitValidator = viptierDescRpmLimit.Validators[0].(func(int) error)
+	// viptierDescUnlimitedRpm is the schema descriptor for unlimited_rpm field.
+	viptierDescUnlimitedRpm := viptierFields[6].Descriptor()
+	// viptier.DefaultUnlimitedRpm holds the default value on creation for the unlimited_rpm field.
+	viptier.DefaultUnlimitedRpm = viptierDescUnlimitedRpm.Default.(bool)
+	// viptierDescUnlimitedConcurrency is the schema descriptor for unlimited_concurrency field.
+	viptierDescUnlimitedConcurrency := viptierFields[7].Descriptor()
+	// viptier.DefaultUnlimitedConcurrency holds the default value on creation for the unlimited_concurrency field.
+	viptier.DefaultUnlimitedConcurrency = viptierDescUnlimitedConcurrency.Default.(bool)
 	// viptierDescGraceDays is the schema descriptor for grace_days field.
-	viptierDescGraceDays := viptierFields[5].Descriptor()
+	viptierDescGraceDays := viptierFields[8].Descriptor()
 	// viptier.DefaultGraceDays holds the default value on creation for the grace_days field.
 	viptier.DefaultGraceDays = viptierDescGraceDays.Default.(int)
 	// viptier.GraceDaysValidator is a validator for the "grace_days" field. It is called by the builders before save.
 	viptier.GraceDaysValidator = viptierDescGraceDays.Validators[0].(func(int) error)
 	// viptierDescBadgeColor is the schema descriptor for badge_color field.
-	viptierDescBadgeColor := viptierFields[6].Descriptor()
+	viptierDescBadgeColor := viptierFields[9].Descriptor()
 	// viptier.DefaultBadgeColor holds the default value on creation for the badge_color field.
 	viptier.DefaultBadgeColor = viptierDescBadgeColor.Default.(string)
 	// viptier.BadgeColorValidator is a validator for the "badge_color" field. It is called by the builders before save.
 	viptier.BadgeColorValidator = viptierDescBadgeColor.Validators[0].(func(string) error)
 	// viptierDescEnabled is the schema descriptor for enabled field.
-	viptierDescEnabled := viptierFields[7].Descriptor()
+	viptierDescEnabled := viptierFields[10].Descriptor()
 	// viptier.DefaultEnabled holds the default value on creation for the enabled field.
 	viptier.DefaultEnabled = viptierDescEnabled.Default.(bool)
 	// viptierDescCreatedAt is the schema descriptor for created_at field.
-	viptierDescCreatedAt := viptierFields[8].Descriptor()
+	viptierDescCreatedAt := viptierFields[11].Descriptor()
 	// viptier.DefaultCreatedAt holds the default value on creation for the created_at field.
 	viptier.DefaultCreatedAt = viptierDescCreatedAt.Default.(func() time.Time)
 	// viptierDescUpdatedAt is the schema descriptor for updated_at field.
-	viptierDescUpdatedAt := viptierFields[9].Descriptor()
+	viptierDescUpdatedAt := viptierFields[12].Descriptor()
 	// viptier.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	viptier.DefaultUpdatedAt = viptierDescUpdatedAt.Default.(func() time.Time)
 	// viptier.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

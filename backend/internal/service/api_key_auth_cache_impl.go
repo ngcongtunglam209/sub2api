@@ -377,8 +377,8 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 		// 查询失败或无 override 时留 nil，checkRPM 会回退到 DB 查询
 	}
 
-	// VIP tiers grant concurrency *on top of* whatever the user already holds.
-	// Resolved once per snapshot like the RPM override above.
+	// VIP tiers grant concurrency and RPM *on top of* whatever the user already
+	// holds. Resolved once per snapshot like the RPM override above.
 	//
 	// Additive rather than the max() this used to apply: `users.concurrency` is
 	// now sold as an add-on, and under max() a VIP whose tier granted more than
@@ -386,32 +386,31 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 	// that lost the comparison. Stacking keeps both levers meaningful, so the
 	// tier reads as a perk and the purchase as an increment.
 	//
-	// A lookup failure leaves the plain user limit — the tier perk goes
+	// The exemptions are only *recorded* here, not applied: add-ons stack below,
+	// and clearing the ceiling to 0 now would let that addend turn "no ceiling"
+	// straight back into a finite number. They are applied once every addend has
+	// been counted.
+	//
+	// A lookup failure leaves the plain user limits — the tier perk goes
 	// missing, which is recoverable; denying the request would not be.
+	var vipUnlimitedConcurrency, vipUnlimitedRPM bool
 	if s.vipBenefitRepo != nil && apiKey.UserID > 0 {
-		if tierConcurrency, err := s.vipBenefitRepo.GetVIPConcurrency(ctx, apiKey.UserID); err == nil && tierConcurrency > 0 {
-			snapshot.User.Concurrency += tierConcurrency
-		}
-	}
-
-	// A reseller plan stacks on top of that again, for the same reason: it is a
-	// separate thing they bought, and swallowing one perk into another is how a
-	// customer ends up paying twice for one number.
-	//
-	// Expired or disabled plans grant nothing — `Active` decides, not the mere
-	// presence of a row — so a lapsed tier stops conferring the instant it
-	// lapses rather than at the next cache refresh of some other subsystem.
-	//
-	// Same failure posture as above: a lookup error leaves the plain limit.
-	if s.resellerPlanResolver != nil && apiKey.UserID > 0 {
-		if assignment, err := s.resellerPlanResolver.ResolveForUser(ctx, apiKey.UserID); err == nil && assignment.Active(time.Now()) {
-			if bonus := assignment.Plan.ConcurrencyBonus; bonus > 0 {
-				snapshot.User.Concurrency += bonus
+		if benefits, err := s.vipBenefitRepo.GetVIPBenefits(ctx, apiKey.UserID); err == nil {
+			if benefits.Concurrency > 0 {
+				snapshot.User.Concurrency += benefits.Concurrency
 			}
+			// Same asymmetry the add-on block documents below: a user whose
+			// rpm_limit is already 0 has no cap at all, so adding to it would
+			// throttle exactly the customer being rewarded.
+			if benefits.RPM > 0 && snapshot.User.RPMLimit > 0 {
+				snapshot.User.RPMLimit += benefits.RPM
+			}
+			vipUnlimitedConcurrency = benefits.UnlimitedConcurrency
+			vipUnlimitedRPM = benefits.UnlimitedRPM
 		}
 	}
 
-	// Add-ons bought from the self-service store are the third addend, resolved
+	// Add-ons bought from the self-service store are the second addend, resolved
 	// the same way and with the same failure posture: a lookup error leaves the
 	// plain limit rather than denying the request.
 	//
@@ -434,6 +433,27 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 			}
 		}
 	}
+
+	// A VIP exemption lands last, after every addend, and wins outright.
+	//
+	// 0 is what both limiters read as "no ceiling" — ConcurrencyService returns
+	// immediately when maxConcurrency <= 0, and the RPM check is skipped when
+	// user.RPMLimit is not positive. Assigning rather than adding is the point:
+	// the tier promises no limit, so whatever the addends summed to is discarded
+	// rather than competing with it.
+	//
+	// Ordering matters and is the reason the flags were carried down here. Had
+	// the ceiling been cleared inside the VIP block, the add-on block above
+	// would have added its bonuses to 0 and produced a small
+	// finite cap — strictly worse than the plain tier and impossible to spot
+	// from the tier configuration.
+	if vipUnlimitedConcurrency {
+		snapshot.User.Concurrency = 0
+	}
+	if vipUnlimitedRPM {
+		snapshot.User.RPMLimit = 0
+	}
+
 	if apiKey.Group != nil {
 		snapshot.Group = &APIKeyAuthGroupSnapshot{
 			ID:                              apiKey.Group.ID,

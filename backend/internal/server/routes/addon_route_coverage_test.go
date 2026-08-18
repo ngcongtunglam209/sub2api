@@ -31,10 +31,9 @@ func requireRoutes(t *testing.T, registered map[string]struct{}, want []string, 
 	require.Empty(t, missing, what)
 }
 
-// The store is wired in two halves that break independently: the user-facing
-// catalogue and purchase routes, and the reseller-tier purchase that lives
-// under /reseller-plans because that is the object being changed. A dropped
-// route fails silently — the page simply stops working — so pin the contract.
+// The store's user-facing catalogue and purchase routes break independently of
+// the admin pricing side. A dropped route fails silently — the page simply
+// stops working — so pin the contract.
 func TestAddonUserRoutesAreRegistered(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -53,11 +52,6 @@ func TestAddonUserRoutesAreRegistered(t *testing.T) {
 	requireRoutes(t, registeredRoutes(router), []string{
 		"GET /api/v1/addons",
 		"POST /api/v1/addons/purchase",
-		// The store lists tiers before anyone holds one, so this read has to
-		// exist separately from the admin listing. Its absence is what shipped
-		// a store page whose first request 404'd.
-		"GET /api/v1/reseller-plans",
-		"POST /api/v1/reseller-plans/:id/purchase",
 	}, "add-on store routes must stay registered")
 }
 

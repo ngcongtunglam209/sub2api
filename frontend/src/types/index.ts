@@ -363,6 +363,16 @@ export interface VIPTier {
   /** Billing multiplier applied on top of the group rate, e.g. 0.9 = 10% off. */
   rate_multiplier: number
   concurrency: number
+  /** Extra requests per minute the tier grants; 0 means it grants none. */
+  rpm_limit: number
+  /**
+   * Exemptions, not amounts. `concurrency` and `rpm_limit` are added to what the
+   * user already holds, so 0 there means "adds nothing" — it cannot also mean
+   * "no ceiling". Read these before rendering either number, or an unlimited
+   * tier displays as its unused addend.
+   */
+  unlimited_concurrency: boolean
+  unlimited_rpm: boolean
   /** Days the tier is extended by on every completed order. */
   grace_days: number
   badge_color: string
@@ -377,6 +387,9 @@ export interface VIPTierRequest {
   min_spend_usd?: number
   rate_multiplier?: number
   concurrency?: number
+  rpm_limit?: number
+  unlimited_concurrency?: boolean
+  unlimited_rpm?: boolean
   grace_days?: number
   badge_color?: string
   enabled?: boolean
@@ -394,112 +407,6 @@ export interface VIPStatus {
   expires_at: string | null
   /** Pinned by an admin: never expires, never re-graded. */
   locked: boolean
-}
-
-// ==================== Reseller Types ====================
-
-/**
- * A reseller tier. Unlike a VIP tier this is never earned: an admin assigns it
- * to a user, and it grants the right to mint redeem codes against their own
- * credit at `credit_rate`.
- */
-export interface ResellerPlan {
-  id: number
-  level: number
-  name: string
-  /** What the reseller pays for the plan itself, in USD. */
-  price: number
-  /** USD of code face value bought per USD of the reseller's credit. */
-  credit_rate: number
-  /** Added on top of the user's own concurrency ceiling. */
-  concurrency_bonus: number
-  rpm_limit: number
-  max_domains: number
-  validity_days: number
-  /** Groups whose subscriptions this plan may mint codes for. */
-  allowed_group_ids: number[]
-  enabled: boolean
-}
-
-export interface ResellerPlanRequest {
-  level?: number
-  name?: string
-  price?: number
-  credit_rate?: number
-  concurrency_bonus?: number
-  rpm_limit?: number
-  max_domains?: number
-  validity_days?: number
-  allowed_group_ids?: number[]
-  enabled?: boolean
-}
-
-export type ResellerDomainStatus = 'active' | 'disabled'
-
-/** A sales domain an admin has cleared for one reseller. */
-export interface ResellerDomain {
-  id: number
-  domain: string
-  user_id: number
-  status: ResellerDomainStatus
-  notes: string
-  created_at: string
-  /**
-   * Per-host branding. `null` and `''` mean the same thing here — no override,
-   * so the host serves the platform's own branding.
-   */
-  site_name?: string | null
-  site_logo?: string | null
-  site_subtitle?: string | null
-}
-
-export interface CreateResellerDomainRequest {
-  domain: string
-  user_id: number
-  notes?: string
-}
-
-/**
- * A partial update: an omitted field is left as it was, and an empty string
- * clears that branding override rather than setting it to an empty name.
- */
-export interface UpdateResellerDomainRequest {
-  status?: ResellerDomainStatus
-  site_name?: string
-  site_logo?: string
-  site_subtitle?: string
-}
-
-/** What `GET /reseller/plan` returns; null when the user holds no plan. */
-export interface ResellerAssignment {
-  plan: ResellerPlan
-  /** null when the assignment does not lapse. */
-  expires_at: string | null
-}
-
-export interface ResellerCode {
-  code: string
-  value: number
-  status: string
-  /** null while the code is still unredeemed. */
-  used_at: string | null
-  created_at: string
-}
-
-export interface GenerateResellerCodesRequest {
-  count: number
-  value: number
-  group_id?: number
-  notes?: string
-}
-
-/**
- * The only time the full code strings are ever returned. Nothing re-fetches
- * them, so the panel that renders this must let the reseller take them away.
- */
-export interface GenerateResellerCodesResponse {
-  codes: Array<{ code: string; value: number }>
-  count: number
 }
 
 // ==================== Add-on Store Types ====================

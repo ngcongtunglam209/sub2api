@@ -192,9 +192,12 @@ func TestActiveVIPTierBenefits(t *testing.T) {
 		rate, err := repo.GetVIPRateMultiplier(ctx, id)
 		require.NoError(t, err)
 		require.InDelta(t, 1, rate, 1e-9)
-		concurrency, err := repo.GetVIPConcurrency(ctx, id)
+		benefits, err := repo.GetVIPBenefits(ctx, id)
 		require.NoError(t, err)
-		require.Zero(t, concurrency)
+		require.Zero(t, benefits.Concurrency)
+		require.Zero(t, benefits.RPM)
+		require.False(t, benefits.UnlimitedConcurrency)
+		require.False(t, benefits.UnlimitedRPM)
 	})
 
 	t.Run("active tier", func(t *testing.T) {
@@ -207,9 +210,9 @@ func TestActiveVIPTierBenefits(t *testing.T) {
 		rate, err := repo.GetVIPRateMultiplier(ctx, id)
 		require.NoError(t, err)
 		require.InDelta(t, 0.9, rate, 1e-9)
-		concurrency, err := repo.GetVIPConcurrency(ctx, id)
+		benefits, err := repo.GetVIPBenefits(ctx, id)
 		require.NoError(t, err)
-		require.Equal(t, 12, concurrency)
+		require.Equal(t, 12, benefits.Concurrency)
 	})
 
 	// Read time, not sweep time, decides: a stalled expiry job must not keep
@@ -250,4 +253,80 @@ func TestActiveVIPTierBenefits(t *testing.T) {
 		require.NoError(t, err)
 		require.InDelta(t, 1, rate, 1e-9)
 	})
+
+	// rpm_limit rides along in the same read, so it must not need a second call
+	// and must not be confused with the concurrency number.
+	t.Run("rpm bonus", func(t *testing.T) {
+		rpmTierID := mustCreateVIPTierWithRPM(t, ctx, client, 3, 0.85, 6, 60, false, false)
+		id := mustCreateVIPSpendUser(t, ctx, client, "vip-rpm@example.com")
+		require.NoError(t, client.User.UpdateOneID(id).
+			SetVipTierID(rpmTierID).
+			SetVipExpiresAt(time.Now().Add(24*time.Hour)).
+			Exec(ctx))
+
+		benefits, err := repo.GetVIPBenefits(ctx, id)
+		require.NoError(t, err)
+		require.Equal(t, 6, benefits.Concurrency)
+		require.Equal(t, 60, benefits.RPM)
+		require.False(t, benefits.UnlimitedRPM)
+	})
+
+	// The exemptions must survive the read even though the addends beside them
+	// are meaningless: a tier that exempts RPM has no reason to also set a bonus,
+	// so reading the flags off the numbers would report "no benefit".
+	t.Run("unlimited flags travel independently of the addends", func(t *testing.T) {
+		unlimitedTierID := mustCreateVIPTierWithRPM(t, ctx, client, 4, 0.8, 1, 0, true, true)
+		id := mustCreateVIPSpendUser(t, ctx, client, "vip-unlimited@example.com")
+		require.NoError(t, client.User.UpdateOneID(id).
+			SetVipTierID(unlimitedTierID).
+			SetVipExpiresAt(time.Now().Add(24*time.Hour)).
+			Exec(ctx))
+
+		benefits, err := repo.GetVIPBenefits(ctx, id)
+		require.NoError(t, err)
+		require.True(t, benefits.UnlimitedConcurrency)
+		require.True(t, benefits.UnlimitedRPM)
+		require.Zero(t, benefits.RPM, "the addend stays 0; the exemption is the flag")
+	})
+
+	// A lapsed tier grants no exemption either. Worth its own case: the numeric
+	// perks decay to 0 harmlessly, but a leaked boolean would remove the ceiling
+	// outright and read as a far larger perk than the tier ever gave.
+	t.Run("lapsed tier grants no exemption", func(t *testing.T) {
+		unlimitedTierID := mustCreateVIPTierWithRPM(t, ctx, client, 5, 0.75, 1, 0, true, true)
+		id := mustCreateVIPSpendUser(t, ctx, client, "vip-unlimited-lapsed@example.com")
+		require.NoError(t, client.User.UpdateOneID(id).
+			SetVipTierID(unlimitedTierID).
+			SetVipExpiresAt(time.Now().Add(-time.Hour)).
+			Exec(ctx))
+
+		benefits, err := repo.GetVIPBenefits(ctx, id)
+		require.NoError(t, err)
+		require.False(t, benefits.UnlimitedConcurrency)
+		require.False(t, benefits.UnlimitedRPM)
+	})
+}
+
+func mustCreateVIPTierWithRPM(
+	t *testing.T,
+	ctx context.Context,
+	client *dbent.Client,
+	level int,
+	rate float64,
+	concurrency, rpmLimit int,
+	unlimitedConcurrency, unlimitedRPM bool,
+) int64 {
+	t.Helper()
+	tier, err := client.VIPTier.Create().
+		SetLevel(level).
+		SetName("VIP").
+		SetMinSpendUsd(20).
+		SetRateMultiplier(rate).
+		SetConcurrency(concurrency).
+		SetRpmLimit(rpmLimit).
+		SetUnlimitedConcurrency(unlimitedConcurrency).
+		SetUnlimitedRpm(unlimitedRPM).
+		Save(ctx)
+	require.NoError(t, err)
+	return tier.ID
 }

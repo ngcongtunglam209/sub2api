@@ -23,6 +23,12 @@ const (
 	FieldRateMultiplier = "rate_multiplier"
 	// FieldConcurrency holds the string denoting the concurrency field in the database.
 	FieldConcurrency = "concurrency"
+	// FieldRpmLimit holds the string denoting the rpm_limit field in the database.
+	FieldRpmLimit = "rpm_limit"
+	// FieldUnlimitedRpm holds the string denoting the unlimited_rpm field in the database.
+	FieldUnlimitedRpm = "unlimited_rpm"
+	// FieldUnlimitedConcurrency holds the string denoting the unlimited_concurrency field in the database.
+	FieldUnlimitedConcurrency = "unlimited_concurrency"
 	// FieldGraceDays holds the string denoting the grace_days field in the database.
 	FieldGraceDays = "grace_days"
 	// FieldBadgeColor holds the string denoting the badge_color field in the database.
@@ -45,6 +51,9 @@ var Columns = []string{
 	FieldMinSpendUsd,
 	FieldRateMultiplier,
 	FieldConcurrency,
+	FieldRpmLimit,
+	FieldUnlimitedRpm,
+	FieldUnlimitedConcurrency,
 	FieldGraceDays,
 	FieldBadgeColor,
 	FieldEnabled,
@@ -73,6 +82,14 @@ var (
 	DefaultConcurrency int
 	// ConcurrencyValidator is a validator for the "concurrency" field. It is called by the builders before save.
 	ConcurrencyValidator func(int) error
+	// DefaultRpmLimit holds the default value on creation for the "rpm_limit" field.
+	DefaultRpmLimit int
+	// RpmLimitValidator is a validator for the "rpm_limit" field. It is called by the builders before save.
+	RpmLimitValidator func(int) error
+	// DefaultUnlimitedRpm holds the default value on creation for the "unlimited_rpm" field.
+	DefaultUnlimitedRpm bool
+	// DefaultUnlimitedConcurrency holds the default value on creation for the "unlimited_concurrency" field.
+	DefaultUnlimitedConcurrency bool
 	// DefaultGraceDays holds the default value on creation for the "grace_days" field.
 	DefaultGraceDays int
 	// GraceDaysValidator is a validator for the "grace_days" field. It is called by the builders before save.
@@ -122,6 +139,21 @@ func ByRateMultiplier(opts ...sql.OrderTermOption) OrderOption {
 // ByConcurrency orders the results by the concurrency field.
 func ByConcurrency(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldConcurrency, opts...).ToFunc()
+}
+
+// ByRpmLimit orders the results by the rpm_limit field.
+func ByRpmLimit(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRpmLimit, opts...).ToFunc()
+}
+
+// ByUnlimitedRpm orders the results by the unlimited_rpm field.
+func ByUnlimitedRpm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUnlimitedRpm, opts...).ToFunc()
+}
+
+// ByUnlimitedConcurrency orders the results by the unlimited_concurrency field.
+func ByUnlimitedConcurrency(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUnlimitedConcurrency, opts...).ToFunc()
 }
 
 // ByGraceDays orders the results by the grace_days field.

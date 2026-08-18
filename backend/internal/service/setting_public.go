@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/branding"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/timezone"
 )
 
@@ -158,48 +157,8 @@ func (s *SettingService) GetFrontendURL(ctx context.Context) string {
 //
 // This is the single choke point every public consumer shares — GET
 // /settings/public and the `window.__APP_CONFIG__` injected into index.html —
-// so the per-host branding override is applied here and both pick it up
-// without either caller knowing it exists.
-//
-// A context carrying no resolved branding (a background job, a health check, an
-// unknown host, the canonical host) gets the global settings byte-for-byte.
+// and it serves this deployment's own settings, identical for every host.
 func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings, error) {
-	settings, err := s.getGlobalPublicSettings(ctx)
-	if err != nil {
-		return nil, err
-	}
-	applyHostBranding(settings, branding.FromContext(ctx))
-	return settings, nil
-}
-
-// applyHostBranding overlays a reseller's branding on the global settings.
-//
-// Per field, not per record: a reseller who set only a name keeps the
-// deployment's logo and subtitle. An empty override means "unset", never
-// "blank" — otherwise configuring one field would silently wipe the other two.
-func applyHostBranding(settings *PublicSettings, host branding.Host) {
-	if settings == nil || !host.HasOverride() {
-		return
-	}
-	if host.SiteName != "" {
-		settings.SiteName = host.SiteName
-	}
-	if host.SiteLogo != "" {
-		settings.SiteLogo = host.SiteLogo
-	}
-	if host.SiteSubtitle != "" {
-		settings.SiteSubtitle = host.SiteSubtitle
-	}
-}
-
-// getGlobalPublicSettings reads this deployment's own public settings, with no
-// per-host override applied.
-//
-// Kept separate from GetPublicSettings so that a caller whose result outlives
-// one request — the CSP frame-src cache in server/router.go is the one that
-// matters — can ask for the global values explicitly instead of accidentally
-// caching whichever reseller's host happened to trigger the refresh.
-func (s *SettingService) getGlobalPublicSettings(ctx context.Context) (*PublicSettings, error) {
 	keys := []string{
 		SettingKeyRegistrationEnabled,
 		SettingKeyEmailVerifyEnabled,
@@ -802,14 +761,12 @@ func safeRawJSONArray(raw string) json.RawMessage {
 // GetFrameSrcOrigins returns deduplicated http(s) origins from home_content URL,
 // purchase_subscription_url, and all custom_menu_items URLs. Used by the router layer for CSP frame-src injection.
 //
-// Deliberately reads the *global* settings, never the per-host branding view:
-// the router caches this result in one process-wide atomic.Pointer that is
-// refreshed only when settings change (server/router.go), so anything host
-// dependent that leaked in here would apply one host's policy to every other
-// host until the next settings update. Branding overrides carry no URLs today —
-// this call must stay on the global settings even if that ever changes.
+// The router caches this result in one process-wide atomic.Pointer that is
+// refreshed only when settings change (server/router.go), so anything request
+// dependent that leaked in here would apply one request's policy to every other
+// until the next settings update.
 func (s *SettingService) GetFrameSrcOrigins(ctx context.Context) ([]string, error) {
-	settings, err := s.getGlobalPublicSettings(ctx)
+	settings, err := s.GetPublicSettings(ctx)
 	if err != nil {
 		return nil, err
 	}

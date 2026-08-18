@@ -171,53 +171,9 @@ func (s *stubAddonSettingRepo) Delete(_ context.Context, key string) error {
 
 var _ SettingRepository = (*stubAddonSettingRepo)(nil)
 
-// stubAddonPlanRepo is a reseller plan repository with error injection, which
-// the shared stubResellerPlanRepo does not offer.
-type stubAddonPlanRepo struct {
-	plans      map[int64]*ResellerPlan
-	assignment *ResellerPlanAssignment
-
-	assignErr      error
-	assignCalls    int
-	assignedCredit float64
-	assignedExpiry time.Time
-}
-
-func (s *stubAddonPlanRepo) List(context.Context) ([]*ResellerPlan, error) { return nil, nil }
-
-func (s *stubAddonPlanRepo) GetByID(_ context.Context, id int64) (*ResellerPlan, error) {
-	return s.plans[id], nil
-}
-
-func (s *stubAddonPlanRepo) Update(_ context.Context, plan *ResellerPlan) (*ResellerPlan, error) {
-	return plan, nil
-}
-
-func (s *stubAddonPlanRepo) AssignToUser(_ context.Context, _ int64, _ *ResellerPlan, expiresAt time.Time, credit float64) error {
-	s.assignCalls++
-	if s.assignErr != nil {
-		return s.assignErr
-	}
-	s.assignedCredit = credit
-	s.assignedExpiry = expiresAt
-	return nil
-}
-
-func (s *stubAddonPlanRepo) GetUserAssignment(context.Context, int64) (*ResellerPlanAssignment, error) {
-	return s.assignment, nil
-}
-
-func (s *stubAddonPlanRepo) ClearUserAssignment(context.Context, int64) error { return nil }
-
-var _ ResellerPlanRepository = (*stubAddonPlanRepo)(nil)
-
-func newTestAddonService(repo *stubAddonRepo, planRepo *stubAddonPlanRepo) *AddonService {
+func newTestAddonService(repo *stubAddonRepo) *AddonService {
 	settings := newStubAddonSettingRepo()
-	var planService *ResellerPlanService
-	if planRepo != nil {
-		planService = NewResellerPlanService(planRepo)
-	}
-	return NewAddonService(repo, NewAddonPricingService(settings), planService)
+	return NewAddonService(repo, NewAddonPricingService(settings))
 }
 
 // Money: amount × unit price × months goes through decimal, because 3 × 0.1 in
@@ -300,7 +256,7 @@ func TestPurchaseRejectsOutOfBoundsOrders(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := newStubAddonRepo(1_000_000)
-			svc := newTestAddonService(repo, nil)
+			svc := newTestAddonService(repo)
 
 			got, err := svc.Purchase(context.Background(), 42, tc.kind, tc.amount, tc.months)
 
@@ -317,7 +273,7 @@ func TestPurchaseRejectsOutOfBoundsOrders(t *testing.T) {
 // once, and dated from now.
 func TestPurchaseDebitsAndStores(t *testing.T) {
 	repo := newStubAddonRepo(100)
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 
 	before := time.Now()
 	got, err := svc.Purchase(context.Background(), 42, AddonKindConcurrency, 3, 2)
@@ -340,7 +296,7 @@ func TestPurchaseDebitsAndStores(t *testing.T) {
 // what lands in the row is 90, not 3.
 func TestPurchaseRPMPricesPerBlockAndStoresRPM(t *testing.T) {
 	repo := newStubAddonRepo(100)
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 
 	got, err := svc.Purchase(context.Background(), 42, AddonKindRPM, 90, 3)
 	require.NoError(t, err)
@@ -355,7 +311,7 @@ func TestPurchaseRPMPricesPerBlockAndStoresRPM(t *testing.T) {
 // past a cap of twenty.
 func TestPurchaseEnforcesCapCumulatively(t *testing.T) {
 	repo := newStubAddonRepo(1000)
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 	ctx := context.Background()
 
 	_, err := svc.Purchase(ctx, 42, AddonKindConcurrency, 15, 1)
@@ -387,7 +343,7 @@ func TestPurchaseRollsBackDebitWhenCapIsBreached(t *testing.T) {
 	repo.rows[AddonKindConcurrency] = &UserAddon{
 		ID: 1, UserID: 42, Kind: AddonKindConcurrency, Amount: 18, ExpiresAt: time.Now().Add(24 * time.Hour),
 	}
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 
 	_, err := svc.Purchase(context.Background(), 42, AddonKindConcurrency, 5, 1)
 	require.Error(t, err)
@@ -401,7 +357,7 @@ func TestPurchaseRollsBackDebitWhenCapIsBreached(t *testing.T) {
 // impossible.
 func TestPurchaseRefusesWhenBalanceIsShort(t *testing.T) {
 	repo := newStubAddonRepo(5)
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 
 	got, err := svc.Purchase(context.Background(), 42, AddonKindConcurrency, 3, 2) // $12
 	require.Error(t, err)
@@ -416,7 +372,7 @@ func TestPurchaseRefusesWhenBalanceIsShort(t *testing.T) {
 func TestPurchaseRollsBackDebitWhenWriteFails(t *testing.T) {
 	repo := newStubAddonRepo(100)
 	repo.upsertErr = errors.New("disk on fire")
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 
 	_, err := svc.Purchase(context.Background(), 42, AddonKindConcurrency, 1, 1)
 	require.Error(t, err)
@@ -429,7 +385,7 @@ func TestPurchaseRollsBackDebitWhenWriteFails(t *testing.T) {
 // migrations/228_user_addons.sql for why one row per (user, kind).
 func TestPurchaseExtendsRatherThanStacking(t *testing.T) {
 	repo := newStubAddonRepo(1000)
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 	ctx := context.Background()
 
 	first, err := svc.Purchase(ctx, 42, AddonKindConcurrency, 2, 1)
@@ -454,7 +410,7 @@ func TestPurchaseTreatsLapsedHoldingsAsGone(t *testing.T) {
 	repo.rows[AddonKindConcurrency] = &UserAddon{
 		ID: 1, UserID: 42, Kind: AddonKindConcurrency, Amount: 20, ExpiresAt: time.Now().Add(-time.Hour),
 	}
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 
 	before := time.Now()
 	got, err := svc.Purchase(context.Background(), 42, AddonKindConcurrency, 4, 1)
@@ -474,7 +430,7 @@ func TestResolveActiveAddonsDropsLapsedRows(t *testing.T) {
 	repo.rows[AddonKindRPM] = &UserAddon{
 		Kind: AddonKindRPM, Amount: 300, ExpiresAt: time.Now().Add(-time.Minute),
 	}
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 
 	holdings, err := svc.ResolveActiveAddons(context.Background(), 42)
 	require.NoError(t, err)
@@ -491,7 +447,7 @@ func TestCatalogueReportsPricingAndHoldings(t *testing.T) {
 	repo.rows[AddonKindConcurrency] = &UserAddon{
 		Kind: AddonKindConcurrency, Amount: 4, ExpiresAt: time.Now().Add(time.Hour),
 	}
-	svc := newTestAddonService(repo, nil)
+	svc := newTestAddonService(repo)
 
 	catalogue, err := svc.Catalogue(context.Background(), 42)
 	require.NoError(t, err)
@@ -509,7 +465,7 @@ func TestPurchaseUsesEditedPricing(t *testing.T) {
 	repo := newStubAddonRepo(1000)
 	settings := newStubAddonSettingRepo()
 	pricing := NewAddonPricingService(settings)
-	svc := NewAddonService(repo, pricing, nil)
+	svc := NewAddonService(repo, pricing)
 	ctx := context.Background()
 
 	price := 3.5
@@ -530,122 +486,10 @@ func TestPurchaseRefusesWhenKindIsOffSale(t *testing.T) {
 	repo := newStubAddonRepo(1000)
 	settings := newStubAddonSettingRepo()
 	settings.values[SettingAddonConcurrencyMax] = "0"
-	svc := NewAddonService(repo, NewAddonPricingService(settings), nil)
+	svc := NewAddonService(repo, NewAddonPricingService(settings))
 
 	_, err := svc.Purchase(context.Background(), 42, AddonKindConcurrency, 1, 1)
 	require.Error(t, err)
 	require.Equal(t, "ADDON_NOT_FOR_SALE", infraerrors.Reason(err))
 	require.Zero(t, repo.debitCalls)
-}
-
-func TestPurchaseResellerPlanDebitsThenAssigns(t *testing.T) {
-	plan := &ResellerPlan{ID: 2, Level: 2, Name: "Reseller 2", Price: 150, CreditRate: 0.6, ValidityDays: 365, Enabled: true}
-	planRepo := &stubAddonPlanRepo{plans: map[int64]*ResellerPlan{2: plan}}
-	repo := newStubAddonRepo(200)
-	svc := newTestAddonService(repo, planRepo)
-
-	assignment, err := svc.PurchaseResellerPlan(context.Background(), 42, 2)
-	require.NoError(t, err)
-
-	require.Equal(t, plan, assignment.Plan)
-	require.Equal(t, []float64{150}, repo.debits, "the price is debited from the buyer's own balance")
-	require.InDelta(t, 50, repo.balance, 1e-9)
-	// The credit is computed by AssignPlan, not recomputed here: one copy of
-	// the arithmetic, so the store and an admin grant can never disagree.
-	require.InDelta(t, 90, planRepo.assignedCredit, 1e-9)
-	require.Equal(t, 1, planRepo.assignCalls)
-	require.Equal(t, 1, repo.txDepth, "the debit and the assignment share one transaction")
-}
-
-// Buying a tier twice is a real money bug, not an inconvenience: assignment
-// pays out price × credit_rate *every* time, while the expiry runs from now
-// rather than extending, so the second payment buys nothing and mints the
-// credit again. At a high credit rate that is a balance printer.
-func TestPurchaseResellerPlanRefusesWhenOneIsAlreadyActive(t *testing.T) {
-	plan := &ResellerPlan{ID: 3, Level: 3, Price: 400, CreditRate: 0.7, ValidityDays: 365, Enabled: true}
-	planRepo := &stubAddonPlanRepo{
-		plans:      map[int64]*ResellerPlan{3: plan},
-		assignment: &ResellerPlanAssignment{Plan: plan, ExpiresAt: time.Now().Add(24 * time.Hour)},
-	}
-	repo := newStubAddonRepo(10_000)
-	svc := newTestAddonService(repo, planRepo)
-
-	got, err := svc.PurchaseResellerPlan(context.Background(), 42, 3)
-
-	require.Error(t, err)
-	require.Nil(t, got)
-	require.Equal(t, "RESELLER_PLAN_ALREADY_ACTIVE", infraerrors.Reason(err))
-	require.Zero(t, planRepo.assignCalls, "a second assignment would pay the credit twice")
-	require.Zero(t, repo.debitCalls)
-	require.InDelta(t, 10_000, repo.balance, 1e-9)
-}
-
-// A lapsed or disabled tier is not an active one: the holder may buy again,
-// because this time the credit is being paid for.
-func TestPurchaseResellerPlanAllowsRepurchaseOnceLapsed(t *testing.T) {
-	plan := &ResellerPlan{ID: 1, Level: 1, Price: 50, CreditRate: 0.5, ValidityDays: 30, Enabled: true}
-	for name, held := range map[string]*ResellerPlanAssignment{
-		"expired":  {Plan: plan, ExpiresAt: time.Now().Add(-time.Hour)},
-		"disabled": {Plan: &ResellerPlan{ID: 1, Price: 50, Enabled: false}, ExpiresAt: time.Now().Add(time.Hour)},
-		"none":     nil,
-	} {
-		t.Run(name, func(t *testing.T) {
-			planRepo := &stubAddonPlanRepo{plans: map[int64]*ResellerPlan{1: plan}, assignment: held}
-			repo := newStubAddonRepo(100)
-			svc := newTestAddonService(repo, planRepo)
-
-			_, err := svc.PurchaseResellerPlan(context.Background(), 42, 1)
-			require.NoError(t, err)
-			require.Equal(t, 1, planRepo.assignCalls)
-			require.InDelta(t, 50, repo.balance, 1e-9)
-		})
-	}
-}
-
-func TestPurchaseResellerPlanRefusesUnknownDisabledAndUnaffordable(t *testing.T) {
-	enabled := &ResellerPlan{ID: 1, Level: 1, Price: 50, CreditRate: 0.5, ValidityDays: 30, Enabled: true}
-	disabled := &ResellerPlan{ID: 9, Level: 9, Price: 10, ValidityDays: 30, Enabled: false}
-
-	for _, tc := range []struct {
-		name    string
-		planID  int64
-		balance float64
-	}{
-		{name: "unknown plan", planID: 404, balance: 1000},
-		{name: "disabled plan", planID: 9, balance: 1000},
-		{name: "cannot afford it", planID: 1, balance: 49.99},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			planRepo := &stubAddonPlanRepo{plans: map[int64]*ResellerPlan{1: enabled, 9: disabled}}
-			repo := newStubAddonRepo(tc.balance)
-			svc := newTestAddonService(repo, planRepo)
-
-			got, err := svc.PurchaseResellerPlan(context.Background(), 42, tc.planID)
-
-			require.Error(t, err)
-			require.Nil(t, got)
-			require.Zero(t, planRepo.assignCalls, "nothing may be stamped for a rejected purchase")
-			require.InDelta(t, tc.balance, repo.balance, 1e-9)
-		})
-	}
-}
-
-// If the assignment fails the debit goes back: taking payment for a tier that
-// was never granted is the failure this transaction exists to prevent.
-func TestPurchaseResellerPlanRollsBackDebitWhenAssignFails(t *testing.T) {
-	plan := &ResellerPlan{ID: 2, Level: 2, Price: 150, CreditRate: 0.6, ValidityDays: 365, Enabled: true}
-	planRepo := &stubAddonPlanRepo{
-		plans:     map[int64]*ResellerPlan{2: plan},
-		assignErr: errors.New("database went away"),
-	}
-	repo := newStubAddonRepo(200)
-	svc := newTestAddonService(repo, planRepo)
-
-	got, err := svc.PurchaseResellerPlan(context.Background(), 42, 2)
-
-	require.Error(t, err)
-	require.Nil(t, got)
-	require.InDelta(t, 200, repo.balance, 1e-9, "a failed assignment must not keep the money")
-	require.Empty(t, repo.debits)
-	require.Equal(t, 1, repo.rollbacks)
 }

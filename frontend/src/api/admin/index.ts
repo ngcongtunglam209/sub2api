@@ -12,8 +12,6 @@ import redeemAPI from './redeem'
 import promoAPI from './promo'
 import announcementsAPI from './announcements'
 import vipTiersAPI from './vipTiers'
-import resellerPlansAPI from './resellerPlans'
-import resellerDomainsAPI from './resellerDomains'
 import settingsAPI from './settings'
 import systemAPI from './system'
 import subscriptionsAPI from './subscriptions'
@@ -51,8 +49,6 @@ export const adminAPI = {
   promo: promoAPI,
   announcements: announcementsAPI,
   vipTiers: vipTiersAPI,
-  resellerPlans: resellerPlansAPI,
-  resellerDomains: resellerDomainsAPI,
   settings: settingsAPI,
   system: systemAPI,
   subscriptions: subscriptionsAPI,
@@ -88,8 +84,6 @@ export {
   promoAPI,
   announcementsAPI,
   vipTiersAPI,
-  resellerPlansAPI,
-  resellerDomainsAPI,
   settingsAPI,
   systemAPI,
   subscriptionsAPI,

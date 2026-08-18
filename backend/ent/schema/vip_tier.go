@@ -54,6 +54,26 @@ func (VIPTier) Fields() []ent.Field {
 		field.Int("concurrency").
 			Positive().
 			Default(5),
+		// 该等级额外赠送的 RPM，累加到 users.rpm_limit 之上。0 表示不赠送。
+		//
+		// 与 concurrency 不同，这里不加 Positive()：不送 RPM 是个合理档位，
+		// 而"不送并发"在上面被 Positive() 排除了。
+		field.Int("rpm_limit").
+			NonNegative().
+			Default(0),
+		// 免除上限的两个开关。
+		//
+		// 不复用 0 当哨兵：users.rpm_limit 里 0 确实表示不限量，但本表的
+		// rpm_limit 是加数，加 0 只能表示"不加"。一列无法同时表达"不加"与
+		// "无上限"，混用会把最便宜的等级变成最好的等级。concurrency 更直接：
+		// Positive() 让它根本存不下 0。
+		//
+		// 生效顺序见 api_key_auth_cache_impl.go：必须在加购项叠加**之后**
+		// 才清上限，否则"无上限"会被后面的加数覆盖成有限值。
+		field.Bool("unlimited_rpm").
+			Default(false),
+		field.Bool("unlimited_concurrency").
+			Default(false),
 		// 等级有效期：每笔订单完成后从当天起顺延这么多天。
 		field.Int("grace_days").
 			Positive().

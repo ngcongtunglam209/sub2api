@@ -50,8 +50,26 @@
             </div>
           </template>
 
+          <!--
+            The exemption has to win over the number here. Both columns hold an
+            addend, so an unlimited tier normally leaves it at whatever it was —
+            printing that would advertise the top tier as the stingiest one.
+          -->
           <template #cell-concurrency="{ row }">
-            <span class="font-mono tabular-nums">{{ row.concurrency }}</span>
+            <span v-if="row.unlimited_concurrency" class="badge badge-success">
+              {{ t('admin.vipTiers.unlimited') }}
+            </span>
+            <span v-else class="font-mono tabular-nums">+{{ row.concurrency }}</span>
+          </template>
+
+          <template #cell-rpm_limit="{ row }">
+            <span v-if="row.unlimited_rpm" class="badge badge-success">
+              {{ t('admin.vipTiers.unlimited') }}
+            </span>
+            <span v-else-if="row.rpm_limit > 0" class="font-mono tabular-nums">
+              +{{ row.rpm_limit }}
+            </span>
+            <span v-else class="text-ink-tertiary">—</span>
           </template>
 
           <template #cell-grace_days="{ row }">
@@ -111,9 +129,49 @@
           </div>
           <div>
             <label class="input-label">{{ t('admin.vipTiers.fields.concurrency') }}</label>
-            <input v-model.number="form.concurrency" type="number" min="1" class="input" />
+            <!--
+              Disabled rather than hidden when exempt: the number stays visible so
+              an admin can see what the tier falls back to if they clear the
+              exemption, without being able to edit a value that has no effect.
+            -->
+            <input
+              v-model.number="form.concurrency"
+              type="number"
+              min="1"
+              class="input"
+              :disabled="form.unlimited_concurrency"
+            />
+            <label class="mt-2 flex items-center gap-2 text-sm text-ink-secondary">
+              <input v-model="form.unlimited_concurrency" type="checkbox" />
+              {{ t('admin.vipTiers.fields.unlimitedConcurrency') }}
+            </label>
             <p class="mt-1 text-xs text-ink-tertiary">
-              {{ t('admin.vipTiers.fields.concurrencyHint') }}
+              {{
+                form.unlimited_concurrency
+                  ? t('admin.vipTiers.fields.unlimitedConcurrencyHint')
+                  : t('admin.vipTiers.fields.concurrencyHint')
+              }}
+            </p>
+          </div>
+          <div>
+            <label class="input-label">{{ t('admin.vipTiers.fields.rpmLimit') }}</label>
+            <input
+              v-model.number="form.rpm_limit"
+              type="number"
+              min="0"
+              class="input"
+              :disabled="form.unlimited_rpm"
+            />
+            <label class="mt-2 flex items-center gap-2 text-sm text-ink-secondary">
+              <input v-model="form.unlimited_rpm" type="checkbox" />
+              {{ t('admin.vipTiers.fields.unlimitedRpm') }}
+            </label>
+            <p class="mt-1 text-xs text-ink-tertiary">
+              {{
+                form.unlimited_rpm
+                  ? t('admin.vipTiers.fields.unlimitedRpmHint')
+                  : t('admin.vipTiers.fields.rpmLimitHint')
+              }}
             </p>
           </div>
           <div>
@@ -190,6 +248,9 @@ const form = reactive<Required<VIPTierRequest>>({
   min_spend_usd: 0,
   rate_multiplier: 1,
   concurrency: 5,
+  rpm_limit: 0,
+  unlimited_concurrency: false,
+  unlimited_rpm: false,
   grace_days: 60,
   badge_color: '',
   enabled: true
@@ -200,6 +261,7 @@ const columns = computed<Column[]>(() => [
   { key: 'min_spend_usd', label: t('admin.vipTiers.fields.minSpend'), sortable: true },
   { key: 'rate_multiplier', label: t('admin.vipTiers.fields.rateMultiplier') },
   { key: 'concurrency', label: t('admin.vipTiers.fields.concurrency') },
+  { key: 'rpm_limit', label: t('admin.vipTiers.fields.rpmLimit') },
   { key: 'grace_days', label: t('admin.vipTiers.fields.graceDays') },
   { key: 'enabled', label: t('admin.vipTiers.fields.enabled') }
 ])
@@ -232,6 +294,9 @@ function resetForm(tier: VIPTier | null) {
   form.min_spend_usd = tier?.min_spend_usd ?? 0
   form.rate_multiplier = tier?.rate_multiplier ?? 1
   form.concurrency = tier?.concurrency ?? 5
+  form.rpm_limit = tier?.rpm_limit ?? 0
+  form.unlimited_concurrency = tier?.unlimited_concurrency ?? false
+  form.unlimited_rpm = tier?.unlimited_rpm ?? false
   form.grace_days = tier?.grace_days ?? 60
   form.badge_color = tier?.badge_color ?? ''
   form.enabled = tier?.enabled ?? true

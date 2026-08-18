@@ -9,7 +9,7 @@ import (
 )
 
 // AddonService is the self-service store: a user spends their own balance on
-// concurrency, RPM, or a reseller tier.
+// concurrency or RPM.
 //
 // No payment gateway is involved and none should be. The money arrived through
 // the existing top-up flow; a purchase here is an internal ledger move — debit
@@ -20,12 +20,6 @@ type AddonService struct {
 	repo    UserAddonRepository
 	pricing *AddonPricingService
 
-	// planService is reused rather than reimplemented: it already stamps the
-	// plan, derives the expiry from validity_days, and credits
-	// price × credit_rate in one write. A second copy of that arithmetic is a
-	// second place for the credit to drift.
-	planService *ResellerPlanService
-
 	// invalidator flushes the auth snapshot so a purchase takes effect now
 	// rather than at the end of the cache TTL. Optional: without it the user
 	// still gets what they bought, just a minute later.
@@ -35,15 +29,14 @@ type AddonService struct {
 func NewAddonService(
 	repo UserAddonRepository,
 	pricing *AddonPricingService,
-	planService *ResellerPlanService,
 ) *AddonService {
-	return &AddonService{repo: repo, pricing: pricing, planService: planService}
+	return &AddonService{repo: repo, pricing: pricing}
 }
 
 // SetAddonResolver injects the add-on lookup the auth snapshot uses for the
 // purchased concurrency and RPM.
 //
-// Set after construction for the same reason SetResellerPlanResolver is: the
+// Set after construction rather than taken as a constructor argument: the
 // add-on service is built later in the dependency graph than the API key
 // service. Left unset, purchased add-ons do not apply — the behaviour before
 // the store existed.
@@ -216,70 +209,6 @@ func (s *AddonService) Purchase(ctx context.Context, userID int64, kind AddonKin
 	return result, nil
 }
 
-// PurchaseResellerPlan sells a reseller tier for balance.
-//
-// The tier is applied through ResellerPlanService.AssignPlan — the same path
-// an admin assignment takes — so the expiry and the credited share of the
-// price are derived in exactly one place. Only the debit is new here.
-func (s *AddonService) PurchaseResellerPlan(ctx context.Context, userID, planID int64) (*ResellerPlanAssignment, error) {
-	if s == nil || s.repo == nil || s.planService == nil {
-		return nil, infraerrors.InternalServer("ADDON_STORE_UNAVAILABLE", "the add-on store is not configured")
-	}
-	if userID <= 0 {
-		return nil, infraerrors.BadRequest("INVALID_USER", "a user is required")
-	}
-
-	plan, err := s.planService.GetPlan(ctx, planID)
-	if err != nil {
-		return nil, err
-	}
-	if plan == nil {
-		return nil, infraerrors.NotFound("RESELLER_PLAN_NOT_FOUND", "reseller plan not found")
-	}
-	if !plan.Enabled {
-		return nil, infraerrors.BadRequest("RESELLER_PLAN_DISABLED", "this reseller plan is no longer offered")
-	}
-
-	// Holding an active plan blocks a second purchase, and this is a money bug
-	// rather than a nicety: assignment credits price × credit_rate *every*
-	// time, so buying twice pays the credit twice while the expiry — which runs
-	// from now, not from the old end date — grants nothing extra for the second
-	// payment. At a credit rate near 1 that is a balance printer.
-	//
-	// Upgrades therefore go through an admin for now. Refusing is the
-	// conservative half of that trade: the worst case is a support ticket,
-	// against a worst case of minted money.
-	assignment, err := s.planService.ResolveForUser(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	if assignment.Active(time.Now()) {
-		return nil, infraerrors.Conflict("RESELLER_PLAN_ALREADY_ACTIVE",
-			"you already hold an active reseller plan; contact support to change tiers")
-	}
-
-	if plan.Price > 0 {
-		// One transaction for the debit and the assignment. AssignToUser joins
-		// the transaction carried on this context instead of opening its own,
-		// so a failure on either side takes both back.
-		err = s.repo.RunInTx(ctx, func(txCtx context.Context) error {
-			if err := s.repo.DebitBalanceGuarded(txCtx, userID, plan.Price); err != nil {
-				return err
-			}
-			assignment, err = s.planService.AssignPlan(txCtx, userID, planID)
-			return err
-		})
-	} else {
-		assignment, err = s.planService.AssignPlan(ctx, userID, planID)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	s.invalidateAuthCache(ctx, userID)
-	return assignment, nil
-}
-
 // invalidateAuthCache drops the caller's cached auth snapshots so the limit
 // they just bought applies to their next request.
 //
@@ -296,28 +225,4 @@ func (s *AddonService) invalidateAuthCache(ctx context.Context, userID int64) {
 func addonCapExceeded(kind AddonKind, limit int) error {
 	return infraerrors.BadRequest("ADDON_CAP_EXCEEDED",
 		fmt.Sprintf("you may hold at most %d %s in total", limit, kind))
-}
-
-// ListPurchasablePlans returns the tiers a user may buy right now.
-//
-// Disabled tiers are filtered here rather than in the repository because the
-// admin screen still has to see them: a tier withdrawn from sale needs editing,
-// and its existing holders need it resolvable.
-func (s *AddonService) ListPurchasablePlans(ctx context.Context) ([]*ResellerPlan, error) {
-	if s == nil || s.planService == nil {
-		return []*ResellerPlan{}, nil
-	}
-
-	plans, err := s.planService.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	purchasable := make([]*ResellerPlan, 0, len(plans))
-	for _, plan := range plans {
-		if plan != nil && plan.Enabled {
-			purchasable = append(purchasable, plan)
-		}
-	}
-	return purchasable, nil
 }

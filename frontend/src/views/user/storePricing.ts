@@ -9,7 +9,6 @@
  * a blocked purchase and lets the view pick the message, so the rules stay
  * independent of the locale layer.
  */
-import type { ResellerAssignment } from '@/types'
 
 /** Why the buy button is disabled, in the order the checks are applied. */
 export type AddonBlockReason = 'amount' | 'months' | 'cap' | 'balance' | null
@@ -86,29 +85,4 @@ export function quoteAddon(input: AddonQuoteInput): AddonQuote {
   }
 
   return { total, capAfter, blockedBy, canBuy: blockedBy === null }
-}
-
-/**
- * The reseller assignment that should actually block a purchase.
- *
- * An assignment whose expiry has passed is not live — the server has stopped
- * honouring it, so treating it as held would strand the user on a page that
- * refuses to sell them a replacement.
- *
- * An expiry that will not parse is deliberately treated as still held. The two
- * failure modes are not symmetric: a wrongly blocked purchase is a support
- * ticket, while a wrongly allowed one pays `price x credit_rate` into the
- * balance a second time for one entitlement.
- */
-export function resolveHeldPlan(
-  assignment: ResellerAssignment | null,
-  now: number = Date.now()
-): ResellerAssignment | null {
-  if (!assignment) return null
-  if (!assignment.expires_at) return assignment
-
-  const expiresAt = Date.parse(assignment.expires_at)
-  if (Number.isNaN(expiresAt)) return assignment
-
-  return expiresAt > now ? assignment : null
 }

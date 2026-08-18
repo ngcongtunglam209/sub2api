@@ -52,7 +52,7 @@ func mustCreateCodeWithCreator(t *testing.T, ctx context.Context, client *dbent.
 
 // Unsold redeem codes are bearer instruments: whoever reads the string can
 // spend it. So the scoping is asserted against the query, not the handler —
-// one reseller seeing another's stock is theft, and a handler-level check is
+// one creator seeing another's stock is theft, and a handler-level check is
 // one refactor away from being skipped.
 func TestListByCreatorReturnsOnlyTheCallersCodes(t *testing.T) {
 	ctx := context.Background()
@@ -63,7 +63,7 @@ func TestListByCreatorReturnsOnlyTheCallersCodes(t *testing.T) {
 	mustCreateCodeWithCreator(t, ctx, client, "mine-b", &mine)
 	mustCreateCodeWithCreator(t, ctx, client, "theirs-a", &theirs)
 	// created_by NULL is a platform/admin-issued code. It belongs to nobody and
-	// must not fall into any reseller's listing.
+	// must not fall into any creator's listing.
 	mustCreateCodeWithCreator(t, ctx, client, "platform-a", nil)
 
 	params := pagination.PaginationParams{Page: 1, PageSize: 50}
@@ -81,9 +81,9 @@ func TestListByCreatorReturnsOnlyTheCallersCodes(t *testing.T) {
 	require.ElementsMatch(t, []string{"mine-a", "mine-b"}, got)
 }
 
-// A reseller who has minted nothing gets an empty page, never the unscoped
-// list that a missing WHERE clause would produce.
-func TestListByCreatorIsEmptyForANonReseller(t *testing.T) {
+// A user who has minted nothing gets an empty page, never the unscoped list
+// that a missing WHERE clause would produce.
+func TestListByCreatorIsEmptyForANonCreator(t *testing.T) {
 	ctx := context.Background()
 	repo, client := newRedeemCodeCreatorScopeRepo(t)
 

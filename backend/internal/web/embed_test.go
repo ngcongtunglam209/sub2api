@@ -13,7 +13,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/branding"
 	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -819,7 +818,7 @@ func TestServeEmbeddedFrontend(t *testing.T) {
 func TestHTMLCache(t *testing.T) {
 	t.Run("new_cache_returns_nil", func(t *testing.T) {
 		cache := NewHTMLCache()
-		assert.Nil(t, cache.Get(branding.DefaultCacheKey))
+		assert.Nil(t, cache.Get())
 	})
 
 	t.Run("set_and_get", func(t *testing.T) {
@@ -828,9 +827,9 @@ func TestHTMLCache(t *testing.T) {
 
 		html := []byte("<html><body>test</body></html>")
 		settings := []byte(`{"key":"value"}`)
-		cache.Set(branding.DefaultCacheKey, html, settings)
+		cache.Set(html, settings)
 
-		result := cache.Get(branding.DefaultCacheKey)
+		result := cache.Get()
 		require.NotNil(t, result)
 		assert.Equal(t, html, result.Content)
 		assert.NotEmpty(t, result.ETag)
@@ -842,13 +841,13 @@ func TestHTMLCache(t *testing.T) {
 
 		html := []byte("<html><body>test</body></html>")
 		settings := []byte(`{"key":"value"}`)
-		cache.Set(branding.DefaultCacheKey, html, settings)
+		cache.Set(html, settings)
 
-		require.NotNil(t, cache.Get(branding.DefaultCacheKey))
+		require.NotNil(t, cache.Get())
 
 		cache.Invalidate()
 
-		assert.Nil(t, cache.Get(branding.DefaultCacheKey))
+		assert.Nil(t, cache.Get())
 	})
 
 	t.Run("etag_changes_with_settings", func(t *testing.T) {
@@ -857,12 +856,12 @@ func TestHTMLCache(t *testing.T) {
 
 		html := []byte("<html><body>test</body></html>")
 
-		cache.Set(branding.DefaultCacheKey, html, []byte(`{"v":1}`))
-		etag1 := cache.Get(branding.DefaultCacheKey).ETag
+		cache.Set(html, []byte(`{"v":1}`))
+		etag1 := cache.Get().ETag
 
 		cache.Invalidate()
-		cache.Set(branding.DefaultCacheKey, html, []byte(`{"v":2}`))
-		etag2 := cache.Get(branding.DefaultCacheKey).ETag
+		cache.Set(html, []byte(`{"v":2}`))
+		etag2 := cache.Get().ETag
 
 		assert.NotEqual(t, etag1, etag2)
 	})
@@ -871,8 +870,8 @@ func TestHTMLCache(t *testing.T) {
 		cache := NewHTMLCache()
 		cache.SetBaseHTML([]byte("<html></html>"))
 
-		cache.Set(branding.DefaultCacheKey, []byte("<html></html>"), []byte(`{}`))
-		result := cache.Get(branding.DefaultCacheKey)
+		cache.Set([]byte("<html></html>"), []byte(`{}`))
+		result := cache.Get()
 
 		// ETag should be quoted
 		assert.True(t, strings.HasPrefix(result.ETag, `"`))
