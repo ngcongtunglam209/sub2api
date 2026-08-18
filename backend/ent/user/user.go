@@ -73,10 +73,6 @@ const (
 	FieldVipExpiresAt = "vip_expires_at"
 	// FieldVipTierLocked holds the string denoting the vip_tier_locked field in the database.
 	FieldVipTierLocked = "vip_tier_locked"
-	// FieldResellerPlanID holds the string denoting the reseller_plan_id field in the database.
-	FieldResellerPlanID = "reseller_plan_id"
-	// FieldResellerPlanExpiresAt holds the string denoting the reseller_plan_expires_at field in the database.
-	FieldResellerPlanExpiresAt = "reseller_plan_expires_at"
 	// EdgeAPIKeys holds the string denoting the api_keys edge name in mutations.
 	EdgeAPIKeys = "api_keys"
 	// EdgeRedeemCodes holds the string denoting the redeem_codes edge name in mutations.
@@ -237,8 +233,6 @@ var Columns = []string{
 	FieldVipTierID,
 	FieldVipExpiresAt,
 	FieldVipTierLocked,
-	FieldResellerPlanID,
-	FieldResellerPlanExpiresAt,
 }
 
 var (
@@ -470,16 +464,6 @@ func ByVipExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 // ByVipTierLocked orders the results by the vip_tier_locked field.
 func ByVipTierLocked(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVipTierLocked, opts...).ToFunc()
-}
-
-// ByResellerPlanID orders the results by the reseller_plan_id field.
-func ByResellerPlanID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResellerPlanID, opts...).ToFunc()
-}
-
-// ByResellerPlanExpiresAt orders the results by the reseller_plan_expires_at field.
-func ByResellerPlanExpiresAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResellerPlanExpiresAt, opts...).ToFunc()
 }
 
 // ByAPIKeysCount orders the results by api_keys count.

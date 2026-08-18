@@ -89,66 +89,10 @@ export default {
     topTier: 'Bạn đang ở hạng cao nhất'
   },
 
-  // Reseller Panel
-  reseller: {
-    title: 'Đại Lý',
-    description: 'Gói đại lý của bạn và các mã bạn đã tạo',
-    planTitle: 'Gói của bạn',
-    planName: 'Gói',
-    creditRate: 'Hệ số tín dụng',
-    creditRateCaption: 'Mệnh giá trên mỗi 1 USD tín dụng',
-    rpmLimit: 'Giới hạn tốc độ',
-    perMinute: 'yêu cầu/phút',
-    maxDomains: 'Tên miền',
-    expiresOn: 'Có hiệu lực đến {date}',
-    noExpiry: 'Gói này không hết hạn',
-    noPlanTitle: 'Bạn chưa có gói đại lý',
-    noPlanDescription: 'Hãy liên hệ quản trị viên để được chỉ định một gói trước khi tạo mã.',
-    planLoadFailed: 'Tải gói đại lý thất bại',
-    generateTitle: 'Tạo mã',
-    generateDescription: 'Mã được trừ vào tín dụng của bạn theo hệ số của gói',
-    generateButton: 'Tạo',
-    generateSuccess: 'Đã tạo {count} mã',
-    generateFailed: 'Tạo mã thất bại',
-    countRequired: 'Hãy nhập số lượng mã cần tạo',
-    valueRequired: 'Hãy nhập mệnh giá lớn hơn 0',
-    fields: {
-      count: 'Số lượng',
-      countHint: 'Số mã trong lô này',
-      value: 'Mệnh giá (USD)',
-      valueHint: 'Giá trị của mỗi mã khi được đổi',
-      group: 'Nhóm',
-      groupHint: 'Giới hạn mã cho một nhóm',
-      noGroup: 'Không giới hạn nhóm',
-      notes: 'Ghi chú',
-      notesHint: 'Chỉ bạn nhìn thấy'
-    },
-    mintedTitle: 'Mã mới của bạn',
-    mintedWarning: 'Các chuỗi này chỉ hiện một lần và không thể lấy lại. Hãy sao chép ngay.',
-    copyAll: 'Sao chép tất cả',
-    copiedAll: 'Đã sao chép {count} mã',
-    codesTitle: 'Mã của bạn',
-    noCodes: 'Bạn chưa tạo mã nào',
-    codesLoadFailed: 'Tải danh sách mã thất bại',
-    columns: {
-      code: 'Mã',
-      value: 'Mệnh giá',
-      status: 'Trạng thái',
-      createdAt: 'Đã tạo',
-      usedAt: 'Đã đổi'
-    },
-    status: {
-      unused: 'Chưa dùng',
-      used: 'Đã đổi',
-      expired: 'Hết hạn',
-      disabled: 'Đã tắt'
-    }
-  },
-
   // Add-on Store
   store: {
     title: 'Cửa Hàng Tiện Ích',
-    description: 'Dùng số dư để mua thêm hạn mức và gói đại lý',
+    description: 'Dùng số dư để mua thêm hạn mức',
     balanceLabel: 'Số dư của bạn',
     loadFailed: 'Không tải được cửa hàng',
     unitPriceLabel: 'Đơn giá',
@@ -180,27 +124,6 @@ export default {
       amountLabel: 'Gói {step} yêu cầu/phút',
       amountHint: 'Bán theo gói {step} yêu cầu mỗi phút',
       unit: 'yêu cầu/phút'
-    },
-    plans: {
-      title: 'Gói đại lý',
-      description: 'Mua hạng đại lý bằng số dư của bạn',
-      loadFailed: 'Không tải được các gói đại lý',
-      empty: 'Hiện chưa có gói đại lý nào được bán',
-      price: 'Giá',
-      creditBack: 'Hoàn tín dụng',
-      creditBackCaption: 'Được hoàn lại vào số dư khi mua',
-      concurrencyBonus: 'Đồng thời thưởng thêm',
-      rpmLimit: 'Hạn mức tốc độ',
-      perMinute: 'yêu cầu/phút',
-      maxDomains: 'Tên miền',
-      validity: 'Hiệu lực {days} ngày',
-      buy: 'Mua gói',
-      purchaseSuccess: 'Gói đại lý đã được kích hoạt',
-      purchaseFailed: 'Không mua được gói đại lý',
-      heldTitle: 'Gói đại lý của bạn',
-      heldNotice: 'Bạn đã có một gói đại lý. Mua lần thứ hai sẽ trả tín dụng hai lần, nên máy chủ từ chối khi gói hiện tại còn hiệu lực.',
-      heldExpires: 'Hiệu lực đến {date}',
-      heldNoExpiry: 'Gói này không hết hạn'
     }
   },
   announcements: {

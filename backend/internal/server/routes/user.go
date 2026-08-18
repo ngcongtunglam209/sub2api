@@ -112,20 +112,7 @@ func RegisterUserRoutes(
 			usage.POST("/dashboard/api-keys-usage", h.Usage.DashboardAPIKeysUsage)
 		}
 
-		// 分销商：用自己的余额生成兑换码转售。
-		// 用户 id 取自会话而非请求体，否则可以让别人的余额买单。
-		if h.ResellerCode != nil {
-			reseller := authenticated.Group("/reseller")
-			{
-				reseller.POST("/codes", h.ResellerCode.GenerateCodes)
-				// 只读自查：套餐与自己发出的卡密。两者的用户 id 都取自会话，
-				// 且卡密按 created_by 在查询层过滤，看不到别人的库存。
-				reseller.GET("/codes", h.ResellerCode.ListCodes)
-				reseller.GET("/plan", h.ResellerCode.GetPlan)
-			}
-		}
-
-		// 自助加购：用自己的余额买并发 / RPM / 分销商套餐。
+		// 自助加购：用自己的余额买并发 / RPM。
 		//
 		// 不走支付网关：钱早就通过充值进了余额，这里只是一次内部记账。
 		// 买家一律取自会话，请求体里没有、也不该有 user id。
@@ -135,12 +122,6 @@ func RegisterUserRoutes(
 				addons.GET("", h.Addon.Catalogue)
 				addons.POST("/purchase", h.Addon.Purchase)
 			}
-			// 套餐购买挂在 /reseller-plans 下而不是 /addons 下：变的是套餐
-			// 归属，与并发额度不是一类东西，路径按被改的对象走。
-			// 商店要先列出在售套餐，用户此时还没有任何套餐，所以这条是只读的
-			// 公开列表（仍需登录），与管理端的列表分开：这里隐藏已下架的档位。
-			authenticated.GET("/reseller-plans", h.Addon.ListResellerPlans)
-			authenticated.POST("/reseller-plans/:id/purchase", h.Addon.PurchaseResellerPlan)
 		}
 
 		// 公告（用户可见）

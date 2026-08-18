@@ -115,9 +115,8 @@ func (h AddonHoldings) ExpiresAt(kind AddonKind) *time.Time {
 
 // AddonResolver is the slice of the add-on service the auth snapshot needs.
 //
-// Mirrors ResellerPlanResolver deliberately: both are injected into
-// APIKeyService after construction, and both leave the plain user limit alone
-// when they fail.
+// Injected into APIKeyService after construction rather than at construction
+// time, and it leaves the plain user limit alone when it fails.
 type AddonResolver interface {
 	ResolveActiveAddons(ctx context.Context, userID int64) (AddonHoldings, error)
 }
@@ -184,9 +183,8 @@ type UserAddonRepository interface {
 
 // calculateAddonPrice prices one order.
 //
-// decimal rather than float64, for the same reason calculateResellerCredit
-// uses it: units × unit price × months is money, and 3 × 0.1 in binary
-// floating point is not 0.3.
+// decimal rather than float64: units × unit price × months is money, and
+// 3 × 0.1 in binary floating point is not 0.3.
 //
 // `units` is the number of priced units, not the raw amount — RPM is sold in
 // blocks of rpmAddonStep, so 90 RPM is three units, not ninety.

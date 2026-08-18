@@ -46,9 +46,6 @@ func RegisterAdminRoutes(
 		// 公告管理
 		registerAnnouncementRoutes(admin, h)
 
-		// 分销商套餐与自定义域名
-		registerResellerRoutes(admin, h)
-
 		// 自助加购定价（并发 / RPM 的单价与上限）
 		registerAddonPricingRoutes(admin, h)
 
@@ -435,37 +432,6 @@ func registerAnnouncementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		announcements.PUT("/:id", h.Admin.Announcement.Update)
 		announcements.DELETE("/:id", h.Admin.Announcement.Delete)
 		announcements.GET("/:id/read-status", h.Admin.Announcement.ListReadStatus)
-	}
-}
-
-// registerResellerRoutes wires the admin side of reseller tiers and domains.
-//
-// The per-user assignment routes sit under /users/:id rather than under
-// /reseller-plans because that is where the object being changed lives: the
-// plan row is untouched, the user's stamp is what moves.
-func registerResellerRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
-	if h.Admin == nil || h.Admin.Reseller == nil {
-		return
-	}
-
-	plans := admin.Group("/reseller-plans")
-	{
-		plans.GET("", h.Admin.Reseller.ListPlans)
-		plans.PUT("/:id", h.Admin.Reseller.UpdatePlan)
-	}
-
-	users := admin.Group("/users")
-	{
-		users.POST("/:id/reseller-plan", h.Admin.Reseller.AssignUserPlan)
-		users.DELETE("/:id/reseller-plan", h.Admin.Reseller.RevokeUserPlan)
-	}
-
-	domains := admin.Group("/reseller-domains")
-	{
-		domains.GET("", h.Admin.Reseller.ListDomains)
-		domains.POST("", h.Admin.Reseller.CreateDomain)
-		domains.PATCH("/:id", h.Admin.Reseller.SetDomainStatus)
-		domains.DELETE("/:id", h.Admin.Reseller.DeleteDomain)
 	}
 }
 

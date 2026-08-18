@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/Wei-Shaw/sub2api/internal/handler/dto"
@@ -12,7 +10,7 @@ import (
 )
 
 // AddonHandler is the self-service store: a user spends their own balance on
-// concurrency, RPM, or a reseller tier.
+// concurrency or RPM.
 //
 // Every route here takes the buyer from the authenticated session and never
 // from the body or the path. There is no user parameter to tamper with,
@@ -83,53 +81,4 @@ func (h *AddonHandler) Purchase(c *gin.Context) {
 		return
 	}
 	response.Success(c, dto.AddonPurchaseResultFromService(result))
-}
-
-// PurchaseResellerPlan handles POST /api/v1/reseller-plans/:id/purchase.
-//
-// Buying a tier runs the same assignment path an admin grant does, so the
-// expiry and the credited share of the price are derived in one place. What is
-// different is that the caller pays for it out of their own balance, and that
-// holding an active tier already is refused — see
-// AddonService.PurchaseResellerPlan for why that one is a money bug rather
-// than an inconvenience.
-// ListResellerPlans returns the tiers on sale.
-// GET /api/v1/reseller-plans
-//
-// Separate from the admin listing on purpose: this one hides withdrawn tiers,
-// and it is reachable by any signed-in user because the store has to show what
-// is for sale before anyone holds a plan.
-func (h *AddonHandler) ListResellerPlans(c *gin.Context) {
-	plans, err := h.addonService.ListPurchasablePlans(c.Request.Context())
-	if err != nil {
-		response.ErrorFrom(c, err)
-		return
-	}
-
-	items := make([]*dto.ResellerPlan, 0, len(plans))
-	for _, plan := range plans {
-		items = append(items, dto.ResellerPlanFromService(plan))
-	}
-	response.Success(c, items)
-}
-
-func (h *AddonHandler) PurchaseResellerPlan(c *gin.Context) {
-	subject, ok := middleware2.GetAuthSubjectFromContext(c)
-	if !ok {
-		response.Unauthorized(c, "User not found in context")
-		return
-	}
-
-	planID, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil || planID <= 0 {
-		response.BadRequest(c, "Invalid reseller plan ID")
-		return
-	}
-
-	assignment, err := h.addonService.PurchaseResellerPlan(c.Request.Context(), subject.UserID, planID)
-	if err != nil {
-		response.ErrorFrom(c, err)
-		return
-	}
-	response.Success(c, dto.ResellerPlanAssignmentFromService(assignment))
 }

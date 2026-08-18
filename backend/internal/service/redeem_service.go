@@ -64,9 +64,9 @@ type RedeemCodeRepository interface {
 	// ListByUserPaginated returns paginated balance/concurrency history for a specific user.
 	// codeType filter is optional - pass empty string to return all types.
 	ListByUserPaginated(ctx context.Context, userID int64, params pagination.PaginationParams, codeType string) ([]RedeemCode, *pagination.PaginationResult, error)
-	// ListByCreator returns the codes a reseller minted, scoped to created_by in
+	// ListByCreator returns the codes one creator minted, scoped to created_by in
 	// the query itself. It takes no filter that could widen that scope — unsold
-	// codes are bearer instruments, and one reseller reading another's stock is
+	// codes are bearer instruments, and one creator reading another's stock is
 	// theft, not a leak.
 	ListByCreator(ctx context.Context, userID int64, params pagination.PaginationParams) ([]RedeemCode, *pagination.PaginationResult, error)
 	// SumPositiveBalanceByUser returns the total recharged amount (sum of positive balance values) for a user.

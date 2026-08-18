@@ -369,17 +369,16 @@ func ProvideVIPTierService(entClient *dbent.Client, invalidator APIKeyAuthCacheI
 // service the resolver it needs for the purchased limits.
 //
 // The resolver is injected here rather than taken as a constructor argument
-// for the same reason the reseller plan resolver is: this service is built
-// later in the graph than APIKeyService, and threading it through every
-// existing caller to reach one optional perk is not worth the churn.
+// because this service is built later in the graph than APIKeyService, and
+// threading it through every existing caller to reach one optional perk is not
+// worth the churn.
 func ProvideAddonService(
 	repo UserAddonRepository,
 	pricing *AddonPricingService,
-	planService *ResellerPlanService,
 	apiKeyService *APIKeyService,
 	invalidator APIKeyAuthCacheInvalidator,
 ) *AddonService {
-	svc := NewAddonService(repo, pricing, planService)
+	svc := NewAddonService(repo, pricing)
 	svc.SetAuthCacheInvalidator(invalidator)
 	apiKeyService.SetAddonResolver(svc)
 	return svc
@@ -827,8 +826,6 @@ var ProviderSet = wire.NewSet(
 	NewBillingService,
 	ProvideBillingCacheService,
 	NewAnnouncementService,
-	ProvideResellerDomainService,
-	NewResellerPlanService,
 	NewAddonPricingService,
 	ProvideAddonService,
 	NewAdminService,

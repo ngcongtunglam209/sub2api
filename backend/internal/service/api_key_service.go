@@ -289,15 +289,11 @@ type APIKeyService struct {
 	userSubRepo       UserSubscriptionRepository
 	userGroupRateRepo UserGroupRateRepository
 	vipBenefitRepo    VIPTierBenefitRepository
-	// resellerPlanResolver is injected after construction rather than taken as a
-	// constructor argument: the plan service is built later in the graph, and
+	// addonResolver is injected after construction rather than taken as a
+	// constructor argument: the add-on service is built later in the graph, and
 	// threading it through every existing NewAPIKeyService caller to reach one
-	// optional perk is not worth the churn.
-	resellerPlanResolver ResellerPlanResolver
-	// addonResolver is injected after construction for the same reason as
-	// resellerPlanResolver: the add-on service is built later in the graph.
-	// Left unset, purchased add-ons simply do not apply — the behaviour before
-	// the store existed.
+	// optional perk is not worth the churn. Left unset, purchased add-ons simply
+	// do not apply — the behaviour before the store existed.
 	addonResolver             AddonResolver
 	cache                     APIKeyCache
 	rateLimitCacheInvalid     RateLimitCacheInvalidator // optional: invalidate Redis rate limit cache

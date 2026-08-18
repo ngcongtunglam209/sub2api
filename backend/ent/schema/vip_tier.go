@@ -68,8 +68,8 @@ func (VIPTier) Fields() []ent.Field {
 		// "无上限"，混用会把最便宜的等级变成最好的等级。concurrency 更直接：
 		// Positive() 让它根本存不下 0。
 		//
-		// 生效顺序见 api_key_auth_cache_impl.go：必须在分销商套餐与加购项
-		// 叠加**之后**才清上限，否则"无上限"会被后面的加数覆盖成有限值。
+		// 生效顺序见 api_key_auth_cache_impl.go：必须在加购项叠加**之后**
+		// 才清上限，否则"无上限"会被后面的加数覆盖成有限值。
 		field.Bool("unlimited_rpm").
 			Default(false),
 		field.Bool("unlimited_concurrency").

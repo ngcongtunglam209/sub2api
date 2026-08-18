@@ -3,9 +3,9 @@ package service
 // VIP 等级除并发外还赠送 RPM，最高档可免除上限。
 //
 // 这里钉两件事：加数的叠加语义，以及免除上限**最后**生效的顺序。后者是本次
-// 改动最容易写错的地方——若在 VIP 那一段就把上限清成 0，下面的分销商套餐与
-// 加购项会把各自的加数加到 0 上，"无上限"退化成一个很小的有限值，而且从等级
-// 配置上完全看不出来。
+// 改动最容易写错的地方——若在 VIP 那一段就把上限清成 0，下面的加购项会把自己
+// 的加数加到 0 上，"无上限"退化成一个很小的有限值，而且从等级配置上完全看不
+// 出来。
 
 import (
 	"context"
@@ -56,15 +56,14 @@ func TestAPIKeyAuthSnapshotAddsVIPRPMOnlyOnTopOfAnExistingLimit(t *testing.T) {
 
 // The ordering guarantee, stated as the bug it prevents.
 //
-// VIP resolves before the reseller plan and the add-ons. If the exemption were
-// applied where it is resolved, those two would then add 10 and 4 to a cleared
-// 0 and produce a ceiling of 14 — lower than the 16 the same user would have
-// had with no exemption at all, and lower than every tier below it.
+// VIP resolves before the add-ons. If the exemption were applied where it is
+// resolved, the add-ons would then add 4 to a cleared 0 and produce a ceiling
+// of 4 — lower than the 11 the same user would have had with no exemption at
+// all, and lower than every tier below it.
 func TestAPIKeyAuthSnapshotUnlimitedVIPConcurrencySurvivesLaterAddends(t *testing.T) {
 	svc := &APIKeyService{
-		vipBenefitRepo:       &stubVIPBenefitRepo{concurrency: 5, unlimitedConcurrency: true},
-		resellerPlanResolver: &stubAuthPlanResolver{assignment: activePlanAssignment(10)},
-		addonResolver:        &stubAddonResolver{holdings: AddonHoldings{Concurrency: 4}},
+		vipBenefitRepo: &stubVIPBenefitRepo{concurrency: 5, unlimitedConcurrency: true},
+		addonResolver:  &stubAddonResolver{holdings: AddonHoldings{Concurrency: 4}},
 	}
 
 	snapshot := svc.snapshotFromAPIKey(context.Background(), vipRPMTestAPIKey(2, 0))

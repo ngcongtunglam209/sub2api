@@ -143,18 +143,6 @@ func (User) Fields() []ent.Field {
 		// 管理员锁定的等级不随消费升降，也不过期。
 		field.Bool("vip_tier_locked").
 			Default(false),
-
-		// 当前分销商套餐；NULL = 不是分销商。套餐被删除后按非分销商处理。
-		//
-		// 不建外键也不设 edge：套餐是运营配置，级联删除会连带改动用户的
-		// 并发与域名配额，那种事必须显式做，不能由删一行配置顺手带走。
-		field.Int64("reseller_plan_id").
-			Optional().
-			Nillable(),
-		// 到期后资源回落，域名与兑换码权限一并失效。
-		field.Time("reseller_plan_expires_at").
-			Optional().
-			Nillable(),
 	}
 }
 

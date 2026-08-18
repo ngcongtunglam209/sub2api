@@ -132,7 +132,6 @@ export function buildSelfNavItems(ctx: NavContext, withDashboard: boolean): NavI
     { path: '/orders', label: t('nav.myOrders'), icon: 'orderList', hideInSimpleMode: true, featureFlag: flags.payment },
     { path: '/redeem', label: t('nav.redeem'), icon: 'gift', hideInSimpleMode: true },
     { path: '/store', label: t('nav.store'), icon: 'priceTag', hideInSimpleMode: true },
-    { path: '/reseller', label: t('nav.reseller'), icon: 'ticket', hideInSimpleMode: true },
     { path: '/affiliate', label: t('nav.affiliate'), icon: 'users', hideInSimpleMode: true, featureFlag: flags.affiliate },
     { path: '/profile', label: t('nav.profile'), icon: 'user' },
     ...customEntries(ctx.userCustomMenuItems, 'user'),
@@ -186,8 +185,6 @@ export function buildAdminNavItems(ctx: NavContext): NavItem[] {
     { path: '/admin/redeem', label: t('nav.redeemCodes'), icon: 'ticket', hideInSimpleMode: true, domId: 'sidebar-wallet' },
     { path: '/admin/promo-codes', label: t('nav.promoCodes'), icon: 'gift', hideInSimpleMode: true },
     { path: '/admin/vip-tiers', label: t('nav.vipTiers'), icon: 'gift', hideInSimpleMode: true },
-    { path: '/admin/reseller-plans', label: t('nav.resellerPlans'), icon: 'priceTag', hideInSimpleMode: true },
-    { path: '/admin/reseller-domains', label: t('nav.resellerDomains'), icon: 'globe', hideInSimpleMode: true },
     {
       path: '/admin/affiliates',
       label: t('nav.affiliateManagement'),

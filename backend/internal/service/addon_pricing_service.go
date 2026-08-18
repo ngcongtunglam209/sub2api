@@ -14,8 +14,8 @@ import (
 //
 // Six scalars do not need a schema, a repository, and a migration each time an
 // operator wants to try $3 a slot. A table would also imply a history nobody
-// keeps: repricing does not re-bill anyone, exactly as repricing a reseller
-// tier leaves existing holders alone.
+// keeps: repricing does not re-bill anyone, and existing holders are left
+// alone.
 const (
 	SettingAddonConcurrencyUnitPrice = "ADDON_CONCURRENCY_UNIT_PRICE"
 	SettingAddonConcurrencyMax       = "ADDON_CONCURRENCY_MAX"
@@ -27,8 +27,7 @@ const (
 // catalogue rather than disabling it.
 //
 // The concurrency cap is the number that matters. The whole pool's ceiling is
-// "usable accounts × 3" and drops to single digits when accounts are throttled
-// — the same scarcity that keeps reseller concurrency_bonus deliberately mean.
+// "usable accounts × 3" and drops to single digits when accounts are throttled.
 // 20 slots is already more than one account should be able to reserve; it is a
 // backstop, not a target.
 const (
@@ -168,8 +167,7 @@ func (s *AddonPricingService) Update(ctx context.Context, req UpdateAddonPricing
 
 // Lowering a cap deliberately does not claw anything back from users already
 // over it: they paid for what they hold, and it lapses on its own. The new cap
-// binds the next purchase, which is the same posture reseller plan repricing
-// takes toward existing holders.
+// binds the next purchase only.
 func validateAddonCap(limit int) error {
 	if limit < 0 {
 		return infraerrors.BadRequest("INVALID_ADDON_CAP", "cap must not be negative")

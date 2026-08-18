@@ -333,30 +333,6 @@ func (f RedeemCodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RedeemCodeMutation", m)
 }
 
-// The ResellerDomainFunc type is an adapter to allow the use of ordinary
-// function as ResellerDomain mutator.
-type ResellerDomainFunc func(context.Context, *ent.ResellerDomainMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ResellerDomainFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.ResellerDomainMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ResellerDomainMutation", m)
-}
-
-// The ResellerPlanFunc type is an adapter to allow the use of ordinary
-// function as ResellerPlan mutator.
-type ResellerPlanFunc func(context.Context, *ent.ResellerPlanMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ResellerPlanFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.ResellerPlanMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ResellerPlanMutation", m)
-}
-
 // The SecuritySecretFunc type is an adapter to allow the use of ordinary
 // function as SecuritySecret mutator.
 type SecuritySecretFunc func(context.Context, *ent.SecuritySecretMutation) (ent.Value, error)

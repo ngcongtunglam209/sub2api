@@ -775,30 +775,6 @@ token_refresh:
   cycle_timeout_seconds: 240
 
 # =============================================================================
-# Reseller Custom Domains
-# 分销商自定义域名
-# =============================================================================
-# Resellers CNAME their own hostname here so their customers never see this
-# deployment's domain. The allowlist lives in the `reseller_domains` table;
-# Caddy consults it through /internal/tls-check before issuing a certificate.
-# The edge config for this lives in deploy/Caddyfile.reseller — swap it in for
-# deploy/Caddyfile, which has no on-demand TLS.
-#
-# 打开 enabled 后，未列入 canonical_hosts 且不在分销商白名单中的 Host 会被
-# 直接拒绝。这一层是必需的：ask 端点只管签发证书，停用分销商后已签发的证书
-# 仍有效近 90 天，不按 Host 拦截流量的话"停用"三个月内形同虚设。
-#
-# 漏填 canonical_hosts 会把自己关在门外，所以默认关闭。
-custom_domain:
-  enabled: false
-  # This deployment's own hostnames — panel and API domains alike.
-  # 本站自己的域名；分销商域名来自数据库，不写在这里。
-  canonical_hosts: []
-  # canonical_hosts:
-  #   - api.example.com
-  #   - panel.example.com
-
-# =============================================================================
 # API Key Auth Cache Configuration
 # API Key 认证缓存配置
 # =============================================================================

@@ -386,10 +386,10 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 	// that lost the comparison. Stacking keeps both levers meaningful, so the
 	// tier reads as a perk and the purchase as an increment.
 	//
-	// The exemptions are only *recorded* here, not applied: a reseller plan and
-	// add-ons stack below, and clearing the ceiling to 0 now would let one of
-	// those addends turn "no ceiling" straight back into a finite number. They
-	// are applied once every addend has been counted.
+	// The exemptions are only *recorded* here, not applied: add-ons stack below,
+	// and clearing the ceiling to 0 now would let that addend turn "no ceiling"
+	// straight back into a finite number. They are applied once every addend has
+	// been counted.
 	//
 	// A lookup failure leaves the plain user limits — the tier perk goes
 	// missing, which is recoverable; denying the request would not be.
@@ -410,24 +410,7 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 		}
 	}
 
-	// A reseller plan stacks on top of that again, for the same reason: it is a
-	// separate thing they bought, and swallowing one perk into another is how a
-	// customer ends up paying twice for one number.
-	//
-	// Expired or disabled plans grant nothing — `Active` decides, not the mere
-	// presence of a row — so a lapsed tier stops conferring the instant it
-	// lapses rather than at the next cache refresh of some other subsystem.
-	//
-	// Same failure posture as above: a lookup error leaves the plain limit.
-	if s.resellerPlanResolver != nil && apiKey.UserID > 0 {
-		if assignment, err := s.resellerPlanResolver.ResolveForUser(ctx, apiKey.UserID); err == nil && assignment.Active(time.Now()) {
-			if bonus := assignment.Plan.ConcurrencyBonus; bonus > 0 {
-				snapshot.User.Concurrency += bonus
-			}
-		}
-	}
-
-	// Add-ons bought from the self-service store are the third addend, resolved
+	// Add-ons bought from the self-service store are the second addend, resolved
 	// the same way and with the same failure posture: a lookup error leaves the
 	// plain limit rather than denying the request.
 	//
@@ -460,8 +443,8 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 	// rather than competing with it.
 	//
 	// Ordering matters and is the reason the flags were carried down here. Had
-	// the ceiling been cleared inside the VIP block, the reseller and add-on
-	// blocks above would have added their bonuses to 0 and produced a small
+	// the ceiling been cleared inside the VIP block, the add-on block above
+	// would have added its bonuses to 0 and produced a small
 	// finite cap — strictly worse than the plain tier and impossible to spot
 	// from the tier configuration.
 	if vipUnlimitedConcurrency {

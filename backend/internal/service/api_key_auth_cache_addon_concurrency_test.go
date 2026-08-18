@@ -36,19 +36,18 @@ func addonConcurrencyAPIKey(userConcurrency, userRPM int) *APIKey {
 	}
 }
 
-// Four things a user can hold, four addends. Folding any of them into a max()
-// is how somebody ends up paying twice for one number: a VIP whose tier grants
-// more than they bought would see the purchase do nothing at all.
-func TestAPIKeyAuthSnapshotStacksAddonOnVIPAndResellerPlan(t *testing.T) {
+// Three things a user can hold, three addends. Folding any of them into a
+// max() is how somebody ends up paying twice for one number: a VIP whose tier
+// grants more than they bought would see the purchase do nothing at all.
+func TestAPIKeyAuthSnapshotStacksAddonOnVIP(t *testing.T) {
 	vip := &stubVIPBenefitRepo{concurrency: 5}
-	plan := &stubAuthPlanResolver{assignment: activePlanAssignment(10)}
 	addons := &stubAddonResolver{holdings: AddonHoldings{Concurrency: 4}}
-	svc := &APIKeyService{vipBenefitRepo: vip, resellerPlanResolver: plan, addonResolver: addons}
+	svc := &APIKeyService{vipBenefitRepo: vip, addonResolver: addons}
 
 	snapshot := svc.snapshotFromAPIKey(context.Background(), addonConcurrencyAPIKey(2, 0))
 
 	require.NotNil(t, snapshot)
-	require.Equal(t, 21, snapshot.User.Concurrency, "2 own + 5 VIP + 10 reseller + 4 purchased")
+	require.Equal(t, 11, snapshot.User.Concurrency, "2 own + 5 VIP + 4 purchased")
 	require.Equal(t, 1, addons.calls, "add-ons are resolved once per snapshot, not per request")
 }
 
@@ -85,7 +84,7 @@ func TestAPIKeyAuthSnapshotAddsPurchasedRPMOnlyOnTopOfAnExistingLimit(t *testing
 	}
 }
 
-// Same failure posture as the VIP and reseller lookups: losing the perk is
+// Same failure posture as the VIP lookup: losing the perk is
 // recoverable, refusing to build the snapshot is not.
 func TestAPIKeyAuthSnapshotKeepsPlainLimitsWhenAddonLookupFails(t *testing.T) {
 	addons := &stubAddonResolver{
@@ -117,7 +116,7 @@ func TestAPIKeyAuthSnapshotIgnoresLapsedAddons(t *testing.T) {
 	repo.rows[AddonKindConcurrency] = &UserAddon{
 		Kind: AddonKindConcurrency, Amount: 10, ExpiresAt: time.Now().Add(-time.Second),
 	}
-	svc := &APIKeyService{addonResolver: newTestAddonService(repo, nil)}
+	svc := &APIKeyService{addonResolver: newTestAddonService(repo)}
 
 	snapshot := svc.snapshotFromAPIKey(context.Background(), addonConcurrencyAPIKey(2, 0))
 

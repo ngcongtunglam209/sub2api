@@ -13,8 +13,8 @@ import (
 
 // UserAddon holds the schema definition for the UserAddon entity.
 //
-// 用户用自己的余额买来的并发 / RPM 额度。与 VIP 等级、分销商套餐同为"加数"：
-// 它们各自是单独掏钱买的东西，谁也不吞并谁。
+// 用户用自己的余额买来的并发 / RPM 额度。与 VIP 等级同为"加数"：
+// 它们各自是单独挣来或掏钱买来的东西，谁也不吞并谁。
 //
 // 每个 (user_id, kind) 只有一行，重复购买续期而非新增行——理由见
 // migrations/228_user_addons.sql 的表注释，简言之：鉴权热路径上一行比一次
@@ -41,8 +41,8 @@ func (UserAddon) Fields() []ent.Field {
 	return []ent.Field{
 		// user_id: 归属用户。
 		//
-		// 不建外键也不设 edge，与 reseller_domains 同理：额度是计费配置，
-		// 用户删除时由后台清理比级联静默带走更安全。
+		// 不建外键也不设 edge：额度是计费配置，用户删除时由后台清理比
+		// 级联静默带走更安全。
 		field.Int64("user_id"),
 
 		// kind: concurrency | rpm。

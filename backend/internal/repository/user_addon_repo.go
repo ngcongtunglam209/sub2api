@@ -113,8 +113,7 @@ func (r *userAddonRepository) Upsert(
 //
 // BalanceGTE sits inside the UPDATE, not in a SELECT beforehand: two
 // concurrent purchases that both read "enough" and then both write would each
-// pass a pre-check and together overdraw. Same idiom as
-// resellerCodeRepository.GenerateForReseller, and for the same reason —
+// pass a pre-check and together overdraw.
 // UserRepository.DeductBalance falls back to an unconditional write and can
 // take a balance negative, which is right for billing work already done and
 // wrong for a purchase that can simply be declined.

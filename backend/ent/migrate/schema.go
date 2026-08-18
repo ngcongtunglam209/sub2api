@@ -1488,61 +1488,6 @@ var (
 			},
 		},
 	}
-	// ResellerDomainsColumns holds the columns for the "reseller_domains" table.
-	ResellerDomainsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt64, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
-		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
-		{Name: "domain", Type: field.TypeString, Unique: true, Size: 253},
-		{Name: "user_id", Type: field.TypeInt64},
-		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
-		{Name: "notes", Type: field.TypeString, Default: "", SchemaType: map[string]string{"postgres": "text"}},
-		{Name: "site_name", Type: field.TypeString, Nullable: true, Size: 100, Default: ""},
-		{Name: "site_logo", Type: field.TypeString, Nullable: true, Default: "", SchemaType: map[string]string{"postgres": "text"}},
-		{Name: "site_subtitle", Type: field.TypeString, Nullable: true, Size: 200, Default: ""},
-	}
-	// ResellerDomainsTable holds the schema information for the "reseller_domains" table.
-	ResellerDomainsTable = &schema.Table{
-		Name:       "reseller_domains",
-		Columns:    ResellerDomainsColumns,
-		PrimaryKey: []*schema.Column{ResellerDomainsColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "resellerdomain_user_id",
-				Unique:  false,
-				Columns: []*schema.Column{ResellerDomainsColumns[4]},
-			},
-		},
-	}
-	// ResellerPlansColumns holds the columns for the "reseller_plans" table.
-	ResellerPlansColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt64, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
-		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
-		{Name: "level", Type: field.TypeInt, Unique: true},
-		{Name: "name", Type: field.TypeString, Size: 50},
-		{Name: "price", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "decimal(20,2)"}},
-		{Name: "credit_rate", Type: field.TypeFloat64, Default: 0.5, SchemaType: map[string]string{"postgres": "decimal(6,4)"}},
-		{Name: "concurrency_bonus", Type: field.TypeInt, Default: 0},
-		{Name: "rpm_limit", Type: field.TypeInt, Default: 0},
-		{Name: "max_domains", Type: field.TypeInt, Default: 1},
-		{Name: "validity_days", Type: field.TypeInt, Default: 365},
-		{Name: "allowed_group_ids", Type: field.TypeJSON},
-		{Name: "enabled", Type: field.TypeBool, Default: true},
-	}
-	// ResellerPlansTable holds the schema information for the "reseller_plans" table.
-	ResellerPlansTable = &schema.Table{
-		Name:       "reseller_plans",
-		Columns:    ResellerPlansColumns,
-		PrimaryKey: []*schema.Column{ResellerPlansColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "resellerplan_enabled_level",
-				Unique:  false,
-				Columns: []*schema.Column{ResellerPlansColumns[12], ResellerPlansColumns[3]},
-			},
-		},
-	}
 	// SecuritySecretsColumns holds the columns for the "security_secrets" table.
 	SecuritySecretsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -1851,8 +1796,6 @@ var (
 		{Name: "vip_tier_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "vip_expires_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "vip_tier_locked", Type: field.TypeBool, Default: false},
-		{Name: "reseller_plan_id", Type: field.TypeInt64, Nullable: true},
-		{Name: "reseller_plan_expires_at", Type: field.TypeTime, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -2214,8 +2157,6 @@ var (
 		PromoCodeUsagesTable,
 		ProxiesTable,
 		RedeemCodesTable,
-		ResellerDomainsTable,
-		ResellerPlansTable,
 		SecuritySecretsTable,
 		SettingsTable,
 		SubscriptionPlansTable,
@@ -2337,12 +2278,6 @@ func init() {
 	RedeemCodesTable.ForeignKeys[1].RefTable = UsersTable
 	RedeemCodesTable.Annotation = &entsql.Annotation{
 		Table: "redeem_codes",
-	}
-	ResellerDomainsTable.Annotation = &entsql.Annotation{
-		Table: "reseller_domains",
-	}
-	ResellerPlansTable.Annotation = &entsql.Annotation{
-		Table: "reseller_plans",
 	}
 	SecuritySecretsTable.Annotation = &entsql.Annotation{
 		Table: "security_secrets",
